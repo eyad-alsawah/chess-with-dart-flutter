@@ -1,4 +1,5 @@
 import 'package:chess/game_logic.dart';
+import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,13 +33,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade50,
+      backgroundColor: Color.fromARGB(255, 141, 141, 141),
       body: Column(
         children: [
-          Image.asset('assets/images/black_bishop.png'),
+          Image.asset(blackCastle),
           const SizedBox(height: 400),
           Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: drawBoard(playingAs: PlayingAs.white, size: 350)),
         ],
       ),
