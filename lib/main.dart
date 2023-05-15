@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.green.shade50,
       body: Column(
         children: [
+          Image.asset('assets/images/black_bishop.png'),
           const SizedBox(height: 400),
           Padding(
               padding: EdgeInsets.all(20),
