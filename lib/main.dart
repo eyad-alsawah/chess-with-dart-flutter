@@ -30,17 +30,42 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String squareName = "";
+  List<String> movementHistory = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 141, 141, 141),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(blackCastle),
-          const SizedBox(height: 400),
           Padding(
-              padding: const EdgeInsets.all(20),
-              child: drawBoard(playingAs: PlayingAs.white, size: 350)),
+            padding: const EdgeInsets.all(20),
+            child: ChessBoard(
+                playingAs: PlayingAs.white,
+                size: 300,
+                onTap: (name) {
+                  setState(() {
+                    movementHistory.add("$name, ");
+                    squareName = name;
+                  });
+                }),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: SizedBox(
+              height: 100,
+              child: SingleChildScrollView(
+                child: Text(
+                  movementHistory.join(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
