@@ -1,24 +1,3 @@
-// void main() {
-//   chessBoard.forEach(
-//     (element) {
-//       print(
-//           "===================================== ${element['file']}${element['rank']}========================================"
-//               .replaceAll('Files.', '')
-//               .toUpperCase());
-//       List<Map<String, dynamic>> possibleSquaresToMove =
-//           getDiagonalPieces(rank: element['rank'], file: element['file']);
-//       possibleSquaresToMove.addAll(
-//           getHorizontalPieces(rank: element['rank'], file: element['file']));
-//       possibleSquaresToMove.addAll(
-//           getVerticalPieces(rank: element['rank'], file: element['file']));
-//       squaresMovableTo(
-//           file: element['file'],
-//           rank: element['rank'],
-//           possibleSquaresToMoveTo: possibleSquaresToMove);
-//     },
-//   );
-// }
-
 List<Map<String, dynamic>> chessBoard = [
   // -----------------------------------rank 1----------------------------
   {
@@ -246,6 +225,48 @@ List<Map<String, dynamic>> getPawnPieces(
   });
 
   return pawnPieces;
+}
+
+List<Map<String, dynamic>> getKingPieces(
+    {required int rank, required Files file}) {
+  Map<String, dynamic> currentPiece = chessBoard.firstWhere(
+      (element) => element['rank'] == rank && element['file'] == file);
+  int index = chessBoard.indexOf(currentPiece);
+  int currentIndex = index;
+
+  List<Map<String, dynamic>> kingPieces = [];
+
+  //right
+  (file != Files.h) ? kingPieces.add(chessBoard[currentIndex + 1]) : null;
+  //left
+  (file != Files.a) ? kingPieces.add(chessBoard[currentIndex - 1]) : null;
+  //top-right
+  (file != Files.h && rank != 8)
+      ? kingPieces.add(chessBoard[currentIndex + 9])
+      : null;
+  //top-left
+  (file != Files.a && rank != 8)
+      ? kingPieces.add(chessBoard[currentIndex + 7])
+      : null;
+  //top
+  rank != 8 ? kingPieces.add(chessBoard[currentIndex + 8]) : null;
+
+  //bottom-right
+  (file != Files.h && rank != 1)
+      ? kingPieces.add(chessBoard[currentIndex - 7])
+      : null;
+  //bottom-left
+  (file != Files.a && rank != 1)
+      ? kingPieces.add(chessBoard[currentIndex - 9])
+      : null;
+  //bottom
+  rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
+
+  kingPieces.forEach((square) {
+    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
+  });
+
+  return kingPieces;
 }
 
 List<Map<String, dynamic>> getDiagonalPieces(

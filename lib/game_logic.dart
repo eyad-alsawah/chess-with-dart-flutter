@@ -116,7 +116,7 @@ class _ChessBoardState extends State<ChessBoard> {
                           int rankName = getRankNameFromIndex(index: index);
                           squareName = getSquareNameFromIndex(index: index);
                           List<Map<String, dynamic>> possibleSquaresToMove =
-                              getPawnPieces(rank: rankName, file: fileName);
+                              getKingPieces(rank: rankName, file: fileName);
                           //     getDiagonalPieces(rank: rankName, file: fileName);
                           // possibleSquaresToMove.addAll(getHorizontalPieces(
                           //     rank: rankName, file: fileName));
