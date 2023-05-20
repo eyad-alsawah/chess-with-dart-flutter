@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:chess/game_logic.dart';
 
 import 'package:flutter/material.dart';
+
+import 'logic.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,7 +56,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   // });
                 }),
           ),
-
+          IconButton(
+              onPressed: () {
+                //emptying the chess board
+                for (var element in chessBoard) {
+                  element['piece'] = null;
+                  element['type'] = null;
+                }
+                List<int> insertionIndex = List.generate(64, (index) => index);
+                insertionIndex.shuffle();
+                for (var newPiece in listToShuffleFrom) {
+                  final random = Random();
+                  int randomIndex = random.nextInt(insertionIndex.length);
+                  insertionIndex.removeAt(randomIndex);
+                  chessBoard[randomIndex]['piece'] = newPiece['piece'];
+                  chessBoard[randomIndex]['type'] = newPiece['type'];
+                }
+                setState(() {});
+              },
+              icon: const Icon(Icons.shuffle))
           // const SizedBox(height: 20),
           // Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -72,3 +94,42 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+List<Map<String, dynamic>> listToShuffleFrom = [
+  {
+    "piece": Pieces.rook,
+    "type": PieceType.light,
+  },
+  {"piece": Pieces.knight, "type": PieceType.light},
+  {"piece": Pieces.bishop, "type": PieceType.light},
+  {"piece": Pieces.queen, "type": PieceType.light},
+  {"piece": Pieces.king, "type": PieceType.light},
+  {"piece": Pieces.bishop, "type": PieceType.light},
+  {"piece": Pieces.knight, "type": PieceType.light},
+  {"piece": Pieces.rook, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  {"piece": Pieces.pawn, "type": PieceType.light},
+  //-----------------------------------dark----------------------------------
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.pawn, "type": PieceType.dark},
+  {"piece": Pieces.rook, "type": PieceType.dark},
+  {"piece": Pieces.knight, "type": PieceType.dark},
+  {"piece": Pieces.bishop, "type": PieceType.dark},
+  {"piece": Pieces.queen, "type": PieceType.dark},
+  {"piece": Pieces.king, "type": PieceType.dark},
+  {"piece": Pieces.bishop, "type": PieceType.dark},
+  {"piece": Pieces.knight, "type": PieceType.dark},
+  {"piece": Pieces.rook, "type": PieceType.dark}
+];

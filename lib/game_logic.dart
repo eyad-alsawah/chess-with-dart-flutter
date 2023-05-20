@@ -126,6 +126,7 @@ class _ChessBoardState extends State<ChessBoard> {
                               chessBoard.indexOf(element),
                             );
                           }
+                          setState(() {});
                           widget.onTap(squareName);
                         },
                         child: Container(

@@ -417,7 +417,9 @@ List<Map<String, dynamic>> squaresMovableTo(
   bool didCaptureOnDiagonalTopRight = false;
   bool didCaptureOnDiagonalBottomLeft = false;
   bool didCaptureOnDiagonalBottomRight = false;
-
+  possibleSquaresToMoveTo.forEach((square) {
+    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
+  });
   if (isPinned(kingType: currentPiece['type'], pieceToCheck: currentPiece)) {
     squaresMovableTo.clear();
   } else {
@@ -515,7 +517,6 @@ List<Map<String, dynamic>> squaresMovableTo(
                 squaresMovableTo.add(square);
                 didCaptureOnRankLeft = true;
               }
-
               break;
             case RelativeDirection.rankRight:
               if (!didCaptureOnRankRight) {
@@ -570,6 +571,7 @@ List<Map<String, dynamic>> squaresMovableTo(
   squaresMovableTo.forEach((square) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
   });
+  print("//-------------------");
   return squaresMovableTo;
 }
 
