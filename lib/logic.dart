@@ -1,3 +1,5 @@
+import 'dart:math';
+
 List<Map<String, dynamic>> chessBoard = [
   // -----------------------------------rank 1----------------------------
   {
@@ -136,6 +138,45 @@ RelativeDirection getRelativeDirection(
 }
 
 //----------------------Get Pieces---------------------------
+
+/// generic
+List<Map<String, dynamic>> getPieces({required int rank, required Files file}) {
+  Map<String, dynamic> currentPiece = chessBoard.firstWhere(
+      (element) => element['rank'] == rank && element['file'] == file);
+  List<Map<String, dynamic>> pieces = [];
+  switch (currentPiece['piece']) {
+    case Pieces.rook:
+      pieces = [
+        ...getHorizontalPieces(rank: rank, file: file),
+        ...getVerticalPieces(rank: rank, file: file)
+      ];
+      break;
+    case Pieces.knight:
+      pieces = getKnightPieces(rank: rank, file: file);
+      break;
+    case Pieces.bishop:
+      pieces = getDiagonalPieces(rank: rank, file: file);
+      break;
+
+    case Pieces.queen:
+      pieces = [
+        ...getHorizontalPieces(rank: rank, file: file),
+        ...getVerticalPieces(rank: rank, file: file),
+        ...getDiagonalPieces(rank: rank, file: file)
+      ];
+      break;
+    case Pieces.king:
+      pieces = getKingPieces(rank: rank, file: file);
+      break;
+    case Pieces.pawn:
+      pieces = getPawnPieces(rank: rank, file: file);
+      break;
+    default:
+      pieces.clear();
+  }
+  return pieces;
+}
+
 List<Map<String, dynamic>> getKnightPieces(
     {required int rank, required Files file}) {
   Map<String, dynamic> currentPiece = chessBoard.firstWhere(
