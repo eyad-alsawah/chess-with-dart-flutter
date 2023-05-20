@@ -1,5 +1,5 @@
 import 'package:chess/game_logic.dart';
-import 'package:chess/image_assets.dart';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -46,12 +46,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 playingAs: PlayingAs.white,
                 size: 330,
                 onTap: (name) {
-                  setState(() {
-                    movementHistory.add("$name, ");
-                    squareName = name;
-                  });
+                  // setState(() {
+                  //   movementHistory.add("$name, ");
+                  //   squareName = name;
+                  // });
                 }),
           ),
+
           // const SizedBox(height: 20),
           // Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 30),

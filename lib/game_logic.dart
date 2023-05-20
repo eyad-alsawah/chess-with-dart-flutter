@@ -115,21 +115,17 @@ class _ChessBoardState extends State<ChessBoard> {
                           Files fileName = getFileNameFromIndex(index: index);
                           int rankName = getRankNameFromIndex(index: index);
                           squareName = getSquareNameFromIndex(index: index);
-                          List<Map<String, dynamic>> possibleSquaresToMove =
-                              getPieces(rank: rankName, file: fileName);
-                          //     getDiagonalPieces(rank: rankName, file: fileName);
-                          // possibleSquaresToMove.addAll(getHorizontalPieces(
-                          //     rank: rankName, file: fileName));
-                          // possibleSquaresToMove.addAll(getVerticalPieces(
-                          //     rank: rankName, file: fileName));
-                          List s = squaresMovableTo(
-                              file: fileName,
-                              rank: rankName,
-                              possibleSquaresToMoveTo: possibleSquaresToMove);
-                          possibleSquaresToMove.forEach((element) {
-                            tappedIndices.add(chessBoard.indexOf(element));
-                          });
-                          print(chessBoard[index]);
+                          List highlightedSquares = squaresMovableTo(
+                            file: fileName,
+                            rank: rankName,
+                            possibleSquaresToMoveTo:
+                                getPieces(rank: rankName, file: fileName),
+                          );
+                          for (var element in highlightedSquares) {
+                            tappedIndices.add(
+                              chessBoard.indexOf(element),
+                            );
+                          }
                           widget.onTap(squareName);
                         },
                         child: Container(
