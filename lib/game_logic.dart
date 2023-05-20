@@ -113,6 +113,7 @@ class _ChessBoardState extends State<ChessBoard> {
                         onTap: () {
                           tappedIndices.clear();
                           Files fileName = getFileNameFromIndex(index: index);
+                          print("file name : $fileName");
                           int rankName = getRankNameFromIndex(index: index);
                           squareName = getSquareNameFromIndex(index: index);
                           List<Map<String, dynamic>> possibleSquaresToMove =
@@ -325,8 +326,6 @@ Files getFileNameFromIndex({required int index}) {
   List<Files> files = [
     Files.a,
     Files.b,
-    Files.c,
-    Files.d,
     Files.c,
     Files.d,
     Files.e,
