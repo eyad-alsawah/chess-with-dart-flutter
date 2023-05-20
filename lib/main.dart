@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(20),
             child: ChessBoard(
                 playingAs: PlayingAs.white,
-                size: 300,
+                size: 330,
                 onTap: (name) {
                   setState(() {
                     movementHistory.add("$name, ");
@@ -52,20 +52,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   });
                 }),
           ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: SizedBox(
-              height: 100,
-              child: SingleChildScrollView(
-                child: Text(
-                  movementHistory.join(),
-                  style: const TextStyle(
-                      fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
+          // const SizedBox(height: 20),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 30),
+          //   child: SizedBox(
+          //     height: 100,
+          //     child: SingleChildScrollView(
+          //       child: Text(
+          //         movementHistory.join(),
+          //         style: const TextStyle(
+          //             fontSize: 10, fontWeight: FontWeight.bold),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

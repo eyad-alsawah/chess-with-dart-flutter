@@ -157,6 +157,97 @@ RelativeDirection getRelativeDirection(
 }
 
 //----------------------Get Pieces---------------------------
+List<Map<String, dynamic>> getKnightPieces(
+    {required int rank, required Files file}) {
+  Map<String, dynamic> currentPiece = chessBoard.firstWhere(
+      (element) => element['rank'] == rank && element['file'] == file);
+  int index = chessBoard.indexOf(currentPiece);
+  int currentIndex = index;
+
+  List<Map<String, dynamic>> knightPieces = [];
+
+  //top-right
+  (file != Files.h && rank <= 6)
+      ? knightPieces.add(chessBoard[currentIndex + 17])
+      : null;
+  //top-left
+  (file != Files.a && rank <= 6)
+      ? knightPieces.add(chessBoard[currentIndex + 15])
+      : null;
+  //----------
+  //bottom-right
+  (file != Files.h && rank >= 3)
+      ? knightPieces.add(chessBoard[currentIndex - 15])
+      : null;
+  //bottom-left
+  (file != Files.a && rank >= 3)
+      ? knightPieces.add(chessBoard[currentIndex - 17])
+      : null;
+  //---------
+  //right-top
+  (file != Files.g && file != Files.h && rank != 8)
+      ? knightPieces.add(chessBoard[currentIndex + 10])
+      : null;
+  //right-bottom
+  (file != Files.g && file != Files.h && rank != 1)
+      ? knightPieces.add(chessBoard[currentIndex - 6])
+      : null;
+  //---------
+  //left-top
+  (file != Files.b && file != Files.a && rank != 8)
+      ? knightPieces.add(chessBoard[currentIndex + 6])
+      : null;
+  //left-bottom
+  (file != Files.b && file != Files.a && rank != 1)
+      ? knightPieces.add(chessBoard[currentIndex - 10])
+      : null;
+
+  knightPieces.forEach((square) {
+    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
+  });
+  return knightPieces;
+}
+
+List<Map<String, dynamic>> getPawnPieces(
+    {required int rank, required Files file}) {
+  Map<String, dynamic> currentPiece = chessBoard.firstWhere(
+      (element) => element['rank'] == rank && element['file'] == file);
+  int index = chessBoard.indexOf(currentPiece);
+  int currentIndex = index;
+
+  List<Map<String, dynamic>> pawnPieces = [];
+
+  if (currentPiece['type'] == PieceType.light) {
+    //top-right
+    (file != Files.h && rank != 8)
+        ? pawnPieces.add(chessBoard[currentIndex + 9])
+        : null;
+    //top-left
+    (file != Files.a && rank != 8)
+        ? pawnPieces.add(chessBoard[currentIndex + 7])
+        : null;
+    //top
+    rank != 8 ? pawnPieces.add(chessBoard[currentIndex + 8]) : null;
+  } else if (currentPiece['type'] == PieceType.dark) {
+    //bottom-right
+    (file != Files.h && rank != 1)
+        ? pawnPieces.add(chessBoard[currentIndex - 7])
+        : null;
+    //bottom-left
+    (file != Files.a && rank != 1)
+        ? pawnPieces.add(chessBoard[currentIndex - 9])
+        : null;
+    //bottom
+    rank != 1 ? pawnPieces.add(chessBoard[currentIndex - 8]) : null;
+  }
+
+  pawnPieces.forEach((square) {
+    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
+  });
+
+  return pawnPieces;
+}
+
 List<Map<String, dynamic>> getDiagonalPieces(
     {required int rank, required Files file}) {
   Map<String, dynamic> currentPiece = chessBoard.firstWhere(
@@ -437,3 +528,5 @@ bool isPinned(
   // print("king type is: $kingType");
   return false;
 }
+
+//--------

@@ -113,20 +113,20 @@ class _ChessBoardState extends State<ChessBoard> {
                         onTap: () {
                           tappedIndices.clear();
                           Files fileName = getFileNameFromIndex(index: index);
-                          print("file name : $fileName");
                           int rankName = getRankNameFromIndex(index: index);
                           squareName = getSquareNameFromIndex(index: index);
                           List<Map<String, dynamic>> possibleSquaresToMove =
-                              getDiagonalPieces(rank: rankName, file: fileName);
-                          possibleSquaresToMove.addAll(getHorizontalPieces(
-                              rank: rankName, file: fileName));
-                          possibleSquaresToMove.addAll(getVerticalPieces(
-                              rank: rankName, file: fileName));
+                              getPawnPieces(rank: rankName, file: fileName);
+                          //     getDiagonalPieces(rank: rankName, file: fileName);
+                          // possibleSquaresToMove.addAll(getHorizontalPieces(
+                          //     rank: rankName, file: fileName));
+                          // possibleSquaresToMove.addAll(getVerticalPieces(
+                          //     rank: rankName, file: fileName));
                           List s = squaresMovableTo(
                               file: fileName,
                               rank: rankName,
                               possibleSquaresToMoveTo: possibleSquaresToMove);
-                          s.forEach((element) {
+                          possibleSquaresToMove.forEach((element) {
                             tappedIndices.add(chessBoard.indexOf(element));
                           });
                           print(chessBoard[index]);
@@ -154,7 +154,7 @@ class _ChessBoardState extends State<ChessBoard> {
                   ),
                   drawInitialPieces(
                       playingAs: PlayingAs.white,
-                      boardSize: 300,
+                      boardSize: 330,
                       tappedIndices: tappedIndices),
                 ],
               ),
