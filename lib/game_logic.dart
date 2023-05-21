@@ -115,12 +115,14 @@ class _ChessBoardState extends State<ChessBoard> {
                           Files fileName = getFileNameFromIndex(index: index);
                           int rankName = getRankNameFromIndex(index: index);
                           squareName = getSquareNameFromIndex(index: index);
-                          List highlightedSquares = squaresMovableTo(
-                            file: fileName,
-                            rank: rankName,
-                            possibleSquaresToMoveTo:
-                                getPieces(rank: rankName, file: fileName),
-                          );
+                          List highlightedSquares = getAllPieces
+                              ? getPieces(rank: rankName, file: fileName)
+                              : squaresMovableTo(
+                                  file: fileName,
+                                  rank: rankName,
+                                  possibleSquaresToMoveTo:
+                                      getPieces(rank: rankName, file: fileName),
+                                );
                           for (var element in highlightedSquares) {
                             tappedIndices.add(
                               chessBoard.indexOf(element),

@@ -74,7 +74,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
                 setState(() {});
               },
-              icon: const Icon(Icons.shuffle))
+              icon: const Icon(Icons.shuffle)),
+          Switch(
+              value: getAllPieces,
+              onChanged: (value) {
+                getAllPieces = value;
+                setState(() {});
+              }),
           // const SizedBox(height: 20),
           // Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 30),

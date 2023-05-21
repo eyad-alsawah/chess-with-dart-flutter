@@ -80,6 +80,8 @@ List<Map<String, dynamic>> chessBoard = [
   {"file": Files.h, "rank": 8, "piece": Pieces.rook, "type": PieceType.dark}
 ];
 
+bool getAllPieces = false;
+
 enum Pieces {
   rook,
   knight,
@@ -118,7 +120,7 @@ RelativeDirection getRelativeDirection(
         ? RelativeDirection.rankRight
         : RelativeDirection.rankLeft;
   } else if (targetSquareFile == currentSquareFile) {
-    relativeDirection = targetSquareRank > targetSquareRank
+    relativeDirection = targetSquareRank > currentSquareRank
         ? RelativeDirection.fileTop
         : RelativeDirection.fileBottom;
   } else if (targetSquareFile.index > currentSquareFile.index) {
@@ -426,6 +428,8 @@ List<Map<String, dynamic>> squaresMovableTo(
     for (var square in possibleSquaresToMoveTo) {
       RelativeDirection relativeDirection = getRelativeDirection(
           currentSquare: currentPiece, targetSquare: square);
+      print(
+          "${square['file']} ${square['rank']}relative direction is:$relativeDirection");
       if (currentPiece['type'] == null) {
         squaresMovableTo.clear();
       } else if (square['piece'] == null) {
