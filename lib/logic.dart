@@ -224,9 +224,9 @@ List<Map<String, dynamic>> getKnightPieces(
       ? knightPieces.add(chessBoard[currentIndex - 10])
       : null;
 
-  knightPieces.forEach((square) {
+  for (var square in knightPieces) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  });
+  }
   return knightPieces;
 }
 
@@ -263,9 +263,9 @@ List<Map<String, dynamic>> getPawnPieces(
     rank != 1 ? pawnPieces.add(chessBoard[currentIndex - 8]) : null;
   }
 
-  pawnPieces.forEach((square) {
+  for (var square in pawnPieces) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  });
+  }
 
   return pawnPieces;
 }
@@ -305,9 +305,9 @@ List<Map<String, dynamic>> getKingPieces(
   //bottom
   rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
 
-  kingPieces.forEach((square) {
+  for (var square in kingPieces) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  });
+  }
 
   return kingPieces;
 }
@@ -419,9 +419,9 @@ List<Map<String, dynamic>> squaresMovableTo(
   bool didCaptureOnDiagonalTopRight = false;
   bool didCaptureOnDiagonalBottomLeft = false;
   bool didCaptureOnDiagonalBottomRight = false;
-  possibleSquaresToMoveTo.forEach((square) {
+  for (var square in possibleSquaresToMoveTo) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  });
+  }
   if (isPinned(kingType: currentPiece['type'], pieceToCheck: currentPiece)) {
     squaresMovableTo.clear();
   } else {
@@ -432,6 +432,10 @@ List<Map<String, dynamic>> squaresMovableTo(
           "${square['file']} ${square['rank']}relative direction is:$relativeDirection");
       if (currentPiece['type'] == null) {
         squaresMovableTo.clear();
+      } else if (currentPiece['piece'] == Pieces.knight) {
+        (square['piece'] == null || square['type'] != currentPiece['type'])
+            ? squaresMovableTo.add(square)
+            : null;
       } else if (square['piece'] == null) {
         switch (relativeDirection) {
           case RelativeDirection.rankLeft:
@@ -572,9 +576,9 @@ List<Map<String, dynamic>> squaresMovableTo(
     }
   }
 
-  squaresMovableTo.forEach((square) {
+  for (var square in squaresMovableTo) {
     print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  });
+  }
   print("//-------------------");
   return squaresMovableTo;
 }
