@@ -123,6 +123,7 @@ class _ChessBoardState extends State<ChessBoard> {
                                   possibleSquaresToMoveTo:
                                       getPieces(rank: rankName, file: fileName),
                                 );
+
                           for (var element in highlightedSquares) {
                             tappedIndices.add(
                               chessBoard.indexOf(element),

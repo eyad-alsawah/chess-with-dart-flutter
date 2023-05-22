@@ -224,9 +224,6 @@ List<Map<String, dynamic>> getKnightPieces(
       ? knightPieces.add(chessBoard[currentIndex - 10])
       : null;
 
-  for (var square in knightPieces) {
-    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  }
   return knightPieces;
 }
 
@@ -261,10 +258,6 @@ List<Map<String, dynamic>> getPawnPieces(
         : null;
     //bottom
     rank != 1 ? pawnPieces.add(chessBoard[currentIndex - 8]) : null;
-  }
-
-  for (var square in pawnPieces) {
-    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
   }
 
   return pawnPieces;
@@ -304,10 +297,6 @@ List<Map<String, dynamic>> getKingPieces(
       : null;
   //bottom
   rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
-
-  for (var square in kingPieces) {
-    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  }
 
   return kingPieces;
 }
@@ -374,7 +363,7 @@ List<Map<String, dynamic>> getHorizontalPieces(
   horizontalPieces.removeWhere(
       (element) => element['rank'] == rank && element['file'] == file);
   //--------------------------------
-  // horizontalPieces.forEach((element) => print(element));
+
   return horizontalPieces;
 }
 
@@ -419,186 +408,209 @@ List<Map<String, dynamic>> squaresMovableTo(
   bool didCaptureOnDiagonalTopRight = false;
   bool didCaptureOnDiagonalBottomLeft = false;
   bool didCaptureOnDiagonalBottomRight = false;
+
   for (var square in possibleSquaresToMoveTo) {
-    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
-  }
-  if (isPinned(kingType: currentPiece['type'], pieceToCheck: currentPiece)) {
-    squaresMovableTo.clear();
-  } else {
-    for (var square in possibleSquaresToMoveTo) {
-      RelativeDirection relativeDirection = getRelativeDirection(
-          currentSquare: currentPiece, targetSquare: square);
-      print(
-          "${square['file']} ${square['rank']}relative direction is:$relativeDirection");
-      if (currentPiece['type'] == null) {
-        squaresMovableTo.clear();
-      } else if (currentPiece['piece'] == Pieces.knight) {
-        (square['piece'] == null || square['type'] != currentPiece['type'])
-            ? squaresMovableTo.add(square)
-            : null;
-      } else if (square['piece'] == null) {
+    RelativeDirection relativeDirection =
+        getRelativeDirection(currentSquare: currentPiece, targetSquare: square);
+
+    if (currentPiece['type'] == null) {
+      squaresMovableTo.clear();
+    } else if (currentPiece['piece'] == Pieces.knight) {
+      (square['piece'] == null || square['type'] != currentPiece['type'])
+          ? squaresMovableTo.add(square)
+          : null;
+    } else if (square['piece'] == null) {
+      switch (relativeDirection) {
+        case RelativeDirection.rankLeft:
+          if (!didCaptureOnRankLeft) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.rankRight:
+          if (!didCaptureOnRankRight) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.fileTop:
+          if (!didCaptureOnFileTop) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.fileBottom:
+          if (!didCaptureOnFileBottom) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.diagonalTopLeft:
+          if (!didCaptureOnDiagonalTopLeft) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.diagonalTopRight:
+          if (!didCaptureOnDiagonalTopRight) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.diagonalBottomLeft:
+          if (!didCaptureOnDiagonalBottomLeft) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        case RelativeDirection.diagonalBottomRight:
+          if (!didCaptureOnDiagonalBottomRight) {
+            squaresMovableTo.add(square);
+          }
+          break;
+        default:
+          break;
+      }
+    } else {
+      if (square['type'] == currentPiece['type']) {
         switch (relativeDirection) {
           case RelativeDirection.rankLeft:
-            if (!didCaptureOnRankLeft) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnRankLeft = true;
             break;
           case RelativeDirection.rankRight:
-            if (!didCaptureOnRankRight) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnRankRight = true;
+
             break;
           case RelativeDirection.fileTop:
-            if (!didCaptureOnFileTop) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnFileTop = true;
+
             break;
           case RelativeDirection.fileBottom:
-            if (!didCaptureOnFileBottom) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnFileBottom = true;
+
             break;
           case RelativeDirection.diagonalTopLeft:
-            if (!didCaptureOnDiagonalTopLeft) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnDiagonalTopLeft = true;
+
             break;
           case RelativeDirection.diagonalTopRight:
-            if (!didCaptureOnDiagonalTopRight) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnDiagonalTopRight = true;
+
             break;
           case RelativeDirection.diagonalBottomLeft:
-            if (!didCaptureOnDiagonalBottomLeft) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnDiagonalBottomLeft = true;
+
             break;
           case RelativeDirection.diagonalBottomRight:
-            if (!didCaptureOnDiagonalBottomRight) {
-              squaresMovableTo.add(square);
-            }
+            didCaptureOnDiagonalBottomRight = true;
+
             break;
           default:
             break;
         }
       } else {
-        if (square['type'] == currentPiece['type']) {
-          switch (relativeDirection) {
-            case RelativeDirection.rankLeft:
+        switch (relativeDirection) {
+          case RelativeDirection.rankLeft:
+            if (!didCaptureOnRankLeft) {
+              squaresMovableTo.add(square);
               didCaptureOnRankLeft = true;
-              break;
-            case RelativeDirection.rankRight:
+            }
+            break;
+          case RelativeDirection.rankRight:
+            if (!didCaptureOnRankRight) {
+              squaresMovableTo.add(square);
               didCaptureOnRankRight = true;
-
-              break;
-            case RelativeDirection.fileTop:
+            }
+            break;
+          case RelativeDirection.fileTop:
+            if (!didCaptureOnFileTop) {
+              squaresMovableTo.add(square);
               didCaptureOnFileTop = true;
-
-              break;
-            case RelativeDirection.fileBottom:
+            }
+            break;
+          case RelativeDirection.fileBottom:
+            if (!didCaptureOnFileBottom) {
+              squaresMovableTo.add(square);
               didCaptureOnFileBottom = true;
-
-              break;
-            case RelativeDirection.diagonalTopLeft:
+            }
+            break;
+          case RelativeDirection.diagonalTopLeft:
+            if (!didCaptureOnDiagonalTopLeft) {
+              squaresMovableTo.add(square);
               didCaptureOnDiagonalTopLeft = true;
-
-              break;
-            case RelativeDirection.diagonalTopRight:
+            }
+            break;
+          case RelativeDirection.diagonalTopRight:
+            if (!didCaptureOnDiagonalTopRight) {
+              squaresMovableTo.add(square);
               didCaptureOnDiagonalTopRight = true;
-
-              break;
-            case RelativeDirection.diagonalBottomLeft:
+            }
+            break;
+          case RelativeDirection.diagonalBottomLeft:
+            if (!didCaptureOnDiagonalBottomLeft) {
+              squaresMovableTo.add(square);
               didCaptureOnDiagonalBottomLeft = true;
-
-              break;
-            case RelativeDirection.diagonalBottomRight:
+            }
+            break;
+          case RelativeDirection.diagonalBottomRight:
+            if (!didCaptureOnDiagonalBottomRight) {
+              squaresMovableTo.add(square);
               didCaptureOnDiagonalBottomRight = true;
-
-              break;
-            default:
-              break;
-          }
-        } else {
-          switch (relativeDirection) {
-            case RelativeDirection.rankLeft:
-              if (!didCaptureOnRankLeft) {
-                squaresMovableTo.add(square);
-                didCaptureOnRankLeft = true;
-              }
-              break;
-            case RelativeDirection.rankRight:
-              if (!didCaptureOnRankRight) {
-                squaresMovableTo.add(square);
-                didCaptureOnRankRight = true;
-              }
-              break;
-            case RelativeDirection.fileTop:
-              if (!didCaptureOnFileTop) {
-                squaresMovableTo.add(square);
-                didCaptureOnFileTop = true;
-              }
-              break;
-            case RelativeDirection.fileBottom:
-              if (!didCaptureOnFileBottom) {
-                squaresMovableTo.add(square);
-                didCaptureOnFileBottom = true;
-              }
-              break;
-            case RelativeDirection.diagonalTopLeft:
-              if (!didCaptureOnDiagonalTopLeft) {
-                squaresMovableTo.add(square);
-                didCaptureOnDiagonalTopLeft = true;
-              }
-              break;
-            case RelativeDirection.diagonalTopRight:
-              if (!didCaptureOnDiagonalTopRight) {
-                squaresMovableTo.add(square);
-                didCaptureOnDiagonalTopRight = true;
-              }
-              break;
-            case RelativeDirection.diagonalBottomLeft:
-              if (!didCaptureOnDiagonalBottomLeft) {
-                squaresMovableTo.add(square);
-                didCaptureOnDiagonalBottomLeft = true;
-              }
-              break;
-            case RelativeDirection.diagonalBottomRight:
-              if (!didCaptureOnDiagonalBottomRight) {
-                squaresMovableTo.add(square);
-                didCaptureOnDiagonalBottomRight = true;
-              }
-              break;
-            default:
-              break;
-          }
+            }
+            break;
+          default:
+            break;
         }
       }
     }
   }
-
-  for (var square in squaresMovableTo) {
-    print("${square['file']}${square['rank']}".replaceAll('Files.', ''));
+  if (isPinned(
+      kingType: currentPiece['type'],
+      pieceToCheck: currentPiece,
+      possibleSquaresToMoveTo: squaresMovableTo)) {
+    squaresMovableTo.clear();
   }
-  print("//-------------------");
+
   return squaresMovableTo;
 }
 
 bool isPinned(
     {required PieceType? kingType,
+    required List<Map<String, dynamic>> possibleSquaresToMoveTo,
     required Map<String, dynamic> pieceToCheck}) {
-  // Map<String, dynamic> kingPiece =
-  //     chessBoard.firstWhere((element) => element['piece'] == Pieces.king);
-  // int kingPieceIndex = chessBoard.indexOf(kingPiece);
-  // List<Map<String, dynamic>> surroundingEnemyPieces = [
-  //   ...getHorizontalPieces(
-  //       rank: pieceToCheck['rank'], file: pieceToCheck['rank']),
-  //   ...getVerticalPieces(
-  //       rank: pieceToCheck['rank'], file: pieceToCheck['rank']),
-  //   ...getDiagonalPieces(rank: pieceToCheck['rank'], file: pieceToCheck['rank'])
-  // ];
-  // print("king piece index is: $kingPieceIndex");
-  // print("king type is: $kingType");
+  List<Map<String, dynamic>> squaresWhereKingMightGetChecked = [];
+  List<Map<String, dynamic>> chessBoardForTesting = chessBoard;
+  int pieceToCheckIndex = chessBoard.indexOf(pieceToCheck);
+
+  //we want to move each piece and check if that might get our king to be checked
+  for (var possibleSquareToMoveTo in possibleSquaresToMoveTo) {
+    isKingChecked(
+            pieceType: pieceToCheck['type'],
+            squaresToCheckIfCheckingKing: possibleSquaresToMoveTo)
+        ? squaresWhereKingMightGetChecked.add(possibleSquareToMoveTo)
+        : null;
+    print(squaresWhereKingMightGetChecked.length);
+  }
+
   return false;
+}
+
+bool isKingChecked(
+    {required PieceType pieceType,
+    required List<Map<String, dynamic>> squaresToCheckIfCheckingKing}) {
+  List<Map<String, dynamic>> piecesCheckingKing = [];
+  for (var square in chessBoard) {
+    int rank = square['rank'];
+    Files file = square['file'];
+    PieceType? type = square['type'];
+    //if pieceType is light we are checking if light's king is checked by any dark piece on the board
+    // this is done by checking if any dark piece on the board can move to light's king square
+    if (type != null && type != pieceType) {
+      for (var squareToCheck in squaresToCheckIfCheckingKing) {
+        if (squareToCheck['type'] != null &&
+            squareToCheck['type'] != type &&
+            squareToCheck['piece'] == Pieces.king) {
+          piecesCheckingKing.add(square);
+        }
+      }
+    }
+  }
+
+  print("//----------------------------------");
+  return piecesCheckingKing.isNotEmpty;
 }
 
 //--------
