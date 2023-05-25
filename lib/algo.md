@@ -59,5 +59,16 @@ Game Over
         * for each player create a timer, and pause the timer if it isn't a player's turn
         * if either player's time runs out, the other player wins
 ---
-### **Testing For Draw**
-   
+### **Testing For Draw:**
+  * insufficient material (includes dead positions):
+    * no pawns on the board &&:
+      * king vs king
+      * king + m * bishops (all bishops are on the same color)  vs king
+      * king + m * bishops (all bishops are on the same color)  vs  king + n * bishops (all bishops are on the same color as the enemy's bishops) 
+      * king + knight vs king
+      * blocked position (dead position) 
+  * stalemate: player is not in check && has no legal move
+  * no capture is made && no pawn is moved for 50 consecutive moves
+  * mutual agreement
+  * threefold repetition
+
