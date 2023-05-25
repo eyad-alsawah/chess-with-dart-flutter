@@ -10,8 +10,7 @@ Game Over
 1. else &rarr; player can move
 2. if:
     * checkmate
-    * draw 
-    * timeout </br>
+    * draw </br>
     &rarr; <span style="color:red">
 Game Over
 </span> </br>
@@ -26,10 +25,39 @@ Game Over
     3. if lightKingsCount or darkKingsCount != 1 &rarr; <span style="color:red">
 Game Over
 ---
-### Second Step:
-* find the square where king is at
-* get all the squares surrounding the king
-* if any square contains a king &rarr; <span style="color:red">
+* two kings are adjacent to each other
+    * find the square where king is at
+    * get all the squares surrounding the king 
+    * if any square contains a king &rarr; <span style="color:red">
 Game Over
-
+---
+ * checkmate when:  (for first and second step)
+    * king is checked & player can neither move king to safety nor take the attacking piece
+    * one of the players' time runs out
+----- 
+* draw when: (for first and second step)
+  * insufficient material (includes dead positions)
+  * stalemate
+  * 50-move rule
+  * mutual agreement
+  * threefold repetition
+---
+### **Testing For Checkmate**:
+* king is checked & player can neither move king to safety nor take the attacking piece:
+   * king is checked:
+        * get pawn squares, and for each square, check if an enemy pawn exists
+        * get knight pieces, and for each square, check if an enemy knight exists
+        * get vertical/horizontal pieces, and for each square, check if either an enemy rook/queen exist.
+        * get diagonal pieces, and for each square, check if either an enemy bishop/queen exist.
+    * player can neither move king to safety nor take the attacking piece:
+        * get king squares, and for each square:
+        * get pawn squares, and for each square, check if an enemy pawn exists
+        * get knight pieces, and for each square, check if an enemy knight exists
+        * get vertical/horizontal pieces, and for each square, check if either an enemy rook/queen exist.
+        * get diagonal pieces, and for each square, check if either an enemy bishop/queen exist. 
+* one of the players' time runs out:
+        * for each player create a timer, and pause the timer if it isn't a player's turn
+        * if either player's time runs out, the other player wins
+---
+### **Testing For Draw**
    
