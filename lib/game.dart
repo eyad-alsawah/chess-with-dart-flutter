@@ -1,17 +1,21 @@
+import 'dart:async';
+
 void main() async {
-  Chess chess = Chess.fromPosition(initialPosition: "initialPosition");
+  Chess chess = Chess.fromPosition(
+    initialPosition: "initialPosition",
+    onGameStatusChanged: (gameStatus) {
+      print(gameStatus);
+    },
+  );
   chess.start();
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
-  await chess.handleSquareTapped(tappedSquareIndex: 63);
 }
 
 //---------------------------------------
+typedef GameStatusChangedCallBack = Function(String);
+
 class Chess {
+  final GameStatusChangedCallBack onGameStatusChanged;
+
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
     Square(
@@ -145,13 +149,26 @@ class Chess {
     Square(
         file: Files.h, rank: 8, piece: Pieces.rook, pieceType: PieceType.dark),
   ];
+  late Timer whiteTimer;
+  late Timer blackTimer;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
-  Chess.fromPosition({required String initialPosition, PlayingTurn? playAs})
+  Chess.fromPosition(
+      {required String initialPosition,
+      PlayingTurn? playAs,
+      required this.onGameStatusChanged})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
-  start() {}
+  start() {
+    whiteTimer = Timer(const Duration(seconds: 15), () {
+      onGameStatusChanged("white time runned out");
+    });
+    blackTimer = Timer(const Duration(seconds: 4), () {
+      onGameStatusChanged("black time runned out");
+    });
+  }
+
   pause() {}
   resume() {}
   offerDraw() {}
