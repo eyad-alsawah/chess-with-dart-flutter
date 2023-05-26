@@ -34,6 +34,7 @@ Game Over
  * checkmate when:  (for first and second step)
     * king is checked & player can neither move king to safety nor take the attacking piece
     * one of the players' time runs out
+    * one of the players resigns
 ----- 
 * draw when: (for first and second step)
   * insufficient material (includes dead positions)
@@ -70,5 +71,9 @@ Game Over
   * stalemate: player is not in check && has no legal move
   * no capture is made && no pawn is moved for 50 consecutive moves
   * mutual agreement
-  * threefold repetition
+  * threefold repetition, happens when all the following conditions are met:
+      *  same positions for all the pieces happened three times.
+      *  for each repeated position it was the turn of the same player to play.
+      *  for each repeated position all the pieces had the same possible moves.
+    
 
