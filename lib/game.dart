@@ -3,18 +3,30 @@ import 'dart:async';
 void main() async {
   Chess chess = Chess.fromPosition(
     initialPosition: "initialPosition",
-    onGameStatusChanged: (gameStatus) {
-      print(gameStatus);
-    },
+    onVictory: (victoryType) {},
+    onDraw: (drawType) {},
+    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {},
+    onCastling: (castlingType, playingTurn) {},
+    onPlayingTurnChanged: (playingTurn) {},
+    onPieceMoved: (from, to) {},
+    onError: (error, errorString) {},
   );
   chess.start();
 }
 
 //---------------------------------------
-typedef GameStatusChangedCallBack = Function(String);
 
 class Chess {
-  final GameStatusChangedCallBack onGameStatusChanged;
+  final void Function(VictoryType victoryType) onVictory;
+  final void Function(DrawType drawType) onDraw;
+  final void Function(PlayingTurn playingTurn) onPlayingTurnChanged;
+  final void Function(
+          List<int> highlightedLegalMovesIndices, int selectedPieceIndex)
+      onPieceSelected;
+  final void Function(CastlingType castlingType, PlayingTurn playingTurn)
+      onCastling;
+  final void Function(int from, int to) onPieceMoved;
+  final void Function(Error error, String errorString) onError;
 
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -156,17 +168,23 @@ class Chess {
   Chess.fromPosition(
       {required String initialPosition,
       PlayingTurn? playAs,
-      required this.onGameStatusChanged})
+      required this.onVictory,
+      required this.onDraw,
+      required this.onPieceSelected,
+      required this.onPlayingTurnChanged,
+      required this.onPieceMoved,
+      required this.onError,
+      required this.onCastling})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
   start() {
-    whiteTimer = Timer(const Duration(seconds: 15), () {
-      onGameStatusChanged("white time runned out");
-    });
-    blackTimer = Timer(const Duration(seconds: 4), () {
-      onGameStatusChanged("black time runned out");
-    });
+    // whiteTimer = Timer(const Duration(seconds: 15), () {
+    //   ("white time runned out");
+    // });
+    // blackTimer = Timer(const Duration(seconds: 4), () {
+    //   onGameStatusChanged("black time runned out");
+    // });
   }
 
   pause() {}
@@ -264,6 +282,8 @@ enum DrawType {
   mutualAgreement,
   threeFoldRepetition
 }
+
+enum CastlingType { kingSide, queenSide }
 
 enum PlayingTurn { white, black }
 
