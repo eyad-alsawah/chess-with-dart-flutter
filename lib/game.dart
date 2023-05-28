@@ -1,17 +1,26 @@
 import 'dart:async';
+import 'dart:io';
 
 void main() async {
   Chess chess = Chess.fromPosition(
     initialPosition: "initialPosition",
     onVictory: (victoryType) {},
     onDraw: (drawType) {},
-    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {},
+    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
+      print("selectedPieceIndex: $selectedPieceIndex");
+      print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
+      print("//---------------------------------------");
+    },
     onCastling: (castlingType, playingTurn) {},
     onPlayingTurnChanged: (playingTurn) {},
     onPieceMoved: (from, to) {},
     onError: (error, errorString) {},
   );
-  chess.start();
+  int x = 0;
+  while (x != 64) {
+    chess.handleSquareTapped(tappedSquareIndex: x);
+    x++;
+  }
 }
 
 //---------------------------------------
@@ -27,7 +36,7 @@ class Chess {
       onCastling;
   final void Function(int from, int to) onPieceMoved;
   final void Function(Error error, String errorString) onError;
-
+//-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
     Square(
@@ -163,6 +172,7 @@ class Chess {
   ];
   late Timer whiteTimer;
   late Timer blackTimer;
+  bool inMoveSelectionMode = true;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   Chess.fromPosition(
@@ -204,19 +214,563 @@ class Chess {
   //-----------------------------------
   getCurrentPlayingTurn() {}
   offerUndoMove() {}
+  List<int> legalMovesIndices = [];
+  int? selectedPieceIndex;
+  Square? selectedPiece;
+  handleSquareTapped({required int tappedSquareIndex}) {
+    print(tappedSquareIndex);
+    print(inMoveSelectionMode);
+    if (inMoveSelectionMode) {
+      selectedPieceIndex = tappedSquareIndex;
+      Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
+      int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
+      print("tappedSquareRank: $tappedSquareRank");
+      print("tappedSquareFile: $tappedSquareFile");
 
-  Future<GameStatus> handleSquareTapped({required int tappedSquareIndex}) {
-    return Future(
-      () => GameStatus(
-          highlightedLegalMoves: [],
-          chessBoard: [],
-          gameOutcome: null,
-          playingTurn: PlayingTurn.white,
-          selectedPieceIndex: 1,
-          gameStatusString: 'White Won !!!',
-          canCastleKingSide: false,
-          canCastleQueenSide: false),
-    );
+      selectedPiece = chessBoard[tappedSquareIndex];
+
+      List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(
+          rank: tappedSquareRank, file: tappedSquareFile);
+      List<Square> legalMovesOnly = getLegalMovesOnly(
+          file: tappedSquareFile,
+          rank: tappedSquareRank,
+          legalAndIllegalMoves: legalAndIllegalMoves);
+      legalMovesIndices =
+          getLegalMovesIndices(legalMovesSquares: legalMovesOnly);
+      onPieceSelected(legalMovesIndices, tappedSquareIndex);
+      inMoveSelectionMode = legalMovesIndices.isEmpty;
+      //get legal moves
+      //if legal moves list is not empty
+    } else {
+      if (legalMovesIndices.contains(tappedSquareIndex) &&
+          selectedPiece != null &&
+          selectedPieceIndex != null) {
+        Files selectedPieceFile =
+            getFileNameFromIndex(index: selectedPieceIndex!);
+        int selectedPieceRank =
+            getRankNameFromIndex(index: selectedPieceIndex!);
+        print("selectedPieceRank: $selectedPieceRank");
+        print("selectedPieceFile: $selectedPieceFile");
+        Square emptySquareAtSelectedPieceIndex = Square(
+            file: selectedPieceFile,
+            rank: selectedPieceRank,
+            piece: null,
+            pieceType: null);
+        Files tappedIndexFile = getFileNameFromIndex(index: tappedSquareIndex);
+        int tappedIndexRank = getRankNameFromIndex(index: tappedSquareIndex);
+        Square newSquareAtTappedIndex = Square(
+          file: tappedIndexFile,
+          rank: tappedIndexRank,
+          piece: selectedPiece?.piece,
+          pieceType: selectedPiece?.pieceType,
+        );
+        chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
+        chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
+        onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
+      }
+      //move
+      inMoveSelectionMode = true;
+      legalMovesIndices.clear();
+      onPieceSelected([], tappedSquareIndex);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  Files getFileNameFromIndex({required int index}) {
+    List<Files> files = [
+      Files.a,
+      Files.b,
+      Files.c,
+      Files.d,
+      Files.e,
+      Files.f,
+      Files.g,
+      Files.h
+    ];
+    index++;
+    int rank = (index / 8).ceil();
+    Files file = files[index - 8 * (rank - 1) - 1];
+    return file;
+  }
+
+  int getRankNameFromIndex({required int index}) {
+    index++;
+    int rank = (index / 8).ceil();
+    return rank;
+  }
+
+  List<Square> getIllegalAndLegalMoves(
+      {required int rank, required Files file}) {
+    // for (var element in chessBoard) {
+    //   print("${element.file}${element.rank}");
+    // }
+    // Square tappedPiece =
+    //     Square(file: Files.a, rank: 1, piece: null, pieceType: null);
+    Square tappedPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    List<Square> moves = [];
+    switch (tappedPiece.piece) {
+      case Pieces.rook:
+        moves = [
+          ...getHorizontalPieces(rank: rank, file: file),
+          ...getVerticalPieces(rank: rank, file: file)
+        ];
+        break;
+      case Pieces.knight:
+        moves = getKnightPieces(rank: rank, file: file);
+        break;
+      case Pieces.bishop:
+        moves = getDiagonalPieces(rank: rank, file: file);
+        break;
+
+      case Pieces.queen:
+        moves = [
+          ...getHorizontalPieces(rank: rank, file: file),
+          ...getVerticalPieces(rank: rank, file: file),
+          ...getDiagonalPieces(rank: rank, file: file)
+        ];
+        break;
+      case Pieces.king:
+        moves = getKingPieces(rank: rank, file: file);
+        break;
+      case Pieces.pawn:
+        moves = getPawnPieces(rank: rank, file: file);
+        break;
+      default:
+        moves.clear();
+    }
+    return moves;
+  }
+
+  List<Square> getKnightPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+
+    List<Square> knightPieces = [];
+
+    //top-right
+    (file != Files.h && rank <= 6)
+        ? knightPieces.add(chessBoard[currentIndex + 17])
+        : null;
+    //top-left
+    (file != Files.a && rank <= 6)
+        ? knightPieces.add(chessBoard[currentIndex + 15])
+        : null;
+    //----------
+    //bottom-right
+    (file != Files.h && rank >= 3)
+        ? knightPieces.add(chessBoard[currentIndex - 15])
+        : null;
+    //bottom-left
+    (file != Files.a && rank >= 3)
+        ? knightPieces.add(chessBoard[currentIndex - 17])
+        : null;
+    //---------
+    //right-top
+    (file != Files.g && file != Files.h && rank != 8)
+        ? knightPieces.add(chessBoard[currentIndex + 10])
+        : null;
+    //right-bottom
+    (file != Files.g && file != Files.h && rank != 1)
+        ? knightPieces.add(chessBoard[currentIndex - 6])
+        : null;
+    //---------
+    //left-top
+    (file != Files.b && file != Files.a && rank != 8)
+        ? knightPieces.add(chessBoard[currentIndex + 6])
+        : null;
+    //left-bottom
+    (file != Files.b && file != Files.a && rank != 1)
+        ? knightPieces.add(chessBoard[currentIndex - 10])
+        : null;
+
+    return knightPieces;
+  }
+
+  List<Square> getPawnPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+
+    List<Square> pawnPieces = [];
+
+    if (currentPiece.pieceType == PieceType.light) {
+      //top-right
+      (file != Files.h &&
+              rank != 8 &&
+              chessBoard[currentIndex + 8].pieceType != null)
+          ? pawnPieces.add(chessBoard[currentIndex + 9])
+          : null;
+      //top-left
+      (file != Files.a &&
+              rank != 8 &&
+              chessBoard[currentIndex + 8].pieceType != null)
+          ? pawnPieces.add(chessBoard[currentIndex + 7])
+          : null;
+      //top
+      (rank != 8 && chessBoard[currentIndex + 8].pieceType == null)
+          ? pawnPieces.add(chessBoard[currentIndex + 8])
+          : null;
+    } else if (currentPiece.pieceType == PieceType.dark) {
+      //bottom-right
+      (file != Files.h && rank != 1)
+          ? pawnPieces.add(chessBoard[currentIndex - 7])
+          : null;
+      //bottom-left
+      (file != Files.a && rank != 1)
+          ? pawnPieces.add(chessBoard[currentIndex - 9])
+          : null;
+      //bottom
+      rank != 1 ? pawnPieces.add(chessBoard[currentIndex - 8]) : null;
+    }
+
+    return pawnPieces;
+  }
+
+  List<Square> getKingPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+
+    List<Square> kingPieces = [];
+
+    //right
+    (file != Files.h) ? kingPieces.add(chessBoard[currentIndex + 1]) : null;
+    //left
+    (file != Files.a) ? kingPieces.add(chessBoard[currentIndex - 1]) : null;
+    //top-right
+    (file != Files.h && rank != 8)
+        ? kingPieces.add(chessBoard[currentIndex + 9])
+        : null;
+    //top-left
+    (file != Files.a && rank != 8)
+        ? kingPieces.add(chessBoard[currentIndex + 7])
+        : null;
+    //top
+    rank != 8 ? kingPieces.add(chessBoard[currentIndex + 8]) : null;
+
+    //bottom-right
+    (file != Files.h && rank != 1)
+        ? kingPieces.add(chessBoard[currentIndex - 7])
+        : null;
+    //bottom-left
+    (file != Files.a && rank != 1)
+        ? kingPieces.add(chessBoard[currentIndex - 9])
+        : null;
+    //bottom
+    rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
+
+    return kingPieces;
+  }
+
+  List<Square> getDiagonalPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+    List<Square> diagonalPieces = [];
+    //-----------------------------
+    //{RelativeDirection.diagonalTopRight}
+    while (currentIndex < 64 &&
+        !(chessBoard[currentIndex].file == Files.a && file != Files.a)) {
+      diagonalPieces.add(chessBoard[currentIndex]);
+      currentIndex = currentIndex + 9;
+    }
+    currentIndex = index;
+    //{RelativeDirection.diagonalBottomLeft}
+    while (currentIndex >= 0 &&
+        !(chessBoard[currentIndex].file == Files.h && file != Files.h)) {
+      diagonalPieces.add(chessBoard[currentIndex]);
+      currentIndex = currentIndex - 9;
+    }
+    currentIndex = index;
+    //{RelativeDirection.diagonalTopLeft}
+    while (currentIndex < 63 &&
+        !(chessBoard[currentIndex].file == Files.h && file != Files.h)) {
+      diagonalPieces.add(chessBoard[currentIndex]);
+      currentIndex = currentIndex + 7;
+    }
+    currentIndex = index;
+    //{RelativeDirection.diagonalBottomRight}
+    while (currentIndex > 0 &&
+        !(chessBoard[currentIndex].file == Files.a && file != Files.a)) {
+      diagonalPieces.add(chessBoard[currentIndex]);
+      currentIndex = currentIndex - 7;
+    }
+    // remove current piece from the list
+    diagonalPieces
+        .removeWhere((element) => element.rank == rank && element.file == file);
+    return diagonalPieces;
+  }
+
+//-------------------
+  List<Square> getHorizontalPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+    List<Square> horizontalPieces = [];
+    while (currentIndex < rank * 8) {
+      horizontalPieces.add(chessBoard[currentIndex]);
+      currentIndex++;
+    }
+    currentIndex = index;
+    while (currentIndex >= (rank - 1) * 8) {
+      horizontalPieces.add(chessBoard[currentIndex]);
+      currentIndex--;
+    }
+    // remove current piece from the list
+    horizontalPieces
+        .removeWhere((element) => element.rank == rank && element.file == file);
+    //--------------------------------
+
+    return horizontalPieces;
+  }
+
+//----------------------
+  List<Square> getVerticalPieces({required int rank, required Files file}) {
+    Square currentPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+    int index = chessBoard.indexOf(currentPiece);
+    int currentIndex = index;
+    List<Square> verticalPieces = [];
+
+    while (currentIndex < 64) {
+      verticalPieces.add(chessBoard[currentIndex]);
+      currentIndex += 8;
+    }
+    currentIndex = index;
+    while (currentIndex >= 0) {
+      verticalPieces.add(chessBoard[currentIndex]);
+      currentIndex -= 8;
+    }
+    // remove current piece from the list
+    verticalPieces
+        .removeWhere((element) => element.rank == rank && element.file == file);
+    return verticalPieces;
+  }
+
+  //------------------------------------------Getting Legal Moves--------------------------
+  List<Square> getLegalMovesOnly(
+      {required List<Square> legalAndIllegalMoves,
+      required Files file,
+      required int rank}) {
+    List<Square> legalMoves = [];
+    Square tappedPiece = chessBoard
+        .firstWhere((element) => element.rank == rank && element.file == file);
+
+    bool didCaptureOnRankLeft = false;
+    bool didCaptureOnRankRight = false;
+    bool didCaptureOnFileTop = false;
+    bool didCaptureOnFileBottom = false;
+    bool didCaptureOnDiagonalTopLeft = false;
+    bool didCaptureOnDiagonalTopRight = false;
+    bool didCaptureOnDiagonalBottomLeft = false;
+    bool didCaptureOnDiagonalBottomRight = false;
+
+    for (var square in legalAndIllegalMoves) {
+      RelativeDirection relativeDirection = getRelativeDirection(
+          currentSquare: tappedPiece, targetSquare: square);
+
+      if (tappedPiece.pieceType == null) {
+        legalMoves.clear();
+      } else if (tappedPiece.piece == Pieces.knight) {
+        (square.piece == null || square.pieceType != tappedPiece.pieceType)
+            ? legalMoves.add(square)
+            : null;
+      } else if (square.piece == null) {
+        switch (relativeDirection) {
+          case RelativeDirection.rankLeft:
+            if (!didCaptureOnRankLeft) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.rankRight:
+            if (!didCaptureOnRankRight) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.fileTop:
+            if (!didCaptureOnFileTop) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.fileBottom:
+            if (!didCaptureOnFileBottom) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.diagonalTopLeft:
+            if (!didCaptureOnDiagonalTopLeft) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.diagonalTopRight:
+            if (!didCaptureOnDiagonalTopRight) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.diagonalBottomLeft:
+            if (!didCaptureOnDiagonalBottomLeft) {
+              legalMoves.add(square);
+            }
+            break;
+          case RelativeDirection.diagonalBottomRight:
+            if (!didCaptureOnDiagonalBottomRight) {
+              legalMoves.add(square);
+            }
+            break;
+          default:
+            break;
+        }
+      } else {
+        if (square.pieceType == tappedPiece.pieceType) {
+          switch (relativeDirection) {
+            case RelativeDirection.rankLeft:
+              didCaptureOnRankLeft = true;
+              break;
+            case RelativeDirection.rankRight:
+              didCaptureOnRankRight = true;
+
+              break;
+            case RelativeDirection.fileTop:
+              didCaptureOnFileTop = true;
+
+              break;
+            case RelativeDirection.fileBottom:
+              didCaptureOnFileBottom = true;
+
+              break;
+            case RelativeDirection.diagonalTopLeft:
+              didCaptureOnDiagonalTopLeft = true;
+
+              break;
+            case RelativeDirection.diagonalTopRight:
+              didCaptureOnDiagonalTopRight = true;
+
+              break;
+            case RelativeDirection.diagonalBottomLeft:
+              didCaptureOnDiagonalBottomLeft = true;
+
+              break;
+            case RelativeDirection.diagonalBottomRight:
+              didCaptureOnDiagonalBottomRight = true;
+
+              break;
+            default:
+              break;
+          }
+        } else {
+          switch (relativeDirection) {
+            case RelativeDirection.rankLeft:
+              if (!didCaptureOnRankLeft) {
+                legalMoves.add(square);
+                didCaptureOnRankLeft = true;
+              }
+              break;
+            case RelativeDirection.rankRight:
+              if (!didCaptureOnRankRight) {
+                legalMoves.add(square);
+                didCaptureOnRankRight = true;
+              }
+              break;
+            case RelativeDirection.fileTop:
+              if (!didCaptureOnFileTop) {
+                legalMoves.add(square);
+                didCaptureOnFileTop = true;
+              }
+              break;
+            case RelativeDirection.fileBottom:
+              if (!didCaptureOnFileBottom) {
+                legalMoves.add(square);
+                didCaptureOnFileBottom = true;
+              }
+              break;
+            case RelativeDirection.diagonalTopLeft:
+              if (!didCaptureOnDiagonalTopLeft) {
+                legalMoves.add(square);
+                didCaptureOnDiagonalTopLeft = true;
+              }
+              break;
+            case RelativeDirection.diagonalTopRight:
+              if (!didCaptureOnDiagonalTopRight) {
+                legalMoves.add(square);
+                didCaptureOnDiagonalTopRight = true;
+              }
+              break;
+            case RelativeDirection.diagonalBottomLeft:
+              if (!didCaptureOnDiagonalBottomLeft) {
+                legalMoves.add(square);
+                didCaptureOnDiagonalBottomLeft = true;
+              }
+              break;
+            case RelativeDirection.diagonalBottomRight:
+              if (!didCaptureOnDiagonalBottomRight) {
+                legalMoves.add(square);
+                didCaptureOnDiagonalBottomRight = true;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+    // if (isPinned(
+    //     kingType: currentPiece['type'],
+    //     pieceToCheck: currentPiece,
+    //     possibleSquaresToMoveTo: squaresMovableTo)) {
+    //   squaresMovableTo.clear();
+    // }
+
+    return legalMoves;
+  }
+//-------------------------------------
+
+  RelativeDirection getRelativeDirection(
+      {required Square targetSquare, required Square currentSquare}) {
+    int currentSquareRank = currentSquare.rank;
+    int targetSquareRank = targetSquare.rank;
+    Files currentSquareFile = currentSquare.file;
+    Files targetSquareFile = targetSquare.file;
+    RelativeDirection relativeDirection;
+    if (targetSquareRank == currentSquareRank) {
+      relativeDirection = targetSquareFile.index > currentSquareFile.index
+          ? RelativeDirection.rankRight
+          : RelativeDirection.rankLeft;
+    } else if (targetSquareFile == currentSquareFile) {
+      relativeDirection = targetSquareRank > currentSquareRank
+          ? RelativeDirection.fileTop
+          : RelativeDirection.fileBottom;
+    } else if (targetSquareFile.index > currentSquareFile.index) {
+      relativeDirection = targetSquareRank > currentSquareRank
+          ? RelativeDirection.diagonalTopRight
+          : RelativeDirection.diagonalBottomRight;
+    } else if (targetSquareFile.index < currentSquareFile.index) {
+      relativeDirection = targetSquareRank > currentSquareRank
+          ? RelativeDirection.diagonalTopLeft
+          : RelativeDirection.diagonalBottomLeft;
+    } else {
+      relativeDirection = RelativeDirection.undefined;
+      print(
+          "reached condition in getRelativeDirection that should not be reached");
+    }
+    return relativeDirection;
+  }
+
+  List<int> getLegalMovesIndices({required List<Square> legalMovesSquares}) {
+    List<int> legalMovesIndices = [];
+    for (var square in legalMovesSquares) {
+      int squareIndex = chessBoard.indexOf(square);
+      if (squareIndex >= 0 && squareIndex <= 63) {
+        legalMovesIndices.add(squareIndex);
+      }
+    }
+    return legalMovesIndices;
   }
 }
 
@@ -264,6 +818,18 @@ class GameStatus {
   });
 }
 
+enum RelativeDirection {
+  rankLeft,
+  rankRight,
+  fileTop,
+  fileBottom,
+  diagonalTopLeft,
+  diagonalTopRight,
+  diagonalBottomLeft,
+  diagonalBottomRight,
+  undefined
+}
+
 enum GameOutcome {
   victory,
   draw,
@@ -300,3 +866,5 @@ enum Pieces {
   pawn,
 }
 //----------------------------------
+/// generic
+/// generic

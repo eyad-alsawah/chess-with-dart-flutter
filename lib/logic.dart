@@ -5,25 +5,50 @@ List<Map<String, dynamic>> chessBoard = [
   {
     "file": Files.a,
     "rank": 1,
-    "piece": Pieces.rook,
-    "type": PieceType.light,
+    "piece": PiecesT.rook,
+    "type": PieceTypeT.light,
   },
-  {"file": Files.b, "rank": 1, "piece": Pieces.knight, "type": PieceType.light},
-  {"file": Files.c, "rank": 1, "piece": Pieces.bishop, "type": PieceType.light},
-  {"file": Files.d, "rank": 1, "piece": Pieces.queen, "type": PieceType.light},
-  {"file": Files.e, "rank": 1, "piece": Pieces.king, "type": PieceType.light},
-  {"file": Files.f, "rank": 1, "piece": Pieces.bishop, "type": PieceType.light},
-  {"file": Files.g, "rank": 1, "piece": Pieces.knight, "type": PieceType.light},
-  {"file": Files.h, "rank": 1, "piece": Pieces.rook, "type": PieceType.light},
+  {
+    "file": Files.b,
+    "rank": 1,
+    "piece": PiecesT.knight,
+    "type": PieceTypeT.light
+  },
+  {
+    "file": Files.c,
+    "rank": 1,
+    "piece": PiecesT.bishop,
+    "type": PieceTypeT.light
+  },
+  {
+    "file": Files.d,
+    "rank": 1,
+    "piece": PiecesT.queen,
+    "type": PieceTypeT.light
+  },
+  {"file": Files.e, "rank": 1, "piece": PiecesT.king, "type": PieceTypeT.light},
+  {
+    "file": Files.f,
+    "rank": 1,
+    "piece": PiecesT.bishop,
+    "type": PieceTypeT.light
+  },
+  {
+    "file": Files.g,
+    "rank": 1,
+    "piece": PiecesT.knight,
+    "type": PieceTypeT.light
+  },
+  {"file": Files.h, "rank": 1, "piece": PiecesT.rook, "type": PieceTypeT.light},
   //--------------------------- rank 2----------------------------------------
-  {"file": Files.a, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.b, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.c, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.d, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.e, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.f, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.g, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
-  {"file": Files.h, "rank": 2, "piece": Pieces.pawn, "type": PieceType.light},
+  {"file": Files.a, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.b, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.c, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.d, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.e, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.f, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.g, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"file": Files.h, "rank": 2, "piece": PiecesT.pawn, "type": PieceTypeT.light},
   //------------------------------rank 3---------------------------------------
   {"file": Files.a, "rank": 3, "piece": null, "type": null},
   {"file": Files.b, "rank": 3, "piece": null, "type": null},
@@ -61,28 +86,48 @@ List<Map<String, dynamic>> chessBoard = [
   {"file": Files.g, "rank": 6, "piece": null, "type": null},
   {"file": Files.h, "rank": 6, "piece": null, "type": null},
   //-----------------------------------rank 7----------------------------------
-  {"file": Files.a, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.b, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.c, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.d, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.e, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.f, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.g, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
-  {"file": Files.h, "rank": 7, "piece": Pieces.pawn, "type": PieceType.dark},
+  {"file": Files.a, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.b, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.c, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.d, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.e, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.f, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.g, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
+  {"file": Files.h, "rank": 7, "piece": PiecesT.pawn, "type": PieceTypeT.dark},
   //------------------------------------rank 8----------------------------------
-  {"file": Files.a, "rank": 8, "piece": Pieces.rook, "type": PieceType.dark},
-  {"file": Files.b, "rank": 8, "piece": Pieces.knight, "type": PieceType.dark},
-  {"file": Files.c, "rank": 8, "piece": Pieces.bishop, "type": PieceType.dark},
-  {"file": Files.d, "rank": 8, "piece": Pieces.queen, "type": PieceType.dark},
-  {"file": Files.e, "rank": 8, "piece": Pieces.king, "type": PieceType.dark},
-  {"file": Files.f, "rank": 8, "piece": Pieces.bishop, "type": PieceType.dark},
-  {"file": Files.g, "rank": 8, "piece": Pieces.knight, "type": PieceType.dark},
-  {"file": Files.h, "rank": 8, "piece": Pieces.rook, "type": PieceType.dark}
+  {"file": Files.a, "rank": 8, "piece": PiecesT.rook, "type": PieceTypeT.dark},
+  {
+    "file": Files.b,
+    "rank": 8,
+    "piece": PiecesT.knight,
+    "type": PieceTypeT.dark
+  },
+  {
+    "file": Files.c,
+    "rank": 8,
+    "piece": PiecesT.bishop,
+    "type": PieceTypeT.dark
+  },
+  {"file": Files.d, "rank": 8, "piece": PiecesT.queen, "type": PieceTypeT.dark},
+  {"file": Files.e, "rank": 8, "piece": PiecesT.king, "type": PieceTypeT.dark},
+  {
+    "file": Files.f,
+    "rank": 8,
+    "piece": PiecesT.bishop,
+    "type": PieceTypeT.dark
+  },
+  {
+    "file": Files.g,
+    "rank": 8,
+    "piece": PiecesT.knight,
+    "type": PieceTypeT.dark
+  },
+  {"file": Files.h, "rank": 8, "piece": PiecesT.rook, "type": PieceTypeT.dark}
 ];
 
 bool getAllPieces = false;
 
-enum Pieces {
+enum PiecesT {
   rook,
   knight,
   bishop,
@@ -91,7 +136,7 @@ enum Pieces {
   pawn,
 }
 
-enum PieceType { light, dark }
+enum PieceTypeT { light, dark }
 
 enum Files { a, b, c, d, e, f, g, h }
 
@@ -147,30 +192,30 @@ List<Map<String, dynamic>> getPieces({required int rank, required Files file}) {
       (element) => element['rank'] == rank && element['file'] == file);
   List<Map<String, dynamic>> pieces = [];
   switch (currentPiece['piece']) {
-    case Pieces.rook:
+    case PiecesT.rook:
       pieces = [
         ...getHorizontalPieces(rank: rank, file: file),
         ...getVerticalPieces(rank: rank, file: file)
       ];
       break;
-    case Pieces.knight:
+    case PiecesT.knight:
       pieces = getKnightPieces(rank: rank, file: file);
       break;
-    case Pieces.bishop:
+    case PiecesT.bishop:
       pieces = getDiagonalPieces(rank: rank, file: file);
       break;
 
-    case Pieces.queen:
+    case PiecesT.queen:
       pieces = [
         ...getHorizontalPieces(rank: rank, file: file),
         ...getVerticalPieces(rank: rank, file: file),
         ...getDiagonalPieces(rank: rank, file: file)
       ];
       break;
-    case Pieces.king:
+    case PiecesT.king:
       pieces = getKingPieces(rank: rank, file: file);
       break;
-    case Pieces.pawn:
+    case PiecesT.pawn:
       pieces = getPawnPieces(rank: rank, file: file);
       break;
     default:
@@ -236,7 +281,7 @@ List<Map<String, dynamic>> getPawnPieces(
 
   List<Map<String, dynamic>> pawnPieces = [];
 
-  if (currentPiece['type'] == PieceType.light) {
+  if (currentPiece['type'] == PieceTypeT.light) {
     //top-right
     (file != Files.h && rank != 8)
         ? pawnPieces.add(chessBoard[currentIndex + 9])
@@ -247,7 +292,7 @@ List<Map<String, dynamic>> getPawnPieces(
         : null;
     //top
     rank != 8 ? pawnPieces.add(chessBoard[currentIndex + 8]) : null;
-  } else if (currentPiece['type'] == PieceType.dark) {
+  } else if (currentPiece['type'] == PieceTypeT.dark) {
     //bottom-right
     (file != Files.h && rank != 1)
         ? pawnPieces.add(chessBoard[currentIndex - 7])
@@ -415,7 +460,7 @@ List<Map<String, dynamic>> squaresMovableTo(
 
     if (currentPiece['type'] == null) {
       squaresMovableTo.clear();
-    } else if (currentPiece['piece'] == Pieces.knight) {
+    } else if (currentPiece['piece'] == PiecesT.knight) {
       (square['piece'] == null || square['type'] != currentPiece['type'])
           ? squaresMovableTo.add(square)
           : null;
@@ -568,7 +613,7 @@ List<Map<String, dynamic>> squaresMovableTo(
 }
 
 bool isPinned(
-    {required PieceType? kingType,
+    {required PieceTypeT? kingType,
     required List<Map<String, dynamic>> possibleSquaresToMoveTo,
     required Map<String, dynamic> pieceToCheck}) {
   List<Map<String, dynamic>> squaresWhereKingMightGetChecked = [];
@@ -589,20 +634,20 @@ bool isPinned(
 }
 
 bool isKingChecked(
-    {required PieceType pieceType,
+    {required PieceTypeT pieceType,
     required List<Map<String, dynamic>> squaresToCheckIfCheckingKing}) {
   List<Map<String, dynamic>> piecesCheckingKing = [];
   for (var square in chessBoard) {
     int rank = square['rank'];
     Files file = square['file'];
-    PieceType? type = square['type'];
+    PieceTypeT? type = square['type'];
     //if pieceType is light we are checking if light's king is checked by any dark piece on the board
     // this is done by checking if any dark piece on the board can move to light's king square
     if (type != null && type != pieceType) {
       for (var squareToCheck in squaresToCheckIfCheckingKing) {
         if (squareToCheck['type'] != null &&
             squareToCheck['type'] != type &&
-            squareToCheck['piece'] == Pieces.king) {
+            squareToCheck['piece'] == PiecesT.king) {
           piecesCheckingKing.add(square);
         }
       }

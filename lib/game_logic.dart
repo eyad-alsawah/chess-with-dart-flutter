@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
 
-import 'logic.dart';
+import 'game.dart';
+import 'logic.dart' show chessBoard, PieceTypeT, PiecesT;
 
 enum PlayingAs { white, black }
 
@@ -27,6 +28,48 @@ class ChessBoard extends StatefulWidget {
 class _ChessBoardState extends State<ChessBoard> {
   String squareName = "";
   List<int> tappedIndices = [];
+  int? selectedIndex;
+  late Chess chess;
+
+  @override
+  void initState() {
+    super.initState();
+    chess = Chess.fromPosition(
+      initialPosition: "initialPosition",
+      onVictory: (victoryType) {},
+      onDraw: (drawType) {},
+      onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
+        print(highlightedLegalMovesIndices);
+        selectedIndex = null;
+        highlightedLegalMovesIndices.isEmpty
+            ? tappedIndices.clear()
+            : tappedIndices.addAll(highlightedLegalMovesIndices);
+
+        selectedIndex =
+            highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
+        setState(() {});
+      },
+      onCastling: (castlingType, playingTurn) {},
+      onPlayingTurnChanged: (playingTurn) {},
+      onPieceMoved: (from, to) {
+        print("moved from: $from to $to");
+        int fromRank = getRankNameFromIndex(index: from);
+        Files fromFile = getFileNameFromIndex(index: to);
+        Map<String, dynamic> fromSquare = chessBoard[from];
+        chessBoard[from] = {
+          "file": fromFile,
+          "rank": fromFile,
+          "piece": null,
+          "type": null
+        };
+        chessBoard[to] = fromSquare;
+        selectedIndex = null;
+        tappedIndices.clear();
+        setState(() {});
+      },
+      onError: (error, errorString) {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,31 +155,22 @@ class _ChessBoardState extends State<ChessBoard> {
                       itemBuilder: (context, index) => GestureDetector(
                         onTap: () {
                           tappedIndices.clear();
-                          Files fileName = getFileNameFromIndex(index: index);
-                          int rankName = getRankNameFromIndex(index: index);
-                          squareName = getSquareNameFromIndex(index: index);
-                          List highlightedSquares = getAllPieces
-                              ? getPieces(rank: rankName, file: fileName)
-                              : squaresMovableTo(
-                                  file: fileName,
-                                  rank: rankName,
-                                  possibleSquaresToMoveTo:
-                                      getPieces(rank: rankName, file: fileName),
-                                );
+                          chess.handleSquareTapped(tappedSquareIndex: index);
 
-                          for (var element in highlightedSquares) {
-                            tappedIndices.add(
-                              chessBoard.indexOf(element),
-                            );
-                          }
-                          setState(() {});
                           widget.onTap(squareName);
                         },
                         child: Container(
-                          color: getSquareColor(
-                              ignoreTappedIndices: true,
-                              index: index,
-                              tappedIndices: tappedIndices),
+                          decoration: BoxDecoration(
+                              color: getSquareColor(
+                                  ignoreTappedIndices: true,
+                                  index: index,
+                                  tappedIndices: tappedIndices),
+                              border: Border.all(
+                                  width: 2,
+                                  color: (index == selectedIndex &&
+                                          selectedIndex != null)
+                                      ? Colors.red
+                                      : Colors.transparent)),
                           padding: const EdgeInsets.all(10),
                           child: Container(
                               height: 4,
@@ -292,29 +326,29 @@ String getImageFromBoard({required int index}) {
   Map<String, dynamic> square = chessBoard[index];
   String imageAssetString = '';
   switch (square['piece']) {
-    case Pieces.pawn:
+    case PiecesT.pawn:
       imageAssetString =
-          square['type'] == PieceType.light ? whitePawn : blackPawn;
+          square['type'] == PieceTypeT.light ? whitePawn : blackPawn;
       break;
-    case Pieces.king:
+    case PiecesT.king:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteKing : blackKing;
+          square['type'] == PieceTypeT.light ? whiteKing : blackKing;
       break;
-    case Pieces.knight:
+    case PiecesT.knight:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteKnight : blackKnight;
+          square['type'] == PieceTypeT.light ? whiteKnight : blackKnight;
       break;
-    case Pieces.queen:
+    case PiecesT.queen:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteQueen : blackQueen;
+          square['type'] == PieceTypeT.light ? whiteQueen : blackQueen;
       break;
-    case Pieces.rook:
+    case PiecesT.rook:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteCastle : blackCastle;
+          square['type'] == PieceTypeT.light ? whiteCastle : blackCastle;
       break;
-    case Pieces.bishop:
+    case PiecesT.bishop:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteBishop : blackBishop;
+          square['type'] == PieceTypeT.light ? whiteBishop : blackBishop;
       break;
     default:
   }
