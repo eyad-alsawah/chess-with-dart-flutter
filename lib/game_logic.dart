@@ -14,12 +14,14 @@ List<String> ranksNotation = ['1', '2', '3', '4', '5', '6', '7', '8'];
 class ChessBoard extends StatefulWidget {
   final PlayingAs playingAs;
   final ValueChanged<String> onTap;
+  final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final double size;
   const ChessBoard(
       {super.key,
       required this.playingAs,
       required this.size,
-      required this.onTap});
+      required this.onTap,
+      required this.onPlayingTurnChanged});
 
   @override
   State<ChessBoard> createState() => _ChessBoardState();
@@ -50,7 +52,9 @@ class _ChessBoardState extends State<ChessBoard> {
         setState(() {});
       },
       onCastling: (castlingType, playingTurn) {},
-      onPlayingTurnChanged: (playingTurn) {},
+      onPlayingTurnChanged: (playingTurn) {
+        widget.onPlayingTurnChanged(playingTurn);
+      },
       onPieceMoved: (from, to) {
         print("moved from: $from to $to");
         int fromRank = getRankNameFromIndex(index: from);

@@ -214,9 +214,12 @@ class Chess {
   //-----------------------------------
   getCurrentPlayingTurn() {}
   offerUndoMove() {}
+
+  //---------------------------------
   List<int> legalMovesIndices = [];
   int? selectedPieceIndex;
   Square? selectedPiece;
+  PlayingTurn playingTurn = PlayingTurn.white;
   handleSquareTapped({required int tappedSquareIndex}) {
     print(tappedSquareIndex);
     print(inMoveSelectionMode);
@@ -224,9 +227,6 @@ class Chess {
       selectedPieceIndex = tappedSquareIndex;
       Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
       int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
-      print("tappedSquareRank: $tappedSquareRank");
-      print("tappedSquareFile: $tappedSquareFile");
-
       selectedPiece = chessBoard[tappedSquareIndex];
 
       List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(
@@ -237,6 +237,13 @@ class Chess {
           legalAndIllegalMoves: legalAndIllegalMoves);
       legalMovesIndices =
           getLegalMovesIndices(legalMovesSquares: legalMovesOnly);
+      // preventing player who's turn is not his to play
+      ((selectedPiece?.pieceType == PieceType.light &&
+                  playingTurn != PlayingTurn.white) ||
+              (selectedPiece?.pieceType == PieceType.dark &&
+                  playingTurn != PlayingTurn.black))
+          ? legalMovesIndices.clear()
+          : null;
       onPieceSelected(legalMovesIndices, tappedSquareIndex);
       inMoveSelectionMode = legalMovesIndices.isEmpty;
       //get legal moves
@@ -249,8 +256,7 @@ class Chess {
             getFileNameFromIndex(index: selectedPieceIndex!);
         int selectedPieceRank =
             getRankNameFromIndex(index: selectedPieceIndex!);
-        print("selectedPieceRank: $selectedPieceRank");
-        print("selectedPieceFile: $selectedPieceFile");
+
         Square emptySquareAtSelectedPieceIndex = Square(
             file: selectedPieceFile,
             rank: selectedPieceRank,
@@ -266,6 +272,10 @@ class Chess {
         );
         chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
         chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
+        playingTurn = playingTurn == PlayingTurn.white
+            ? PlayingTurn.black
+            : PlayingTurn.white;
+        onPlayingTurnChanged(playingTurn);
         onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
       }
       //move
@@ -401,13 +411,13 @@ class Chess {
       //top-right
       (file != Files.h &&
               rank != 8 &&
-              chessBoard[currentIndex + 8].pieceType != null)
+              chessBoard[currentIndex + 9].pieceType != null)
           ? pawnPieces.add(chessBoard[currentIndex + 9])
           : null;
       //top-left
       (file != Files.a &&
               rank != 8 &&
-              chessBoard[currentIndex + 8].pieceType != null)
+              chessBoard[currentIndex + 7].pieceType != null)
           ? pawnPieces.add(chessBoard[currentIndex + 7])
           : null;
       //top
@@ -416,15 +426,21 @@ class Chess {
           : null;
     } else if (currentPiece.pieceType == PieceType.dark) {
       //bottom-right
-      (file != Files.h && rank != 1)
+      (file != Files.h &&
+              rank != 1 &&
+              chessBoard[currentIndex - 7].pieceType != null)
           ? pawnPieces.add(chessBoard[currentIndex - 7])
           : null;
       //bottom-left
-      (file != Files.a && rank != 1)
+      (file != Files.a &&
+              rank != 1 &&
+              chessBoard[currentIndex - 9].pieceType != null)
           ? pawnPieces.add(chessBoard[currentIndex - 9])
           : null;
       //bottom
-      rank != 1 ? pawnPieces.add(chessBoard[currentIndex - 8]) : null;
+      (rank != 1 && chessBoard[currentIndex - 8].pieceType == null)
+          ? pawnPieces.add(chessBoard[currentIndex - 8])
+          : null;
     }
 
     return pawnPieces;

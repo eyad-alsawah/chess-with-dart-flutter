@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chess/game.dart';
 import 'package:chess/game_logic.dart';
 
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String squareName = "";
   List<String> movementHistory = [];
+  String currentPlayingTurn = "White's Turn";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,40 +49,32 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: ChessBoard(
-                playingAs: PlayingAs.white,
-                size: 330,
-                onTap: (name) {
-                  // setState(() {
-                  //   movementHistory.add("$name, ");
-                  //   squareName = name;
-                  // });
-                }),
-          ),
-          IconButton(
-              onPressed: () {
-                //emptying the chess board
-                for (var element in chessBoard) {
-                  element['piece'] = null;
-                  element['type'] = null;
-                }
-                List<int> insertionIndex = List.generate(64, (index) => index);
-                insertionIndex.shuffle();
-                for (var newPiece in listToShuffleFrom) {
-                  final random = Random();
-                  int randomIndex = random.nextInt(insertionIndex.length);
-                  insertionIndex.removeAt(randomIndex);
-                  chessBoard[randomIndex]['piece'] = newPiece['piece'];
-                  chessBoard[randomIndex]['type'] = newPiece['type'];
-                }
+              playingAs: PlayingAs.white,
+              size: 330,
+              onTap: (name) {
+                // setState(() {
+                //   movementHistory.add("$name, ");
+                //   squareName = name;
+                // });
+              },
+              onPlayingTurnChanged: (playingTurn) {
+                currentPlayingTurn = playingTurn == PlayingTurn.white
+                    ? "White's Turn"
+                    : "Black's Turn";
                 setState(() {});
               },
-              icon: const Icon(Icons.shuffle)),
-          Switch(
-              value: getAllPieces,
-              onChanged: (value) {
-                getAllPieces = value;
-                setState(() {});
-              }),
+            ),
+          ),
+
+          Center(
+            child: Text(
+              currentPlayingTurn,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           // const SizedBox(height: 20),
           // Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 30),
