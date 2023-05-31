@@ -40,13 +40,16 @@ class _ChessBoardState extends State<ChessBoard> {
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
+      onPawnPromoted: (promotedPieceIndex, promotedTo) {
+        chessBoard[promotedPieceIndex]['piece'] = PiecesT.queen;
+
+        setState(() {});
+      },
       onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
-        print(highlightedLegalMovesIndices);
         selectedIndex = null;
         highlightedLegalMovesIndices.isEmpty
             ? tappedIndices.clear()
             : tappedIndices.addAll(highlightedLegalMovesIndices);
-
         selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
         setState(() {});

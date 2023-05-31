@@ -3,24 +3,19 @@ import 'dart:io';
 
 void main() async {
   Chess chess = Chess.fromPosition(
-    initialPosition: "initialPosition",
-    onVictory: (victoryType) {},
-    onDraw: (drawType) {},
-    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
-      print("selectedPieceIndex: $selectedPieceIndex");
-      print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
-      print("//---------------------------------------");
-    },
-    onCastling: (castlingType, playingTurn) {},
-    onPlayingTurnChanged: (playingTurn) {},
-    onPieceMoved: (from, to) {},
-    onError: (error, errorString) {},
-  );
-  int x = 0;
-  while (x != 64) {
-    chess.handleSquareTapped(tappedSquareIndex: x);
-    x++;
-  }
+      initialPosition: "initialPosition",
+      onVictory: (victoryType) {},
+      onDraw: (drawType) {},
+      onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
+        print("selectedPieceIndex: $selectedPieceIndex");
+        print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
+        print("//---------------------------------------");
+      },
+      onCastling: (castlingType, playingTurn) {},
+      onPlayingTurnChanged: (playingTurn) {},
+      onPieceMoved: (from, to) {},
+      onError: (error, errorString) {},
+      onPawnPromoted: (promotedPieceIndex, promotedTo) {});
 }
 
 //---------------------------------------
@@ -36,6 +31,7 @@ class Chess {
       onCastling;
   final void Function(int from, int to) onPieceMoved;
   final void Function(Error error, String errorString) onError;
+  final void Function(int promotedPieceIndex, Pieces promotedTo) onPawnPromoted;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -184,18 +180,12 @@ class Chess {
       required this.onPlayingTurnChanged,
       required this.onPieceMoved,
       required this.onError,
-      required this.onCastling})
+      required this.onCastling,
+      required this.onPawnPromoted})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
-  start() {
-    // whiteTimer = Timer(const Duration(seconds: 15), () {
-    //   ("white time runned out");
-    // });
-    // blackTimer = Timer(const Duration(seconds: 4), () {
-    //   onGameStatusChanged("black time runned out");
-    // });
-  }
+  start() {}
 
   pause() {}
   resume() {}
@@ -250,6 +240,9 @@ class Chess {
     else if (legalMovesIndices.contains(tappedSquareIndex) &&
         selectedPiece != null &&
         selectedPieceIndex != null) {
+      bool shouldPromotePawn = selectedPiece!.piece == Pieces.pawn &&
+          (tappedSquareRank == 1 || tappedSquareRank == 8);
+
       Files selectedPieceFile =
           getFileNameFromIndex(index: selectedPieceIndex!);
       int selectedPieceRank = getRankNameFromIndex(index: selectedPieceIndex!);
@@ -262,7 +255,7 @@ class Chess {
       Square newSquareAtTappedIndex = Square(
         file: tappedSquareFile,
         rank: tappedSquareRank,
-        piece: selectedPiece?.piece,
+        piece: shouldPromotePawn ? Pieces.queen : selectedPiece?.piece,
         pieceType: selectedPiece?.pieceType,
       );
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
@@ -272,6 +265,9 @@ class Chess {
           : PlayingTurn.white;
       onPlayingTurnChanged(playingTurn);
       onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
+      shouldPromotePawn
+          ? onPawnPromoted(tappedSquareIndex, Pieces.queen)
+          : null;
     }
     onPieceSelected([], tappedSquareIndex);
     inMoveSelectionMode = true;
@@ -304,11 +300,6 @@ class Chess {
 
   List<Square> getIllegalAndLegalMoves(
       {required int rank, required Files file}) {
-    // for (var element in chessBoard) {
-    //   print("${element.file}${element.rank}");
-    // }
-    // Square tappedPiece =
-    //     Square(file: Files.a, rank: 1, piece: null, pieceType: null);
     Square tappedPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     List<Square> moves = [];
