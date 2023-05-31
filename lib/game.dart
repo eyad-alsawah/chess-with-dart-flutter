@@ -219,16 +219,14 @@ class Chess {
   List<int> legalMovesIndices = [];
   int? selectedPieceIndex;
   Square? selectedPiece;
+  // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
   PlayingTurn playingTurn = PlayingTurn.white;
   handleSquareTapped({required int tappedSquareIndex}) {
-    print(tappedSquareIndex);
-    print(inMoveSelectionMode);
+    Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
+    int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
     if (inMoveSelectionMode) {
       selectedPieceIndex = tappedSquareIndex;
-      Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
-      int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
       selectedPiece = chessBoard[tappedSquareIndex];
-
       List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(
           rank: tappedSquareRank, file: tappedSquareFile);
       List<Square> legalMovesOnly = getLegalMovesOnly(
@@ -237,7 +235,7 @@ class Chess {
           legalAndIllegalMoves: legalAndIllegalMoves);
       legalMovesIndices =
           getLegalMovesIndices(legalMovesSquares: legalMovesOnly);
-      // preventing player who's turn is not his to play
+      // preventing player who's turn is not his to play by emptying the legalMovesIndices list
       ((selectedPiece?.pieceType == PieceType.light &&
                   playingTurn != PlayingTurn.white) ||
               (selectedPiece?.pieceType == PieceType.dark &&
@@ -246,43 +244,38 @@ class Chess {
           : null;
       onPieceSelected(legalMovesIndices, tappedSquareIndex);
       inMoveSelectionMode = legalMovesIndices.isEmpty;
-      //get legal moves
-      //if legal moves list is not empty
-    } else {
-      if (legalMovesIndices.contains(tappedSquareIndex) &&
-          selectedPiece != null &&
-          selectedPieceIndex != null) {
-        Files selectedPieceFile =
-            getFileNameFromIndex(index: selectedPieceIndex!);
-        int selectedPieceRank =
-            getRankNameFromIndex(index: selectedPieceIndex!);
-
-        Square emptySquareAtSelectedPieceIndex = Square(
-            file: selectedPieceFile,
-            rank: selectedPieceRank,
-            piece: null,
-            pieceType: null);
-        Files tappedIndexFile = getFileNameFromIndex(index: tappedSquareIndex);
-        int tappedIndexRank = getRankNameFromIndex(index: tappedSquareIndex);
-        Square newSquareAtTappedIndex = Square(
-          file: tappedIndexFile,
-          rank: tappedIndexRank,
-          piece: selectedPiece?.piece,
-          pieceType: selectedPiece?.pieceType,
-        );
-        chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
-        chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
-        playingTurn = playingTurn == PlayingTurn.white
-            ? PlayingTurn.black
-            : PlayingTurn.white;
-        onPlayingTurnChanged(playingTurn);
-        onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
-      }
-      //move
-      inMoveSelectionMode = true;
-      legalMovesIndices.clear();
-      onPieceSelected([], tappedSquareIndex);
+      return;
     }
+    // checking nullability only for safely using null check operator
+    else if (legalMovesIndices.contains(tappedSquareIndex) &&
+        selectedPiece != null &&
+        selectedPieceIndex != null) {
+      Files selectedPieceFile =
+          getFileNameFromIndex(index: selectedPieceIndex!);
+      int selectedPieceRank = getRankNameFromIndex(index: selectedPieceIndex!);
+      // empty square that will replace the square on which the piece that we will move is at
+      Square emptySquareAtSelectedPieceIndex = Square(
+          file: selectedPieceFile,
+          rank: selectedPieceRank,
+          piece: null,
+          pieceType: null);
+      Square newSquareAtTappedIndex = Square(
+        file: tappedSquareFile,
+        rank: tappedSquareRank,
+        piece: selectedPiece?.piece,
+        pieceType: selectedPiece?.pieceType,
+      );
+      chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
+      chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
+      playingTurn = playingTurn == PlayingTurn.white
+          ? PlayingTurn.black
+          : PlayingTurn.white;
+      onPlayingTurnChanged(playingTurn);
+      onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
+    }
+    onPieceSelected([], tappedSquareIndex);
+    inMoveSelectionMode = true;
+    legalMovesIndices.clear();
   }
 
   // ---------------------------------------------------------------------------
