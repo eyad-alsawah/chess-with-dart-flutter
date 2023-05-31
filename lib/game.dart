@@ -415,7 +415,10 @@ class Chess {
           : null;
       //top
       (rank != 8 && chessBoard[currentIndex + 8].pieceType == null)
-          ? pawnPieces.add(chessBoard[currentIndex + 8])
+          ? (rank == 2 && chessBoard[currentIndex + 16].pieceType == null)
+              ? pawnPieces.addAll(
+                  [chessBoard[currentIndex + 8], chessBoard[currentIndex + 16]])
+              : pawnPieces.add(chessBoard[currentIndex + 8])
           : null;
     } else if (currentPiece.pieceType == PieceType.dark) {
       //bottom-right
@@ -432,10 +435,12 @@ class Chess {
           : null;
       //bottom
       (rank != 1 && chessBoard[currentIndex - 8].pieceType == null)
-          ? pawnPieces.add(chessBoard[currentIndex - 8])
+          ? (rank == 7 && chessBoard[currentIndex - 16].pieceType == null)
+              ? pawnPieces.addAll(
+                  [chessBoard[currentIndex - 8], chessBoard[currentIndex - 16]])
+              : pawnPieces.add(chessBoard[currentIndex - 8])
           : null;
     }
-
     return pawnPieces;
   }
 
@@ -588,6 +593,7 @@ class Chess {
       if (tappedPiece.pieceType == null) {
         legalMoves.clear();
       } else if (tappedPiece.piece == Pieces.knight) {
+        // treated differently than other pieces due to the way the knight moves
         (square.piece == null || square.pieceType != tappedPiece.pieceType)
             ? legalMoves.add(square)
             : null;
