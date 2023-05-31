@@ -3,19 +3,23 @@ import 'dart:io';
 
 void main() async {
   Chess chess = Chess.fromPosition(
-      initialPosition: "initialPosition",
-      onVictory: (victoryType) {},
-      onDraw: (drawType) {},
-      onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
-        print("selectedPieceIndex: $selectedPieceIndex");
-        print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
-        print("//---------------------------------------");
-      },
-      onCastling: (castlingType, playingTurn) {},
-      onPlayingTurnChanged: (playingTurn) {},
-      onPieceMoved: (from, to) {},
-      onError: (error, errorString) {},
-      onPawnPromoted: (promotedPieceIndex, promotedTo) {});
+    initialPosition: "initialPosition",
+    onVictory: (victoryType) {},
+    onDraw: (drawType) {},
+    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
+      print("selectedPieceIndex: $selectedPieceIndex");
+      print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
+      print("//---------------------------------------");
+    },
+    onCastling: (castlingType, playingTurn) {},
+    onPlayingTurnChanged: (playingTurn) {},
+    onPieceMoved: (from, to) {},
+    onError: (error, errorString) {},
+    onPawnPromoted: (promotedPieceIndex, promotedTo) {},
+    onSelectPromotionType: () async {
+      return Pieces.queen;
+    },
+  );
 }
 
 //---------------------------------------
@@ -32,6 +36,7 @@ class Chess {
   final void Function(int from, int to) onPieceMoved;
   final void Function(Error error, String errorString) onError;
   final void Function(int promotedPieceIndex, Pieces promotedTo) onPawnPromoted;
+  final Future<Pieces> Function() onSelectPromotionType;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -181,7 +186,8 @@ class Chess {
       required this.onPieceMoved,
       required this.onError,
       required this.onCastling,
-      required this.onPawnPromoted})
+      required this.onPawnPromoted,
+      required this.onSelectPromotionType})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
@@ -211,7 +217,7 @@ class Chess {
   Square? selectedPiece;
   // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
   PlayingTurn playingTurn = PlayingTurn.white;
-  handleSquareTapped({required int tappedSquareIndex}) {
+  handleSquareTapped({required int tappedSquareIndex}) async {
     Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
     int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
     if (inMoveSelectionMode) {
@@ -266,7 +272,8 @@ class Chess {
       onPlayingTurnChanged(playingTurn);
       onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
       shouldPromotePawn
-          ? onPawnPromoted(tappedSquareIndex, Pieces.queen)
+          ? await onSelectPromotionType().then((selectedPromotionType) =>
+              onPawnPromoted(tappedSquareIndex, selectedPromotionType))
           : null;
     }
     onPieceSelected([], tappedSquareIndex);

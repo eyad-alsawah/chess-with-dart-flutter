@@ -4,7 +4,7 @@ import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
 
 import 'game.dart';
-import 'logic.dart' show chessBoard, PieceTypeT, PiecesT;
+import 'logic.dart' show chessBoard, PieceTypeT;
 
 enum PlayingAs { white, black }
 
@@ -41,9 +41,13 @@ class _ChessBoardState extends State<ChessBoard> {
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
       onPawnPromoted: (promotedPieceIndex, promotedTo) {
-        chessBoard[promotedPieceIndex]['piece'] = PiecesT.queen;
+        chessBoard[promotedPieceIndex]['piece'] = promotedTo;
 
         setState(() {});
+      },
+      onSelectPromotionType: () async {
+        await Future.delayed(Duration(seconds: 2), () {});
+        return Pieces.bishop;
       },
       onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
         selectedIndex = null;
@@ -333,27 +337,27 @@ String getImageFromBoard({required int index}) {
   Map<String, dynamic> square = chessBoard[index];
   String imageAssetString = '';
   switch (square['piece']) {
-    case PiecesT.pawn:
+    case Pieces.pawn:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whitePawn : blackPawn;
       break;
-    case PiecesT.king:
+    case Pieces.king:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whiteKing : blackKing;
       break;
-    case PiecesT.knight:
+    case Pieces.knight:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whiteKnight : blackKnight;
       break;
-    case PiecesT.queen:
+    case Pieces.queen:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whiteQueen : blackQueen;
       break;
-    case PiecesT.rook:
+    case Pieces.rook:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whiteCastle : blackCastle;
       break;
-    case PiecesT.bishop:
+    case Pieces.bishop:
       imageAssetString =
           square['type'] == PieceTypeT.light ? whiteBishop : blackBishop;
       break;

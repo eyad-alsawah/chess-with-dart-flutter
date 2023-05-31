@@ -5,7 +5,7 @@ import 'package:chess/game_logic.dart';
 
 import 'package:flutter/material.dart';
 
-import 'logic.dart';
+import 'logic.dart' hide Pieces;
 
 void main() {
   runApp(const MyApp());
@@ -97,39 +97,39 @@ class _MyHomePageState extends State<MyHomePage> {
 
 List<Map<String, dynamic>> listToShuffleFrom = [
   {
-    "piece": PiecesT.rook,
+    "piece": Pieces.rook,
     "type": PieceTypeT.light,
   },
-  {"piece": PiecesT.knight, "type": PieceTypeT.light},
-  {"piece": PiecesT.bishop, "type": PieceTypeT.light},
-  {"piece": PiecesT.queen, "type": PieceTypeT.light},
-  {"piece": PiecesT.king, "type": PieceTypeT.light},
-  {"piece": PiecesT.bishop, "type": PieceTypeT.light},
-  {"piece": PiecesT.knight, "type": PieceTypeT.light},
-  {"piece": PiecesT.rook, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.knight, "type": PieceTypeT.light},
+  {"piece": Pieces.bishop, "type": PieceTypeT.light},
+  {"piece": Pieces.queen, "type": PieceTypeT.light},
+  {"piece": Pieces.king, "type": PieceTypeT.light},
+  {"piece": Pieces.bishop, "type": PieceTypeT.light},
+  {"piece": Pieces.knight, "type": PieceTypeT.light},
+  {"piece": Pieces.rook, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
+  {"piece": Pieces.pawn, "type": PieceTypeT.light},
   //-----------------------------------dark----------------------------------
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.pawn, "type": PieceTypeT.dark},
-  {"piece": PiecesT.rook, "type": PieceTypeT.dark},
-  {"piece": PiecesT.knight, "type": PieceTypeT.dark},
-  {"piece": PiecesT.bishop, "type": PieceTypeT.dark},
-  {"piece": PiecesT.queen, "type": PieceTypeT.dark},
-  {"piece": PiecesT.king, "type": PieceTypeT.dark},
-  {"piece": PiecesT.bishop, "type": PieceTypeT.dark},
-  {"piece": PiecesT.knight, "type": PieceTypeT.dark},
-  {"piece": PiecesT.rook, "type": PieceTypeT.dark}
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.pawn, "type": PieceTypeT.dark},
+  {"piece": Pieces.rook, "type": PieceTypeT.dark},
+  {"piece": Pieces.knight, "type": PieceTypeT.dark},
+  {"piece": Pieces.bishop, "type": PieceTypeT.dark},
+  {"piece": Pieces.queen, "type": PieceTypeT.dark},
+  {"piece": Pieces.king, "type": PieceTypeT.dark},
+  {"piece": Pieces.bishop, "type": PieceTypeT.dark},
+  {"piece": Pieces.knight, "type": PieceTypeT.dark},
+  {"piece": Pieces.rook, "type": PieceTypeT.dark}
 ];
