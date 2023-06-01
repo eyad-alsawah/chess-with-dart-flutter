@@ -16,7 +16,7 @@ void main() async {
     onPieceMoved: (from, to) {},
     onError: (error, errorString) {},
     onPawnPromoted: (promotedPieceIndex, promotedTo) {},
-    onSelectPromotionType: () async {
+    onSelectPromotionType: (playingTurn) async {
       return Pieces.queen;
     },
   );
@@ -36,7 +36,7 @@ class Chess {
   final void Function(int from, int to) onPieceMoved;
   final void Function(Error error, String errorString) onError;
   final void Function(int promotedPieceIndex, Pieces promotedTo) onPawnPromoted;
-  final Future<Pieces> Function() onSelectPromotionType;
+  final Future<Pieces> Function(PlayingTurn playingTurn) onSelectPromotionType;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -248,10 +248,26 @@ class Chess {
         selectedPieceIndex != null) {
       bool shouldPromotePawn = selectedPiece!.piece == Pieces.pawn &&
           (tappedSquareRank == 1 || tappedSquareRank == 8);
-
+      // pawn will be promoted to queen by default
+      Pieces promotedPawn = Pieces.queen;
       Files selectedPieceFile =
           getFileNameFromIndex(index: selectedPieceIndex!);
       int selectedPieceRank = getRankNameFromIndex(index: selectedPieceIndex!);
+
+      playingTurn = playingTurn == PlayingTurn.white
+          ? PlayingTurn.black
+          : PlayingTurn.white;
+      onPlayingTurnChanged(playingTurn);
+      onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
+      shouldPromotePawn
+          ? await onSelectPromotionType(playingTurn == PlayingTurn.white
+                  ? PlayingTurn.black
+                  : PlayingTurn.white)
+              .then((selectedPromotionType) {
+              promotedPawn = selectedPromotionType;
+              onPawnPromoted(tappedSquareIndex, selectedPromotionType);
+            })
+          : null;
       // empty square that will replace the square on which the piece that we will move is at
       Square emptySquareAtSelectedPieceIndex = Square(
           file: selectedPieceFile,
@@ -261,20 +277,11 @@ class Chess {
       Square newSquareAtTappedIndex = Square(
         file: tappedSquareFile,
         rank: tappedSquareRank,
-        piece: shouldPromotePawn ? Pieces.queen : selectedPiece?.piece,
+        piece: shouldPromotePawn ? promotedPawn : selectedPiece?.piece,
         pieceType: selectedPiece?.pieceType,
       );
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
       chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
-      playingTurn = playingTurn == PlayingTurn.white
-          ? PlayingTurn.black
-          : PlayingTurn.white;
-      onPlayingTurnChanged(playingTurn);
-      onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
-      shouldPromotePawn
-          ? await onSelectPromotionType().then((selectedPromotionType) =>
-              onPawnPromoted(tappedSquareIndex, selectedPromotionType))
-          : null;
     }
     onPieceSelected([], tappedSquareIndex);
     inMoveSelectionMode = true;

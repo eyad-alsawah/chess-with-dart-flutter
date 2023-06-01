@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'game.dart';
 import 'logic.dart' show chessBoard, PieceTypeT;
@@ -40,22 +41,109 @@ class _ChessBoardState extends State<ChessBoard> {
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
-      onPawnPromoted: (promotedPieceIndex, promotedTo) {
+      onPawnPromoted: (promotedPieceIndex, promotedTo) async {
         chessBoard[promotedPieceIndex]['piece'] = promotedTo;
-
         setState(() {});
       },
-      onSelectPromotionType: () async {
-        await Future.delayed(Duration(seconds: 2), () {});
-        return Pieces.bishop;
+      onSelectPromotionType: (playingTurn) async {
+        return await showDialog(
+            useRootNavigator: true,
+            context: context,
+            barrierDismissible: true,
+            builder: (dialogContext) {
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12))),
+                content: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  ),
+                  height: 100,
+                  width: 100,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(dialogContext, rootNavigator: true)
+                                .pop(Pieces.rook);
+                          },
+                          child: Image.asset(
+                            playingTurn == PlayingTurn.white
+                                ? whiteCastle
+                                : blackCastle,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 2,
+                        color: Colors.black,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(dialogContext, rootNavigator: true)
+                                .pop(Pieces.knight);
+                          },
+                          child: Image.asset(
+                            playingTurn == PlayingTurn.white
+                                ? whiteKnight
+                                : blackKnight,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 2,
+                        color: Colors.black,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(dialogContext, rootNavigator: true)
+                                .pop(Pieces.bishop);
+                          },
+                          child: Image.asset(
+                            playingTurn == PlayingTurn.white
+                                ? whiteBishop
+                                : blackBishop,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 2,
+                        color: Colors.black,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(dialogContext, rootNavigator: true)
+                                .pop(Pieces.queen);
+                          },
+                          child: Image.asset(
+                            playingTurn == PlayingTurn.white
+                                ? whiteQueen
+                                : blackQueen,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            });
       },
-      onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
+      onPieceSelected:
+          (highlightedLegalMovesIndices, selectedPieceIndex) async {
         selectedIndex = null;
         highlightedLegalMovesIndices.isEmpty
             ? tappedIndices.clear()
             : tappedIndices.addAll(highlightedLegalMovesIndices);
         selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
+
         setState(() {});
       },
       onCastling: (castlingType, playingTurn) {},
@@ -63,7 +151,6 @@ class _ChessBoardState extends State<ChessBoard> {
         widget.onPlayingTurnChanged(playingTurn);
       },
       onPieceMoved: (from, to) {
-        print("moved from: $from to $to");
         int fromRank = getRankNameFromIndex(index: from);
         Files fromFile = getFileNameFromIndex(index: to);
         Map<String, dynamic> fromSquare = chessBoard[from];
