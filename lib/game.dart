@@ -463,9 +463,16 @@ class Chess {
   bool canCaptureEnPassant(
       {required int currentPawnIndex,
       required int toIndex,
-      required PieceType pawnType}) {
-    return enPassantCapturablePawnsIndices.contains(
-            currentPawnIndex + (pawnType == PieceType.light ? 8 : -8)) &&
+      required PieceType pawnType,
+      required RelativeDirection relativeDirection}) {
+    int indexToCheck = currentPawnIndex +
+        ([
+          RelativeDirection.diagonalTopLeft,
+          RelativeDirection.diagonalBottomLeft
+        ].any((direction) => relativeDirection == direction)
+            ? -1
+            : 1);
+    return enPassantCapturablePawnsIndices.contains(indexToCheck) &&
         chessBoard[toIndex].piece == null;
   }
 
@@ -484,7 +491,8 @@ class Chess {
                   canCaptureEnPassant(
                       currentPawnIndex: currentIndex,
                       toIndex: currentIndex + 9,
-                      pawnType: PieceType.light)))
+                      pawnType: PieceType.light,
+                      relativeDirection: RelativeDirection.diagonalTopRight)))
           ? pawnPieces.add(chessBoard[currentIndex + 9])
           : null;
       //top-left
@@ -494,7 +502,8 @@ class Chess {
                   canCaptureEnPassant(
                       currentPawnIndex: currentIndex,
                       toIndex: currentIndex + 7,
-                      pawnType: PieceType.light)))
+                      pawnType: PieceType.light,
+                      relativeDirection: RelativeDirection.diagonalTopLeft)))
           ? pawnPieces.add(chessBoard[currentIndex + 7])
           : null;
       //top
@@ -512,7 +521,9 @@ class Chess {
                   canCaptureEnPassant(
                       currentPawnIndex: currentIndex,
                       toIndex: currentIndex - 7,
-                      pawnType: PieceType.dark)))
+                      pawnType: PieceType.dark,
+                      relativeDirection:
+                          RelativeDirection.diagonalBottomRight)))
           ? pawnPieces.add(chessBoard[currentIndex - 7])
           : null;
       //bottom-left
@@ -522,7 +533,8 @@ class Chess {
                   canCaptureEnPassant(
                       currentPawnIndex: currentIndex,
                       toIndex: currentIndex - 9,
-                      pawnType: PieceType.dark)))
+                      pawnType: PieceType.dark,
+                      relativeDirection: RelativeDirection.diagonalBottomLeft)))
           ? pawnPieces.add(chessBoard[currentIndex - 9])
           : null;
       //bottom
