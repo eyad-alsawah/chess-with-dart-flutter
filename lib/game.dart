@@ -6,11 +6,7 @@ void main() async {
     initialPosition: "initialPosition",
     onVictory: (victoryType) {},
     onDraw: (drawType) {},
-    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {
-      print("selectedPieceIndex: $selectedPieceIndex");
-      print("highlightedLegalMovesIndices:$highlightedLegalMovesIndices");
-      print("//---------------------------------------");
-    },
+    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {},
     onCastling: (castlingType, playingTurn) {},
     onPlayingTurnChanged: (playingTurn) {},
     onPieceMoved: (from, to) {},
@@ -19,6 +15,7 @@ void main() async {
     onSelectPromotionType: (playingTurn) async {
       return Pieces.queen;
     },
+    onEnPassent: (_) {},
   );
 }
 
@@ -37,6 +34,7 @@ class Chess {
   final void Function(Error error, String errorString) onError;
   final void Function(int promotedPieceIndex, Pieces promotedTo) onPawnPromoted;
   final Future<Pieces> Function(PlayingTurn playingTurn) onSelectPromotionType;
+  final void Function(int capturedPawnIndex) onEnPassent;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -187,7 +185,8 @@ class Chess {
       required this.onError,
       required this.onCastling,
       required this.onPawnPromoted,
-      required this.onSelectPromotionType})
+      required this.onSelectPromotionType,
+      required this.onEnPassent})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
@@ -218,6 +217,7 @@ class Chess {
   Square? selectedPiece;
   // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
   PlayingTurn playingTurn = PlayingTurn.white;
+
   handleSquareTapped({required int tappedSquareIndex}) async {
     Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
     int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
@@ -286,6 +286,25 @@ class Chess {
         piece: shouldPromotePawn ? promotedPawn : selectedPiece?.piece,
         pieceType: selectedPiece?.pieceType,
       );
+      Square emptyEnPassentCapturedPawnSquare = Square(
+          file: selectedPieceFile,
+          rank: selectedPieceRank + (playingTurn == PlayingTurn.white ? 8 : -8),
+          piece: null,
+          pieceType: null);
+      if (didCaptureEnPassent(
+          didMovePawn: selectedPiece!.piece == Pieces.pawn,
+          didMoveToEmptySquareOnDifferentFile:
+              selectedPieceFile != tappedSquareFile &&
+                  chessBoard[tappedSquareIndex].piece == null,
+          indexPieceMovedFrom: selectedPieceIndex!,
+          movedPieceType: selectedPiece!.pieceType)) {
+        chessBoard[selectedPieceIndex! +
+                (selectedPiece!.pieceType == PieceType.light ? 8 : -8)] =
+            emptyEnPassentCapturedPawnSquare;
+        onEnPassent(selectedPieceIndex! +
+            (selectedPiece!.pieceType == PieceType.light ? 8 : -8));
+      }
+
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
       chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
     }
@@ -403,15 +422,41 @@ class Chess {
     return knightPieces;
   }
 
-  void addPawnToEnPassantCapturablePawns(
-      {required int fromRank,
-      required int toRank,
-      required Pieces? piece,
-      required int movedToIndex}) {
+  void addPawnToEnPassantCapturablePawns({
+    required int fromRank,
+    required int toRank,
+    required Pieces? piece,
+    required int movedToIndex,
+  }) {
     if (piece == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
       enPassantCapturablePawnsIndices.add(movedToIndex);
     }
+  }
+
+  void removePawnFromEnPassantCapturablePawns(
+      {required PieceType? movedPawnType, required int indexPawnMovedFrom}) {
+    int capturedPawnIndex = movedPawnType == PieceType.light
+        ? indexPawnMovedFrom + 8
+        : indexPawnMovedFrom - 8;
+    enPassantCapturablePawnsIndices
+        .removeWhere((index) => index == capturedPawnIndex);
+  }
+
+  bool didCaptureEnPassent({
+    required bool didMovePawn,
+    required bool didMoveToEmptySquareOnDifferentFile,
+    required PieceType? movedPieceType,
+    required int indexPieceMovedFrom,
+  }) {
+    bool didCaptureEnPassent =
+        didMovePawn && didMoveToEmptySquareOnDifferentFile;
+    didCaptureEnPassent
+        ? removePawnFromEnPassantCapturablePawns(
+            movedPawnType: movedPieceType,
+            indexPawnMovedFrom: indexPieceMovedFrom)
+        : null;
+    return didCaptureEnPassent;
   }
 
   List<int> enPassantCapturablePawnsIndices = [];
@@ -818,8 +863,6 @@ class Chess {
           : RelativeDirection.diagonalBottomLeft;
     } else {
       relativeDirection = RelativeDirection.undefined;
-      print(
-          "reached condition in getRelativeDirection that should not be reached");
     }
     return relativeDirection;
   }

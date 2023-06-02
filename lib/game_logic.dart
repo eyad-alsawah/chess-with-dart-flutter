@@ -155,13 +155,18 @@ class _ChessBoardState extends State<ChessBoard> {
         Map<String, dynamic> fromSquare = chessBoard[from];
         chessBoard[from] = {
           "file": fromFile,
-          "rank": fromFile,
+          "rank": fromRank,
           "piece": null,
           "type": null
         };
         chessBoard[to] = fromSquare;
         selectedIndex = null;
         tappedIndices.clear();
+        setState(() {});
+      },
+      onEnPassent: (capturedPawnIndex) {
+        chessBoard[capturedPawnIndex]['piece'] = null;
+        chessBoard[capturedPawnIndex]['type'] = null;
         setState(() {});
       },
       onError: (error, errorString) {},
