@@ -212,6 +212,7 @@ class Chess {
   offerUndoMove() {}
 
   //---------------------------------
+
   List<int> legalMovesIndices = [];
   int? selectedPieceIndex;
   Square? selectedPiece;
@@ -259,6 +260,11 @@ class Chess {
           : PlayingTurn.white;
       onPlayingTurnChanged(playingTurn);
       onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
+      addPawnToEnPassantCapturablePawns(
+          fromRank: selectedPieceRank,
+          toRank: tappedSquareRank,
+          piece: chessBoard[selectedPieceIndex!].piece,
+          movedToIndex: tappedSquareIndex);
       shouldPromotePawn
           ? await onSelectPromotionType(playingTurn == PlayingTurn.white
                   ? PlayingTurn.black
@@ -397,11 +403,31 @@ class Chess {
     return knightPieces;
   }
 
+  void addPawnToEnPassantCapturablePawns(
+      {required int fromRank,
+      required int toRank,
+      required Pieces? piece,
+      required int movedToIndex}) {
+    if (piece == Pieces.pawn &&
+        ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
+      enPassantCapturablePawnsIndices.add(movedToIndex);
+    }
+  }
+
+  List<int> enPassantCapturablePawnsIndices = [];
+  bool canCaptureEnPassant(
+      {required int currentPawnIndex,
+      required int toIndex,
+      required PieceType pawnType}) {
+    return enPassantCapturablePawnsIndices.contains(
+            currentPawnIndex + (pawnType == PieceType.light ? 8 : -8)) &&
+        chessBoard[toIndex].piece == null;
+  }
+
   List<Square> getPawnPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
-    int currentIndex = index;
+    int currentIndex = chessBoard.indexOf(currentPiece);
 
     List<Square> pawnPieces = [];
 
@@ -409,13 +435,21 @@ class Chess {
       //top-right
       (file != Files.h &&
               rank != 8 &&
-              chessBoard[currentIndex + 9].pieceType != null)
+              (chessBoard[currentIndex + 9].pieceType != null ||
+                  canCaptureEnPassant(
+                      currentPawnIndex: currentIndex,
+                      toIndex: currentIndex + 9,
+                      pawnType: PieceType.light)))
           ? pawnPieces.add(chessBoard[currentIndex + 9])
           : null;
       //top-left
       (file != Files.a &&
               rank != 8 &&
-              chessBoard[currentIndex + 7].pieceType != null)
+              (chessBoard[currentIndex + 7].pieceType != null ||
+                  canCaptureEnPassant(
+                      currentPawnIndex: currentIndex,
+                      toIndex: currentIndex + 7,
+                      pawnType: PieceType.light)))
           ? pawnPieces.add(chessBoard[currentIndex + 7])
           : null;
       //top
@@ -429,13 +463,21 @@ class Chess {
       //bottom-right
       (file != Files.h &&
               rank != 1 &&
-              chessBoard[currentIndex - 7].pieceType != null)
+              (chessBoard[currentIndex - 7].pieceType != null ||
+                  canCaptureEnPassant(
+                      currentPawnIndex: currentIndex,
+                      toIndex: currentIndex - 7,
+                      pawnType: PieceType.dark)))
           ? pawnPieces.add(chessBoard[currentIndex - 7])
           : null;
       //bottom-left
       (file != Files.a &&
               rank != 1 &&
-              chessBoard[currentIndex - 9].pieceType != null)
+              (chessBoard[currentIndex - 9].pieceType != null ||
+                  canCaptureEnPassant(
+                      currentPawnIndex: currentIndex,
+                      toIndex: currentIndex - 9,
+                      pawnType: PieceType.dark)))
           ? pawnPieces.add(chessBoard[currentIndex - 9])
           : null;
       //bottom

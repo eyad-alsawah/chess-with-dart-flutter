@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'game.dart';
 import 'logic.dart' show chessBoard, PieceTypeT;
