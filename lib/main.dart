@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:chess/game.dart';
-import 'package:chess/game_logic.dart';
+import 'package:chess/game_view.dart';
 
 import 'package:flutter/material.dart';
 
@@ -41,35 +41,28 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 141, 141, 141),
+      backgroundColor: Color.fromARGB(255, 38, 37, 33),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: ChessBoard(
-              playingAs: PlayingAs.white,
-              size: 330,
-              onTap: (name) {
-                // setState(() {
-                //   movementHistory.add("$name, ");
-                //   squareName = name;
-                // });
-              },
-              onPlayingTurnChanged: (playingTurn) {
-                currentPlayingTurn = playingTurn == PlayingTurn.white
-                    ? "White's Turn"
-                    : "Black's Turn";
-                setState(() {});
-              },
-            ),
+          ChessBoard(
+            playingAs: PlayingAs.white,
+            size: 375,
+            onTap: (name) {},
+            onPlayingTurnChanged: (playingTurn) {
+              currentPlayingTurn = playingTurn == PlayingTurn.white
+                  ? "White's Turn"
+                  : "Black's Turn";
+              setState(() {});
+            },
           ),
 
           Center(
             child: Text(
               currentPlayingTurn,
               style: const TextStyle(
+                color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),

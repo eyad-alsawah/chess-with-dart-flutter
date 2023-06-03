@@ -56,9 +56,9 @@ class _ChessBoardState extends State<ChessBoard> {
                     borderRadius: BorderRadius.all(Radius.circular(12))),
                 content: Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade100,
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFB58863),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   height: 100,
                   width: 100,
@@ -167,6 +167,7 @@ class _ChessBoardState extends State<ChessBoard> {
       onEnPassent: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex]['piece'] = null;
         chessBoard[capturedPawnIndex]['type'] = null;
+
         setState(() {});
       },
       onError: (error, errorString) {},
@@ -203,7 +204,9 @@ class _ChessBoardState extends State<ChessBoard> {
                               child: Text(
                                 filesNotation[index],
                                 style: const TextStyle(
-                                    fontSize: 9, fontWeight: FontWeight.w700),
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700),
                               ),
                             ),
                           ),
@@ -234,7 +237,9 @@ class _ChessBoardState extends State<ChessBoard> {
                             child: Text(
                               ranksNotation[index],
                               style: const TextStyle(
-                                  fontSize: 9, fontWeight: FontWeight.w700),
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),
@@ -263,34 +268,21 @@ class _ChessBoardState extends State<ChessBoard> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                              color: getSquareColor(
-                                  ignoreTappedIndices: true,
-                                  index: index,
-                                  tappedIndices: tappedIndices),
-                              border: Border.all(
-                                  width: 2,
-                                  color: (index == selectedIndex &&
-                                          selectedIndex != null)
-                                      ? Colors.red
-                                      : Colors.transparent)),
-                          padding: const EdgeInsets.all(10),
-                          child: Container(
-                              height: 4,
-                              width: 4,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: getSquareColor(
-                                    ignoreTappedIndices: false,
+                            color: (index == selectedIndex &&
+                                    selectedIndex != null)
+                                ? Colors.lightGreen
+                                : getSquareColor(
+                                    ignoreTappedIndices: true,
                                     index: index,
                                     tappedIndices: tappedIndices),
-                              )),
+                          ),
                         ),
                       ),
                     ),
                   ),
                   drawInitialPieces(
                       playingAs: PlayingAs.white,
-                      boardSize: 330,
+                      boardSize: 375,
                       tappedIndices: tappedIndices),
                 ],
               ),
@@ -313,7 +305,9 @@ class _ChessBoardState extends State<ChessBoard> {
                               child: Text(
                                 ranksNotation[index],
                                 style: const TextStyle(
-                                    fontSize: 9, fontWeight: FontWeight.w700),
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700),
                               ),
                             ),
                           ),
@@ -344,7 +338,9 @@ class _ChessBoardState extends State<ChessBoard> {
                             child: Text(
                               filesNotation[index],
                               style: const TextStyle(
-                                  fontSize: 9, fontWeight: FontWeight.w700),
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),
@@ -379,9 +375,11 @@ Color getSquareColor(
   if (tappedIndices.contains(index - 1) && !ignoreTappedIndices) {
     squareColor = Colors.red;
   } else if (currentRow % 2 == 0) {
-    squareColor = index % 2 == 0 ? Colors.green : Colors.white;
+    squareColor =
+        index % 2 == 0 ? const Color(0xFFB58863) : const Color(0xFFF0D9B5);
   } else {
-    squareColor = index % 2 == 0 ? Colors.white : Colors.green;
+    squareColor =
+        index % 2 == 0 ? const Color(0xFFF0D9B5) : const Color(0xFFB58863);
   }
   return squareColor;
 }
@@ -390,6 +388,7 @@ Widget drawInitialPieces(
     {required PlayingAs playingAs,
     required double boardSize,
     required List<int> tappedIndices}) {
+  print("drawing pieces");
   return IgnorePointer(
     child: SizedBox(
       width: boardSize * 0.8,
@@ -402,18 +401,24 @@ Widget drawInitialPieces(
           crossAxisCount: 8,
         ),
         itemBuilder: (context, index) => Stack(
+          alignment: Alignment.center,
           children: [
             Visibility(
-                visible: getImageFromBoard(index: index).isNotEmpty,
-                child: Image.asset(
-                    height: 30, width: 30, getImageFromBoard(index: index))),
+              visible: getImageFromBoard(index: index).isNotEmpty,
+              child: Image.asset(
+                height: boardSize * 0.08,
+                width: boardSize * 0.08,
+                getImageFromBoard(index: index),
+              ),
+            ),
             Visibility(
               visible: tappedIndices.contains(index),
               child: Container(
-                padding: const EdgeInsets.all(10),
-                child: Container(
-                  decoration: const BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.red),
+                height: 10,
+                width: 10,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.lightGreen,
                 ),
               ),
             ),
