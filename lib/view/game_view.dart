@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chess/controller/enums.dart';
 import 'package:chess/controller/game_controller.dart';
 import 'package:chess/utils/image_assets.dart';
+import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/game_controller.dart' hide Files;
@@ -33,6 +35,7 @@ class _ChessBoardState extends State<ChessBoard> {
   String squareName = "";
   List<int> tappedIndices = [];
   int? selectedIndex;
+  final AudioPlayer audioPlayer = AudioPlayer();
   late Chess chess;
 
   @override
@@ -152,6 +155,7 @@ class _ChessBoardState extends State<ChessBoard> {
         widget.onPlayingTurnChanged(playingTurn);
       },
       onPieceMoved: (from, to) {
+        audioPlayer.play(AssetSource(pieceMovedSound));
         int fromRank = getRankNameFromIndex(index: from);
         Files fromFile = getFileNameFromIndex(index: to);
         Map<String, dynamic> fromSquare = chessBoard[from];
