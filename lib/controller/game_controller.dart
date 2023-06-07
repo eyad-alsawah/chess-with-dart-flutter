@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:chess/controller/enums.dart';
+
 //-------------------typedefs--------------------
 typedef OnVictory = void Function(VictoryType victoryType);
 typedef OnDraw = void Function(DrawType drawType);
@@ -956,53 +958,7 @@ class GameStatus {
   });
 }
 
-enum RelativeDirection {
-  rankLeft,
-  rankRight,
-  fileTop,
-  fileBottom,
-  diagonalTopLeft,
-  diagonalTopRight,
-  diagonalBottomLeft,
-  diagonalBottomRight,
-  undefined
-}
 
-enum GameOutcome {
-  victory,
-  draw,
-}
-
-enum VictoryType {
-  checkmate,
-  timeout,
-  resignation,
-}
-
-enum DrawType {
-  insufficientMaterial,
-  stalemate,
-  fiftyMoveRule,
-  mutualAgreement,
-  threeFoldRepetition
-}
-
-enum CastlingType { kingSide, queenSide }
-
-enum PlayingTurn { white, black }
-
-enum PieceType { light, dark }
-
-enum Files { a, b, c, d, e, f, g, h }
-
-enum Pieces {
-  rook,
-  knight,
-  bishop,
-  queen,
-  king,
-  pawn,
-}
 //----------------------------------
 /// generic
 /// generic

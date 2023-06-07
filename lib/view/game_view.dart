@@ -1,10 +1,12 @@
 import 'dart:math';
 
-import 'package:chess/image_assets.dart';
+import 'package:chess/controller/enums.dart';
+import 'package:chess/controller/game_controller.dart';
+import 'package:chess/utils/image_assets.dart';
 import 'package:flutter/material.dart';
 
-import 'game_controller.dart' hide Files;
-import 'package:chess/model.dart' show Files, PieceTypeT, chessBoard;
+import '../controller/game_controller.dart' hide Files;
+import 'package:chess/model/model.dart';
 
 enum PlayingAs { white, black }
 
@@ -434,27 +436,27 @@ String getImageFromBoard({required int index}) {
   switch (square['piece']) {
     case Pieces.pawn:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whitePawn : blackPawn;
+          square['type'] == PieceType.light ? whitePawn : blackPawn;
       break;
     case Pieces.king:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whiteKing : blackKing;
+          square['type'] == PieceType.light ? whiteKing : blackKing;
       break;
     case Pieces.knight:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whiteKnight : blackKnight;
+          square['type'] == PieceType.light ? whiteKnight : blackKnight;
       break;
     case Pieces.queen:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whiteQueen : blackQueen;
+          square['type'] == PieceType.light ? whiteQueen : blackQueen;
       break;
     case Pieces.rook:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whiteCastle : blackCastle;
+          square['type'] == PieceType.light ? whiteCastle : blackCastle;
       break;
     case Pieces.bishop:
       imageAssetString =
-          square['type'] == PieceTypeT.light ? whiteBishop : blackBishop;
+          square['type'] == PieceType.light ? whiteBishop : blackBishop;
       break;
     default:
   }
