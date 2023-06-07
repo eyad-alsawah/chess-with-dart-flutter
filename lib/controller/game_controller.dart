@@ -197,12 +197,16 @@ class Chess {
   PlayingTurn playingTurn = PlayingTurn.white;
   List<int> pawnLegalMovesIndices = [];
   handleSquareTapped({required int tappedSquareIndex}) async {
-    print(
-        "enPassentCapturableLightPawnIndex: $enPassentCapturableLightPawnIndex");
-    print(
-        "enPassentCapturableDarkPawnIndex: $enPassentCapturableDarkPawnIndex");
     Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
     int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
+
+    /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
+    inMoveSelectionMode =
+        (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
+                playingTurn == PlayingTurn.white) ||
+            (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
+                playingTurn == PlayingTurn.black);
+
     if (inMoveSelectionMode) {
       selectedPieceIndex = tappedSquareIndex;
       selectedPiece = chessBoard[tappedSquareIndex];
@@ -942,7 +946,6 @@ class GameStatus {
     required this.canCastleQueenSide,
   });
 }
-
 
 //----------------------------------
 /// generic
