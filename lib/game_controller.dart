@@ -1,21 +1,33 @@
 import 'dart:async';
 
-//---------------------------------------
+//-------------------typedefs--------------------
+typedef OnVictory = void Function(VictoryType victoryType);
+typedef OnDraw = void Function(DrawType drawType);
+typedef OnPlayingTurnChanged = void Function(PlayingTurn playingTurn);
+typedef OnPieceSelected = void Function(
+    List<int> highlightedLegalMovesIndices, int selectedPieceIndex);
+typedef OnCastling = void Function(
+    CastlingType castlingType, PlayingTurn playingTurn);
+typedef OnPieceMoved = void Function(int from, int to);
+typedef OnError = void Function(Error error, String errorString);
+typedef OnPawnPromoted = void Function(
+    int promotedPieceIndex, Pieces promotedTo);
+typedef OnSelectPromotionType = Future<Pieces> Function(
+    PlayingTurn playingTurn);
+typedef OnEnPassant = void Function(int capturedPawnIndex);
 
+//--------------Main Game Controller-------------------
 class Chess {
-  final void Function(VictoryType victoryType) onVictory;
-  final void Function(DrawType drawType) onDraw;
-  final void Function(PlayingTurn playingTurn) onPlayingTurnChanged;
-  final void Function(
-          List<int> highlightedLegalMovesIndices, int selectedPieceIndex)
-      onPieceSelected;
-  final void Function(CastlingType castlingType, PlayingTurn playingTurn)
-      onCastling;
-  final void Function(int from, int to) onPieceMoved;
-  final void Function(Error error, String errorString) onError;
-  final void Function(int promotedPieceIndex, Pieces promotedTo) onPawnPromoted;
-  final Future<Pieces> Function(PlayingTurn playingTurn) onSelectPromotionType;
-  final void Function(int capturedPawnIndex) onEnPassent;
+  final OnVictory onVictory;
+  final OnDraw onDraw;
+  final OnPlayingTurnChanged onPlayingTurnChanged;
+  final OnPieceSelected onPieceSelected;
+  final OnCastling onCastling;
+  final OnPieceMoved onPieceMoved;
+  final OnError onError;
+  final OnPawnPromoted onPawnPromoted;
+  final OnSelectPromotionType onSelectPromotionType;
+  final OnEnPassant onEnPassant;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -167,19 +179,17 @@ class Chess {
       required this.onCastling,
       required this.onPawnPromoted,
       required this.onSelectPromotionType,
-      required this.onEnPassent})
+      required this.onEnPassant})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
   start() {}
-
   pause() {}
   resume() {}
   offerDraw() {}
   resign() {}
   //------------------------------
   toggleLegalMovesHighlight() {}
-
   highlightLegalMovesForAllPieces() {}
   //--------------------------------
   exportGame() {}
@@ -287,7 +297,7 @@ class Chess {
         chessBoard[selectedPieceIndex! +
                 (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
             emptyEnPassentCapturedPawnSquare;
-        onEnPassent(selectedPieceIndex! +
+        onEnPassant(selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
       }
 

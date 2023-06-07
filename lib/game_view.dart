@@ -164,7 +164,7 @@ class _ChessBoardState extends State<ChessBoard> {
         tappedIndices.clear();
         setState(() {});
       },
-      onEnPassent: (capturedPawnIndex) {
+      onEnPassant: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex]['piece'] = null;
         chessBoard[capturedPawnIndex]['type'] = null;
 
