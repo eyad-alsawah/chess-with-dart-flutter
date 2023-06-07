@@ -149,9 +149,8 @@ class Chess {
     Square(
         file: Files.h, rank: 8, piece: Pieces.rook, pieceType: PieceType.dark),
   ];
-  late Timer whiteTimer;
-  late Timer blackTimer;
-  bool inMoveSelectionMode = true;
+
+  bool _inMoveSelectionMode = true;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   Chess.fromPosition(
@@ -190,70 +189,71 @@ class Chess {
 
   //---------------------------------
 
-  List<int> legalMovesIndices = [];
-  int? selectedPieceIndex;
-  Square? selectedPiece;
+  List<int> _legalMovesIndices = [];
+  int? _selectedPieceIndex;
+  Square? _selectedPiece;
   // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
-  PlayingTurn playingTurn = PlayingTurn.white;
-  List<int> pawnLegalMovesIndices = [];
+  PlayingTurn _playingTurn = PlayingTurn.white;
+
   handleSquareTapped({required int tappedSquareIndex}) async {
-    Files tappedSquareFile = getFileNameFromIndex(index: tappedSquareIndex);
-    int tappedSquareRank = getRankNameFromIndex(index: tappedSquareIndex);
+    Files tappedSquareFile = _getFileNameFromIndex(index: tappedSquareIndex);
+    int tappedSquareRank = _getRankNameFromIndex(index: tappedSquareIndex);
 
     /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
-    inMoveSelectionMode =
+    _inMoveSelectionMode =
         (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
-                playingTurn == PlayingTurn.white) ||
+                _playingTurn == PlayingTurn.white) ||
             (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
-                playingTurn == PlayingTurn.black);
+                _playingTurn == PlayingTurn.black);
 
-    if (inMoveSelectionMode) {
-      selectedPieceIndex = tappedSquareIndex;
-      selectedPiece = chessBoard[tappedSquareIndex];
-      List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(
+    if (_inMoveSelectionMode) {
+      _selectedPieceIndex = tappedSquareIndex;
+      _selectedPiece = chessBoard[tappedSquareIndex];
+      List<Square> legalAndIllegalMoves = _getIllegalAndLegalMoves(
           rank: tappedSquareRank, file: tappedSquareFile);
-      List<Square> legalMovesOnly = getLegalMovesOnly(
+      List<Square> legalMovesOnly = _getLegalMovesOnly(
           file: tappedSquareFile,
           rank: tappedSquareRank,
           legalAndIllegalMoves: legalAndIllegalMoves);
-      legalMovesIndices =
-          getLegalMovesIndices(legalMovesSquares: legalMovesOnly);
+      _legalMovesIndices =
+          _getLegalMovesIndices(legalMovesSquares: legalMovesOnly);
       // preventing player who's turn is not his to play by emptying the legalMovesIndices list
-      ((selectedPiece?.pieceType == PieceType.light &&
-                  playingTurn != PlayingTurn.white) ||
-              (selectedPiece?.pieceType == PieceType.dark &&
-                  playingTurn != PlayingTurn.black))
-          ? legalMovesIndices.clear()
+      ((_selectedPiece?.pieceType == PieceType.light &&
+                  _playingTurn != PlayingTurn.white) ||
+              (_selectedPiece?.pieceType == PieceType.dark &&
+                  _playingTurn != PlayingTurn.black))
+          ? _legalMovesIndices.clear()
           : null;
-      onPieceSelected(legalMovesIndices, tappedSquareIndex);
-      inMoveSelectionMode = legalMovesIndices.isEmpty;
+      onPieceSelected(_legalMovesIndices, tappedSquareIndex);
+      _inMoveSelectionMode = _legalMovesIndices.isEmpty;
       return;
     }
     // checking nullability only for safely using null check operator
-    else if (legalMovesIndices.contains(tappedSquareIndex) &&
-        selectedPiece != null &&
-        selectedPieceIndex != null) {
-      bool shouldPromotePawn = selectedPiece!.piece == Pieces.pawn &&
+    else if (_legalMovesIndices.contains(tappedSquareIndex) &&
+        _selectedPiece != null &&
+        _selectedPieceIndex != null) {
+      bool shouldPromotePawn = _selectedPiece!.piece == Pieces.pawn &&
           (tappedSquareRank == 1 || tappedSquareRank == 8);
       // pawn will be promoted to queen by default
       Pieces promotedPawn = Pieces.queen;
       Files selectedPieceFile =
-          getFileNameFromIndex(index: selectedPieceIndex!);
-      int selectedPieceRank = getRankNameFromIndex(index: selectedPieceIndex!);
+          _getFileNameFromIndex(index: _selectedPieceIndex!);
+      int selectedPieceRank =
+          _getRankNameFromIndex(index: _selectedPieceIndex!);
 
-      playingTurn = playingTurn == PlayingTurn.white
+      _playingTurn = _playingTurn == PlayingTurn.white
           ? PlayingTurn.black
           : PlayingTurn.white;
-      onPlayingTurnChanged(playingTurn);
-      onPieceMoved(selectedPieceIndex!, tappedSquareIndex);
-      addPawnToEnPassantCapturablePawns(
+      onPlayingTurnChanged(_playingTurn);
+      onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
+      _addPawnToEnPassantCapturablePawns(
           fromRank: selectedPieceRank,
           toRank: tappedSquareRank,
-          piece: chessBoard[selectedPieceIndex!].piece,
+          piece: chessBoard[_selectedPieceIndex!].piece,
           movedToIndex: tappedSquareIndex,
-          pawnType: chessBoard[selectedPieceIndex!].pieceType);
+          pawnType: chessBoard[_selectedPieceIndex!].pieceType);
       shouldPromotePawn
-          ? await onSelectPromotionType(playingTurn == PlayingTurn.white
+          ? await onSelectPromotionType(_playingTurn == PlayingTurn.white
                   ? PlayingTurn.black
                   : PlayingTurn.white)
               .then((selectedPromotionType) {
@@ -270,38 +270,38 @@ class Chess {
       Square newSquareAtTappedIndex = Square(
         file: tappedSquareFile,
         rank: tappedSquareRank,
-        piece: shouldPromotePawn ? promotedPawn : selectedPiece?.piece,
-        pieceType: selectedPiece?.pieceType,
+        piece: shouldPromotePawn ? promotedPawn : _selectedPiece?.piece,
+        pieceType: _selectedPiece?.pieceType,
       );
       Square emptyEnPassentCapturedPawnSquare = Square(
           file: tappedSquareFile,
           rank: selectedPieceRank,
           piece: null,
           pieceType: null);
-      if (didCaptureEnPassent(
-        movedPieceType: selectedPiece?.pieceType,
-        didMovePawn: selectedPiece!.piece == Pieces.pawn,
+      if (_didCaptureEnPassent(
+        movedPieceType: _selectedPiece?.pieceType,
+        didMovePawn: _selectedPiece!.piece == Pieces.pawn,
         didMoveToEmptySquareOnDifferentFile:
             selectedPieceFile != tappedSquareFile &&
                 chessBoard[tappedSquareIndex].piece == null,
       )) {
-        chessBoard[selectedPieceIndex! +
+        chessBoard[_selectedPieceIndex! +
                 (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
             emptyEnPassentCapturedPawnSquare;
-        onEnPassant(selectedPieceIndex! +
+        onEnPassant(_selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
       }
 
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
-      chessBoard[selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
+      chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
     }
     onPieceSelected([], tappedSquareIndex);
-    inMoveSelectionMode = true;
-    legalMovesIndices.clear();
+    _inMoveSelectionMode = true;
+    _legalMovesIndices.clear();
   }
 
   // ---------------------------------------------------------------------------
-  Files getFileNameFromIndex({required int index}) {
+  Files _getFileNameFromIndex({required int index}) {
     List<Files> files = [
       Files.a,
       Files.b,
@@ -318,13 +318,13 @@ class Chess {
     return file;
   }
 
-  int getRankNameFromIndex({required int index}) {
+  int _getRankNameFromIndex({required int index}) {
     index++;
     int rank = (index / 8).ceil();
     return rank;
   }
 
-  List<Square> getIllegalAndLegalMoves(
+  List<Square> _getIllegalAndLegalMoves(
       {required int rank, required Files file}) {
     Square tappedPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
@@ -332,29 +332,29 @@ class Chess {
     switch (tappedPiece.piece) {
       case Pieces.rook:
         moves = [
-          ...getHorizontalPieces(rank: rank, file: file),
-          ...getVerticalPieces(rank: rank, file: file)
+          ..._getHorizontalPieces(rank: rank, file: file),
+          ..._getVerticalPieces(rank: rank, file: file)
         ];
         break;
       case Pieces.knight:
-        moves = getKnightPieces(rank: rank, file: file);
+        moves = _getKnightPieces(rank: rank, file: file);
         break;
       case Pieces.bishop:
-        moves = getDiagonalPieces(rank: rank, file: file);
+        moves = _getDiagonalPieces(rank: rank, file: file);
         break;
 
       case Pieces.queen:
         moves = [
-          ...getHorizontalPieces(rank: rank, file: file),
-          ...getVerticalPieces(rank: rank, file: file),
-          ...getDiagonalPieces(rank: rank, file: file)
+          ..._getHorizontalPieces(rank: rank, file: file),
+          ..._getVerticalPieces(rank: rank, file: file),
+          ..._getDiagonalPieces(rank: rank, file: file)
         ];
         break;
       case Pieces.king:
-        moves = getKingPieces(rank: rank, file: file);
+        moves = _getKingPieces(rank: rank, file: file);
         break;
       case Pieces.pawn:
-        moves = getPawnPieces(rank: rank, file: file);
+        moves = _getPawnPieces(rank: rank, file: file);
         break;
       default:
         moves.clear();
@@ -362,7 +362,7 @@ class Chess {
     return moves;
   }
 
-  List<Square> getKnightPieces({required int rank, required Files file}) {
+  List<Square> _getKnightPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -409,10 +409,10 @@ class Chess {
     return knightPieces;
   }
 
-  int? enPassentCapturableLightPawnIndex;
-  int? enPassentCapturableDarkPawnIndex;
+  int? _enPassentCapturableLightPawnIndex;
+  int? _enPassentCapturableDarkPawnIndex;
 
-  void addPawnToEnPassantCapturablePawns(
+  void _addPawnToEnPassantCapturablePawns(
       {required int fromRank,
       required int toRank,
       required Pieces? piece,
@@ -421,38 +421,38 @@ class Chess {
     if (piece == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
       if (pawnType == PieceType.light) {
-        enPassentCapturableLightPawnIndex = movedToIndex;
+        _enPassentCapturableLightPawnIndex = movedToIndex;
       } else {
-        enPassentCapturableDarkPawnIndex = movedToIndex;
+        _enPassentCapturableDarkPawnIndex = movedToIndex;
       }
     }
   }
 
-  void removePawnFromEnPassantCapturablePawns({
+  void _removePawnFromEnPassantCapturablePawns({
     required PieceType? movedPieceType,
   }) {
     if (movedPieceType == PieceType.light) {
-      enPassentCapturableDarkPawnIndex = null;
+      _enPassentCapturableDarkPawnIndex = null;
     } else if (movedPieceType == PieceType.dark) {
-      enPassentCapturableLightPawnIndex = null;
+      _enPassentCapturableLightPawnIndex = null;
     } else {
       print(
           "this condition will only be reached if player tapped on empty square in selection mode which shouldn't happen because in handleTap we are checking if we pressed on a highlighted index in selection mode");
     }
   }
 
-  bool didCaptureEnPassent({
+  bool _didCaptureEnPassent({
     required bool didMovePawn,
     required bool didMoveToEmptySquareOnDifferentFile,
     required PieceType? movedPieceType,
   }) {
     bool didCaptureEnPassent =
         didMovePawn && didMoveToEmptySquareOnDifferentFile;
-    removePawnFromEnPassantCapturablePawns(movedPieceType: movedPieceType);
+    _removePawnFromEnPassantCapturablePawns(movedPieceType: movedPieceType);
     return didCaptureEnPassent;
   }
 
-  bool canCaptureEnPassant({
+  bool _canCaptureEnPassant({
     required int fromIndex,
     required int toIndex,
     required int fromRank,
@@ -461,8 +461,8 @@ class Chess {
   }) {
     bool canCaptureEnPassant = false;
     int? indexToCheck = selectedPawnType == PieceType.light
-        ? enPassentCapturableDarkPawnIndex
-        : enPassentCapturableLightPawnIndex;
+        ? _enPassentCapturableDarkPawnIndex
+        : _enPassentCapturableLightPawnIndex;
 
     if ((selectedPawnType == PieceType.light && fromRank == 5) ||
         (selectedPawnType == PieceType.dark && fromRank == 4)) {
@@ -481,7 +481,7 @@ class Chess {
     return canCaptureEnPassant;
   }
 
-  List<Square> getPawnPieces({required int rank, required Files file}) {
+  List<Square> _getPawnPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int currentIndex = chessBoard.indexOf(currentPiece);
@@ -493,7 +493,7 @@ class Chess {
       (file != Files.h &&
               rank != 8 &&
               (chessBoard[currentIndex + 9].pieceType != null ||
-                  canCaptureEnPassant(
+                  _canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
                     toIndex: currentIndex + 9,
@@ -506,7 +506,7 @@ class Chess {
       (file != Files.a &&
               rank != 8 &&
               (chessBoard[currentIndex + 7].pieceType != null ||
-                  canCaptureEnPassant(
+                  _canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
                     toIndex: currentIndex + 7,
@@ -527,7 +527,7 @@ class Chess {
       (file != Files.h &&
               rank != 1 &&
               (chessBoard[currentIndex - 7].pieceType != null ||
-                  canCaptureEnPassant(
+                  _canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
                     toIndex: currentIndex - 7,
@@ -540,7 +540,7 @@ class Chess {
       (file != Files.a &&
               rank != 1 &&
               (chessBoard[currentIndex - 9].pieceType != null ||
-                  canCaptureEnPassant(
+                  _canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
                     toIndex: currentIndex - 9,
@@ -560,7 +560,7 @@ class Chess {
     return pawnPieces;
   }
 
-  List<Square> getKingPieces({required int rank, required Files file}) {
+  List<Square> _getKingPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -597,7 +597,7 @@ class Chess {
     return kingPieces;
   }
 
-  List<Square> getDiagonalPieces({required int rank, required Files file}) {
+  List<Square> _getDiagonalPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -638,7 +638,7 @@ class Chess {
   }
 
 //-------------------
-  List<Square> getHorizontalPieces({required int rank, required Files file}) {
+  List<Square> _getHorizontalPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -662,7 +662,7 @@ class Chess {
   }
 
 //----------------------
-  List<Square> getVerticalPieces({required int rank, required Files file}) {
+  List<Square> _getVerticalPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -685,7 +685,7 @@ class Chess {
   }
 
   //------------------------------------------Getting Legal Moves--------------------------
-  List<Square> getLegalMovesOnly(
+  List<Square> _getLegalMovesOnly(
       {required List<Square> legalAndIllegalMoves,
       required Files file,
       required int rank}) {
@@ -703,7 +703,7 @@ class Chess {
     bool didCaptureOnDiagonalBottomRight = false;
 
     for (var square in legalAndIllegalMoves) {
-      RelativeDirection relativeDirection = getRelativeDirection(
+      RelativeDirection relativeDirection = _getRelativeDirection(
           currentSquare: tappedPiece, targetSquare: square);
 
       if (tappedPiece.pieceType == null) {
@@ -862,7 +862,7 @@ class Chess {
   }
 //-------------------------------------
 
-  RelativeDirection getRelativeDirection(
+  RelativeDirection _getRelativeDirection(
       {required Square targetSquare, required Square currentSquare}) {
     int currentSquareRank = currentSquare.rank;
     int targetSquareRank = targetSquare.rank;
@@ -891,7 +891,7 @@ class Chess {
     return relativeDirection;
   }
 
-  List<int> getLegalMovesIndices({required List<Square> legalMovesSquares}) {
+  List<int> _getLegalMovesIndices({required List<Square> legalMovesSquares}) {
     List<int> legalMovesIndices = [];
     for (var square in legalMovesSquares) {
       int squareIndex = chessBoard.indexOf(square);
