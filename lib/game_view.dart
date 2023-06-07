@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:chess/image_assets.dart';
 import 'package:flutter/material.dart';
 
-import 'game.dart';
-import 'logic.dart' show chessBoard, PieceTypeT;
+import 'game_controller.dart' hide Files;
+import 'package:chess/model.dart' show Files, PieceTypeT, chessBoard;
 
 enum PlayingAs { white, black }
 
@@ -388,7 +388,6 @@ Widget drawInitialPieces(
     {required PlayingAs playingAs,
     required double boardSize,
     required List<int> tappedIndices}) {
-  print("drawing pieces");
   return IgnorePointer(
     child: SizedBox(
       width: boardSize * 0.8,

@@ -1,23 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
-void main() async {
-  Chess chess = Chess.fromPosition(
-    initialPosition: "initialPosition",
-    onVictory: (victoryType) {},
-    onDraw: (drawType) {},
-    onPieceSelected: (highlightedLegalMovesIndices, selectedPieceIndex) {},
-    onCastling: (castlingType, playingTurn) {},
-    onPlayingTurnChanged: (playingTurn) {},
-    onPieceMoved: (from, to) {},
-    onError: (error, errorString) {},
-    onPawnPromoted: (promotedPieceIndex, promotedTo) {},
-    onSelectPromotionType: (playingTurn) async {
-      return Pieces.queen;
-    },
-    onEnPassent: (_) {},
-  );
-}
 
 //---------------------------------------
 

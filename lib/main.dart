@@ -1,11 +1,11 @@
 import 'dart:math';
 
-import 'package:chess/game.dart';
+import 'package:chess/game_controller.dart';
 import 'package:chess/game_view.dart';
 
 import 'package:flutter/material.dart';
 
-import 'logic.dart' hide Pieces;
+import 'model.dart' hide Pieces;
 
 void main() {
   runApp(const MyApp());
