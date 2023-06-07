@@ -410,10 +410,13 @@ Widget drawInitialPieces(
           children: [
             Visibility(
               visible: getImageFromBoard(index: index).isNotEmpty,
-              child: Image.asset(
-                height: boardSize * 0.08,
-                width: boardSize * 0.08,
-                getImageFromBoard(index: index),
+              child: Transform.rotate(
+                angle: chessBoard[index]['type'] == PieceType.light ? 0 : pi,
+                child: Image.asset(
+                  height: boardSize * 0.08,
+                  width: boardSize * 0.08,
+                  getImageFromBoard(index: index),
+                ),
               ),
             ),
             Visibility(
