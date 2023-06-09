@@ -42,7 +42,7 @@ class _ChessBoardState extends State<ChessBoard> {
     super.initState();
     chess = ChessController.fromPosition(
       playSound: (soundType) {
-        audioPlayer.play(AssetSource(pieceMovedSound));
+        audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
       },
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
