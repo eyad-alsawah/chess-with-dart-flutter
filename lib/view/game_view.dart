@@ -44,12 +44,14 @@ class _ChessBoardState extends State<ChessBoard> {
       playSound: (soundType) {
         audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
       },
+      updateView: () {
+        setState(() {});
+      },
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
       onPawnPromoted: (promotedPieceIndex, promotedTo) async {
         chessBoard[promotedPieceIndex]['piece'] = promotedTo;
-        setState(() {});
       },
       onSelectPromotionType: (playingTurn) async {
         return await showDialog(
@@ -152,8 +154,6 @@ class _ChessBoardState extends State<ChessBoard> {
             : tappedIndices.addAll(highlightedLegalMovesIndices);
         selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
-
-        setState(() {});
       },
       onCastling: (castlingType, playingTurn) {},
       onPlayingTurnChanged: (playingTurn) {
@@ -172,13 +172,10 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[to] = fromSquare;
         selectedIndex = null;
         tappedIndices.clear();
-        setState(() {});
       },
       onEnPassant: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex]['piece'] = null;
         chessBoard[capturedPawnIndex]['type'] = null;
-
-        setState(() {});
       },
       onError: (error, errorString) {},
     );

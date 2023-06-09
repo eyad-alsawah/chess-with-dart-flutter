@@ -14,6 +14,7 @@ class ChessController {
   final OnSelectPromotionType onSelectPromotionType;
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
+  final UpdateView updateView;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -152,21 +153,22 @@ class ChessController {
   bool _inMoveSelectionMode = true;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
-  ChessController.fromPosition(
-      {required String initialPosition,
-      PlayingTurn? playAs,
-      required this.onVictory,
-      required this.onDraw,
-      required this.onPieceSelected,
-      required this.onPlayingTurnChanged,
-      required this.onPieceMoved,
-      required this.onError,
-      required this.onCastling,
-      required this.onPawnPromoted,
-      required this.onSelectPromotionType,
-      required this.onEnPassant,
-      required this.playSound})
-      : assert(_isValidFen(fenString: initialPosition),
+  ChessController.fromPosition({
+    required String initialPosition,
+    PlayingTurn? playAs,
+    required this.onVictory,
+    required this.onDraw,
+    required this.onPieceSelected,
+    required this.onPlayingTurnChanged,
+    required this.onPieceMoved,
+    required this.onError,
+    required this.onCastling,
+    required this.onPawnPromoted,
+    required this.onSelectPromotionType,
+    required this.onEnPassant,
+    required this.playSound,
+    required this.updateView,
+  }) : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
   start() {}
@@ -218,7 +220,9 @@ class ChessController {
           : null;
 
       onPieceSelected(_legalMovesIndices, tappedSquareIndex);
+
       _inMoveSelectionMode = _legalMovesIndices.isEmpty;
+      updateView();
       return;
     }
     // checking nullability only for safely using null check operator
@@ -294,6 +298,7 @@ class ChessController {
 
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
       chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
+      updateView();
     }
     onPieceSelected([], tappedSquareIndex);
     _inMoveSelectionMode = true;
