@@ -45,3 +45,11 @@ enum Pieces {
   king,
   pawn,
 }
+
+enum SoundType {
+  pieceMoved,
+  capture,
+  kingChecked,
+  victory,
+  draw,
+}

@@ -41,6 +41,7 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     super.initState();
     chess = Chess.fromPosition(
+      playSound: (soundType) {},
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
       onDraw: (drawType) {},

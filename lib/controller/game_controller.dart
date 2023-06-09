@@ -15,6 +15,7 @@ class Chess {
   final OnPawnPromoted onPawnPromoted;
   final OnSelectPromotionType onSelectPromotionType;
   final OnEnPassant onEnPassant;
+  final PlaySound playSound;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -165,7 +166,8 @@ class Chess {
       required this.onCastling,
       required this.onPawnPromoted,
       required this.onSelectPromotionType,
-      required this.onEnPassant})
+      required this.onEnPassant,
+      required this.playSound})
       : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
   //------------------------------
@@ -595,6 +597,10 @@ class Chess {
     rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
 
     return kingPieces;
+  }
+
+  List<CastlingType> getCastlingAvailabiltiy() {
+    return [];
   }
 
   List<Square> _getDiagonalPieces({required int rank, required Files file}) {
