@@ -254,6 +254,7 @@ class ChessController {
           (chessBoard[tappedSquareIndex].piece != null || didCaptureEnPassant)
               ? SoundType.capture
               : SoundType.pieceMoved);
+
       onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
 
       _addPawnToEnPassantCapturablePawns(
@@ -477,10 +478,37 @@ class ChessController {
   }
 
   /// --------------------------------LegalMoves getters----------------------
-  List<CastlingType> getCastlingAvailabiltiy() {
-    return [];
+  ///  ------------------------------------Castling-------------------------
+  bool didLightKingMove = false;
+  bool didDarkKingMove = false;
+  bool didLightKingSideRookMove = false;
+  bool didLightQueenSideRookMove = false;
+  bool didDarkKingSideRookMove = false;
+  bool didDarkQueenSideRookMove = false;
+
+  List<int> getCastlingAvailabiltiy({required PlayingTurn playingTurn}) {
+    List<int> castlingAvailability;
+    if (playingTurn == PlayingTurn.white) {
+      if (didLightKingMove) {
+        castlingAvailability = [];
+      } else if (didLightKingSideRookMove) {
+        castlingAvailability = didLightQueenSideRookMove ? [] : [3];
+      } else {
+        castlingAvailability = didLightQueenSideRookMove ? [5] : [3, 5];
+      }
+    } else {
+      if (didDarkKingMove) {
+        castlingAvailability = [];
+      } else if (didDarkKingSideRookMove) {
+        castlingAvailability = didDarkQueenSideRookMove ? [] : [59];
+      } else {
+        castlingAvailability = didDarkQueenSideRookMove ? [61] : [59, 61];
+      }
+    }
+    return castlingAvailability;
   }
 
+  //------------------------------------------------
   List<Square> _getPawnPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
