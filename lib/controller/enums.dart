@@ -52,4 +52,5 @@ enum SoundType {
   kingChecked,
   victory,
   draw,
+  illegal,
 }

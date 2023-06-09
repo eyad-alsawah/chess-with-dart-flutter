@@ -15,6 +15,7 @@ class ChessController {
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
+  final OnCapture onCapture;
 //-------------------------------------------
   List<Square> chessBoard = [
     // -------------------------------First Rank------------------
@@ -154,6 +155,7 @@ class ChessController {
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
+    required this.onCapture,
     required String initialPosition,
     PlayingTurn? playAs,
     required this.onVictory,
@@ -240,7 +242,18 @@ class ChessController {
           ? PlayingTurn.black
           : PlayingTurn.white;
       onPlayingTurnChanged(_playingTurn);
-      playSound(SoundType.victory);
+
+      bool didCaptureEnPassant = _didCaptureEnPassant(
+        movedPieceType: _selectedPiece?.pieceType,
+        didMovePawn: _selectedPiece!.piece == Pieces.pawn,
+        didMoveToEmptySquareOnDifferentFile:
+            selectedPieceFile != tappedSquareFile &&
+                chessBoard[tappedSquareIndex].piece == null,
+      );
+      playSound(
+          (chessBoard[tappedSquareIndex].piece != null || didCaptureEnPassant)
+              ? SoundType.capture
+              : SoundType.pieceMoved);
       onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
 
       _addPawnToEnPassantCapturablePawns(
@@ -282,13 +295,7 @@ class ChessController {
           piece: null,
           pieceType: null);
 
-      if (_didCaptureEnPassent(
-        movedPieceType: _selectedPiece?.pieceType,
-        didMovePawn: _selectedPiece!.piece == Pieces.pawn,
-        didMoveToEmptySquareOnDifferentFile:
-            selectedPieceFile != tappedSquareFile &&
-                chessBoard[tappedSquareIndex].piece == null,
-      )) {
+      if (didCaptureEnPassant) {
         chessBoard[_selectedPieceIndex! +
                 (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
             emptyEnPassentCapturedPawnSquare;
@@ -299,6 +306,8 @@ class ChessController {
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
       chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
       updateView();
+    } else {
+      playSound(SoundType.illegal);
     }
     onPieceSelected([], tappedSquareIndex);
     _inMoveSelectionMode = true;
@@ -427,7 +436,7 @@ class ChessController {
     }
   }
 
-  bool _didCaptureEnPassent({
+  bool _didCaptureEnPassant({
     required bool didMovePawn,
     required bool didMoveToEmptySquareOnDifferentFile,
     required PieceType? movedPieceType,

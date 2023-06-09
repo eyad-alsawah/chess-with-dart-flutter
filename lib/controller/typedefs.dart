@@ -8,6 +8,7 @@ typedef OnPieceSelected = void Function(
 typedef OnCastling = void Function(
     CastlingType castlingType, PlayingTurn playingTurn);
 typedef OnPieceMoved = void Function(int from, int to);
+typedef OnCapture = void Function();
 typedef OnError = void Function(Error error, String errorString);
 typedef OnPawnPromoted = void Function(
     int promotedPieceIndex, Pieces promotedTo);

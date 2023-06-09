@@ -42,7 +42,18 @@ class _ChessBoardState extends State<ChessBoard> {
     super.initState();
     chess = ChessController.fromPosition(
       playSound: (soundType) {
-        audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
+        switch (soundType) {
+          case SoundType.illegal:
+            audioPlayer.play(volume: 1, AssetSource(illegalSound));
+            break;
+          case SoundType.pieceMoved:
+            audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
+            break;
+          case SoundType.capture:
+            audioPlayer.play(volume: 1, AssetSource(captureSound));
+            break;
+          default:
+        }
       },
       updateView: () {
         setState(() {});
@@ -177,6 +188,7 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[capturedPawnIndex]['piece'] = null;
         chessBoard[capturedPawnIndex]['type'] = null;
       },
+      onCapture: () {},
       onError: (error, errorString) {},
     );
   }
