@@ -35,13 +35,15 @@ class _ChessBoardState extends State<ChessBoard> {
   List<int> tappedIndices = [];
   int? selectedIndex;
   final AudioPlayer audioPlayer = AudioPlayer();
-  late Chess chess;
+  late ChessController chess;
 
   @override
   void initState() {
     super.initState();
-    chess = Chess.fromPosition(
-      playSound: (soundType) {},
+    chess = ChessController.fromPosition(
+      playSound: (soundType) {
+        audioPlayer.play(AssetSource(pieceMovedSound));
+      },
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
@@ -158,7 +160,6 @@ class _ChessBoardState extends State<ChessBoard> {
         widget.onPlayingTurnChanged(playingTurn);
       },
       onPieceMoved: (from, to) {
-        audioPlayer.play(AssetSource(pieceMovedSound));
         int fromRank = getRankNameFromIndex(index: from);
         Files fromFile = getFileNameFromIndex(index: to);
         Map<String, dynamic> fromSquare = chessBoard[from];
