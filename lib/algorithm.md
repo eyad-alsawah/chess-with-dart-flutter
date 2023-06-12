@@ -17,12 +17,12 @@ Game Over
 4 . else &rarr; goto 2
 ---  
 ### First Step:
-* only one king exists, or more than one king for each player:
+* only one king exists, or more than one king for any player:
     1. create two counters for the number of kings of each player: lightKingsCount/darkKingsCount
     2. for each square on the board:
         * if square is not empty && square is occupied by a king </br>
         &rarr; if king is light? lightKingsCount++: darkKingsCount++
-    3. if lightKingsCount or darkKingsCount != 1 &rarr; <span style="color:red">
+    3. if lightKingsCount and darkKingsCount != 1 &rarr; <span style="color:red">
 Game Over
 ---
 * two kings are adjacent to each other

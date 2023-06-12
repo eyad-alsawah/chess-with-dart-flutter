@@ -250,6 +250,45 @@ class ChessController {
             selectedPieceFile != tappedSquareFile &&
                 chessBoard[tappedSquareIndex].piece == null,
       );
+
+      // moving the rook in case a king castled
+      if (_selectedPiece?.piece == Pieces.king) {
+        if (_selectedPiece?.pieceType == PieceType.dark &&
+            _selectedPieceIndex! == 60 &&
+            (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
+          // moving the rook and updating the board
+          if (tappedSquareIndex == 62) {
+            onPieceMoved(63, 61);
+            chessBoard[63].piece = null;
+            chessBoard[63].pieceType = null;
+            chessBoard[61].piece = Pieces.rook;
+            chessBoard[61].pieceType = PieceType.dark;
+          } else {
+            onPieceMoved(56, 59);
+            chessBoard[56].piece = null;
+            chessBoard[56].pieceType = null;
+            chessBoard[59].piece = Pieces.rook;
+            chessBoard[59].pieceType = PieceType.dark;
+          }
+        } else if (_selectedPiece?.pieceType == PieceType.light &&
+            _selectedPieceIndex! == 4 &&
+            (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
+          if (tappedSquareIndex == 6) {
+            onPieceMoved(7, 5);
+            chessBoard[7].piece = null;
+            chessBoard[7].pieceType = null;
+            chessBoard[5].piece = Pieces.rook;
+            chessBoard[5].pieceType = PieceType.light;
+          } else {
+            onPieceMoved(0, 3);
+            chessBoard[0].piece = null;
+            chessBoard[0].pieceType = null;
+            chessBoard[3].piece = Pieces.rook;
+            chessBoard[3].pieceType = PieceType.light;
+          }
+        }
+      }
+
       playSound(
           (chessBoard[tappedSquareIndex].piece != null || didCaptureEnPassant)
               ? SoundType.capture
@@ -303,12 +342,14 @@ class ChessController {
         onEnPassant(_selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
       }
+      changeCastlingAvailability(
+          movedPiece: _selectedPiece!.piece!,
+          movedPieceType: _selectedPiece!.pieceType!,
+          indexPieceMovedFrom: _selectedPieceIndex!);
 
       chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
       chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
       updateView();
-    } else {
-      playSound(SoundType.illegal);
     }
     onPieceSelected([], tappedSquareIndex);
     _inMoveSelectionMode = true;
@@ -486,26 +527,70 @@ class ChessController {
   bool didDarkKingSideRookMove = false;
   bool didDarkQueenSideRookMove = false;
 
-  List<int> getCastlingAvailabiltiy({required PlayingTurn playingTurn}) {
-    List<int> castlingAvailability;
-    if (playingTurn == PlayingTurn.white) {
+  List<Square> getCastlingAvailabiltiy({required PieceType pieceType}) {
+    List<Square> castlingAvailability;
+    if (pieceType == PieceType.light) {
       if (didLightKingMove) {
         castlingAvailability = [];
       } else if (didLightKingSideRookMove) {
-        castlingAvailability = didLightQueenSideRookMove ? [] : [3];
+        castlingAvailability = didLightQueenSideRookMove ? [] : [chessBoard[2]];
       } else {
-        castlingAvailability = didLightQueenSideRookMove ? [5] : [3, 5];
+        castlingAvailability = didLightQueenSideRookMove
+            ? [chessBoard[6]]
+            : [chessBoard[2], chessBoard[6]];
       }
     } else {
       if (didDarkKingMove) {
         castlingAvailability = [];
       } else if (didDarkKingSideRookMove) {
-        castlingAvailability = didDarkQueenSideRookMove ? [] : [59];
+        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[59]];
       } else {
-        castlingAvailability = didDarkQueenSideRookMove ? [61] : [59, 61];
+        castlingAvailability = didDarkQueenSideRookMove
+            ? [chessBoard[62]]
+            : [chessBoard[59], chessBoard[62]];
       }
     }
     return castlingAvailability;
+  }
+
+  void changeCastlingAvailability(
+      {required Pieces movedPiece,
+      required PieceType movedPieceType,
+      required int indexPieceMovedFrom}) {
+    // checking if castling is possible in the first place before checking all the other conditions
+    bool canWhiteKingCastle = !didLightKingMove &&
+        (!didLightKingSideRookMove || !didLightQueenSideRookMove);
+    bool canBlackKingCastle = !didDarkKingMove &&
+        (!didDarkKingSideRookMove || !didDarkQueenSideRookMove);
+
+    if (movedPieceType == PieceType.dark && !canBlackKingCastle) {
+      return;
+    }
+    if (movedPieceType == PieceType.light && !canWhiteKingCastle) {
+      return;
+    }
+    // todo: check castling availability on the start of the game by checking the existing pieces on the squares like the a1 and h8 for example
+    if (movedPiece == Pieces.king) {
+      if (movedPieceType == PieceType.light) {
+        didLightKingMove = true;
+      } else {
+        didDarkKingMove = true;
+      }
+    } else if (movedPiece == Pieces.rook) {
+      if (movedPieceType == PieceType.light) {
+        if (indexPieceMovedFrom == 0) {
+          didLightQueenSideRookMove = true;
+        } else if (indexPieceMovedFrom == 7) {
+          didLightKingSideRookMove = true;
+        }
+      } else {
+        if (indexPieceMovedFrom == 56) {
+          didDarkQueenSideRookMove = true;
+        } else if (indexPieceMovedFrom == 63) {
+          didDarkKingSideRookMove = true;
+        }
+      }
+    }
   }
 
   //------------------------------------------------
@@ -595,6 +680,10 @@ class ChessController {
     int currentIndex = index;
 
     List<Square> kingPieces = [];
+
+    // castling:
+    kingPieces
+        .addAll(getCastlingAvailabiltiy(pieceType: currentPiece.pieceType!));
 
     //right
     (file != Files.h) ? kingPieces.add(chessBoard[currentIndex + 1]) : null;
@@ -776,6 +865,35 @@ class ChessController {
     bool didCaptureOnDiagonalBottomLeft = false;
     bool didCaptureOnDiagonalBottomRight = false;
 
+    // for castling: to prevent the king from castling if any piece stands between the king and the rook
+    if (tappedPiece.piece == Pieces.king) {
+      if (tappedPiece.pieceType == PieceType.light) {
+        if (!didLightKingMove) {
+          if (chessBoard[6].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.g && square.rank == 1),
+            );
+          } else if (chessBoard[2].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.c && square.rank == 1),
+            );
+          }
+        }
+      } else {
+        if (!didDarkKingMove) {
+          if (chessBoard[62].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.g && square.rank == 8),
+            );
+          } else if (chessBoard[56].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.c && square.rank == 8),
+            );
+          }
+        }
+      }
+    }
+
     for (var square in legalAndIllegalMoves) {
       RelativeDirection relativeDirection = _getRelativeDirection(
           currentSquare: tappedPiece, targetSquare: square);
@@ -925,12 +1043,6 @@ class ChessController {
         }
       }
     }
-    // if (isPinned(
-    //     kingType: currentPiece['type'],
-    //     pieceToCheck: currentPiece,
-    //     possibleSquaresToMoveTo: squaresMovableTo)) {
-    //   squaresMovableTo.clear();
-    // }
 
     return legalMoves;
   }
@@ -980,8 +1092,39 @@ class ChessController {
         legalMovesIndices.add(squareIndex);
       }
     }
+
     return legalMovesIndices;
   }
+
+  ///---------------------------------------------Checking Game Status-----------------------------------
+  bool doesOnlyOneKingExists() {
+    int kingsCount = 0;
+    for (var element in chessBoard) {
+      if (element.piece == Pieces.king) {
+        kingsCount++;
+      }
+    }
+    return kingsCount == 1;
+  }
+
+  bool doesAnyPlayerHaveMoreThanOneKing() {
+    int whiteKingsCount = 0;
+    int blackKingsCount = 0;
+    for (var element in chessBoard) {
+      if (element.piece == Pieces.king) {
+        element.pieceType == PieceType.light
+            ? whiteKingsCount++
+            : blackKingsCount++;
+      }
+    }
+    return whiteKingsCount > 1 && blackKingsCount > 1;
+  }
+
+  // bool isAnyKingAdjacentToAnotherKing() {
+  //   for (var element in chessBoard) {
+  //     if (element.piece == Pieces.king) {}
+  //   }
+  // }
 }
 
 class Square {
