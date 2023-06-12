@@ -204,8 +204,10 @@ class ChessController {
     int tappedSquareRank = _getRankNameFromIndex(index: tappedSquareIndex);
 
     /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
-    _inMoveSelectionMode = isInMoveSelectionMode(
-        playingTurn: _playingTurn, tappedSquareIndex: tappedSquareIndex);
+    _inMoveSelectionMode = _isInMoveSelectionMode(
+        playingTurn: _playingTurn,
+        tappedSquareIndex: tappedSquareIndex,
+        legalMovesIndices: _legalMovesIndices);
 
     if (_inMoveSelectionMode) {
       _selectedPieceIndex = tappedSquareIndex;
@@ -356,10 +358,15 @@ class ChessController {
     _legalMovesIndices.clear();
   }
 
-  bool isInMoveSelectionMode(
-      {required int tappedSquareIndex, required PlayingTurn playingTurn}) {
+  bool _isInMoveSelectionMode(
+      {required int tappedSquareIndex,
+      required PlayingTurn playingTurn,
+      required List<int> legalMovesIndices}) {
     bool inMoveSelectionMode =
-        (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
+        // pressing on an empty square that is not in the legal moves should not change the value to false
+        (chessBoard[tappedSquareIndex].pieceType == null &&
+                !legalMovesIndices.contains(tappedSquareIndex)) ||
+            (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
                 _playingTurn == PlayingTurn.white) ||
             (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
                 _playingTurn == PlayingTurn.black);
