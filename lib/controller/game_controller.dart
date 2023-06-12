@@ -363,8 +363,14 @@ class ChessController {
       required PlayingTurn playingTurn,
       required List<int> legalMovesIndices}) {
     bool inMoveSelectionMode =
-        // pressing on an empty square that is not in the legal moves should not change the value to false
-        (chessBoard[tappedSquareIndex].pieceType == null &&
+        // pressing on an empty square or on a square occupied by an enemy piece that is not in the legal moves should not change the value to false
+        ((chessBoard[tappedSquareIndex].pieceType == null ||
+                    (chessBoard[tappedSquareIndex].pieceType ==
+                            PieceType.light &&
+                        _playingTurn != PlayingTurn.white) ||
+                    (chessBoard[tappedSquareIndex].pieceType ==
+                            PieceType.dark &&
+                        _playingTurn != PlayingTurn.black)) &&
                 !legalMovesIndices.contains(tappedSquareIndex)) ||
             (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
                 _playingTurn == PlayingTurn.white) ||
