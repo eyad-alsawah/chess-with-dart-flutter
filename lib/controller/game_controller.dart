@@ -556,11 +556,11 @@ class ChessController {
       if (didDarkKingMove) {
         castlingAvailability = [];
       } else if (didDarkKingSideRookMove) {
-        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[59]];
+        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[58]];
       } else {
         castlingAvailability = didDarkQueenSideRookMove
             ? [chessBoard[62]]
-            : [chessBoard[59], chessBoard[62]];
+            : [chessBoard[58], chessBoard[62]];
       }
     }
     return castlingAvailability;
