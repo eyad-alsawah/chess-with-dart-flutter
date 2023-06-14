@@ -723,6 +723,10 @@ class ChessController {
         : null;
     //bottom
     rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
+    for (var e in kingPieces) {
+      print("kingPieces: ${e.file}");
+      print("kingPieces: ${e.rank}");
+    }
 
     return kingPieces;
   }
@@ -882,11 +886,14 @@ class ChessController {
     if (tappedPiece.piece == Pieces.king) {
       if (tappedPiece.pieceType == PieceType.light) {
         if (!didLightKingMove) {
-          if (chessBoard[6].piece != null || chessBoard[5].piece != null) {
+          if (chessBoard[5].piece != null || chessBoard[6].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 1),
             );
-          } else if (chessBoard[2].piece != null) {
+          }
+          if (chessBoard[1].piece != null ||
+              chessBoard[2].piece != null ||
+              chessBoard[3].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.c && square.rank == 1),
             );
@@ -894,11 +901,14 @@ class ChessController {
         }
       } else {
         if (!didDarkKingMove) {
-          if (chessBoard[62].piece != null) {
+          if (chessBoard[61].piece != null || chessBoard[62].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 8),
             );
-          } else if (chessBoard[56].piece != null) {
+          }
+          if (chessBoard[57].piece != null ||
+              chessBoard[58].piece != null ||
+              chessBoard[59].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.c && square.rank == 8),
             );
