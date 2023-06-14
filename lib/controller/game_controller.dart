@@ -882,7 +882,7 @@ class ChessController {
     if (tappedPiece.piece == Pieces.king) {
       if (tappedPiece.pieceType == PieceType.light) {
         if (!didLightKingMove) {
-          if (chessBoard[6].piece != null) {
+          if (chessBoard[6].piece != null || chessBoard[5].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 1),
             );
