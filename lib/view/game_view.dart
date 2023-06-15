@@ -34,6 +34,7 @@ class _ChessBoardState extends State<ChessBoard> {
   String squareName = "";
   List<int> tappedIndices = [];
   int? selectedIndex;
+  int? checkedKingIndex;
   final AudioPlayer audioPlayer = AudioPlayer();
   late ChessController chess;
 
@@ -41,19 +42,8 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     super.initState();
     chess = ChessController.fromPosition(
-      onCheck: () async {
-        return await showDialog(
-            useRootNavigator: true,
-            context: context,
-            // barrierDismissible: false,
-            builder: (dialogContext) {
-              return const AlertDialog(
-                contentPadding: EdgeInsets.zero,
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12))),
-                content: Center(child: Text('King is Checked')),
-              );
-            });
+      onCheck: (enemyKingIndex) {
+        checkedKingIndex = enemyKingIndex;
       },
       playSound: (soundType) {
         switch (soundType) {
@@ -65,6 +55,9 @@ class _ChessBoardState extends State<ChessBoard> {
             break;
           case SoundType.capture:
             audioPlayer.play(volume: 1, AssetSource(captureSound));
+            break;
+          case SoundType.kingChecked:
+            audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
             break;
           default:
         }
@@ -197,6 +190,9 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[to] = fromSquare;
         selectedIndex = null;
         tappedIndices.clear();
+
+        // todo: change the place of this to ensure that its value won't be null after we set it to an Int
+        checkedKingIndex = null;
       },
       onEnPassant: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex]['piece'] = null;
@@ -303,13 +299,16 @@ class _ChessBoardState extends State<ChessBoard> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: (index == selectedIndex &&
-                                    selectedIndex != null)
-                                ? Colors.lightGreen
-                                : getSquareColor(
-                                    ignoreTappedIndices: true,
-                                    index: index,
-                                    tappedIndices: tappedIndices),
+                            color: (checkedKingIndex != null &&
+                                    index == checkedKingIndex)
+                                ? Colors.red
+                                : (index == selectedIndex &&
+                                        selectedIndex != null)
+                                    ? Colors.lightGreen
+                                    : getSquareColor(
+                                        ignoreTappedIndices: true,
+                                        index: index,
+                                        tappedIndices: tappedIndices),
                           ),
                         ),
                       ),

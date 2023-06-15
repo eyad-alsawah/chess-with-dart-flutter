@@ -16,4 +16,4 @@ typedef OnSelectPromotionType = Future<Pieces> Function(
 typedef OnEnPassant = void Function(int capturedPawnIndex);
 typedef PlaySound = void Function(SoundType soundType);
 typedef UpdateView = void Function();
-typedef OnCheck = void Function();
+typedef OnCheck = void Function(int checkedKingIndex);

@@ -356,7 +356,11 @@ class ChessController {
 
         chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
         chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
-        isKingChecked(playingTurn: _playingTurn) ? onCheck() : null;
+        if (isKingChecked(playingTurn: _playingTurn)) {
+          onCheck(chessBoard.indexWhere((piece) =>
+              piece.pieceType != _selectedPiece?.pieceType &&
+              piece.piece == Pieces.king));
+        }
         updateView();
       }
       onPieceSelected([], tappedSquareIndex);
@@ -1188,7 +1192,7 @@ class ChessController {
         return true;
       }
       // a white king can't be put in check by white pawns lower in rank
-      if (enemyKingPiece.pieceType == PieceType.dark &&
+      if (enemyKingPiece.pieceType == PieceType.light &&
           pawn.rank < enemyKingPiece.rank) {
         return true;
       }
@@ -1201,8 +1205,9 @@ class ChessController {
     // knights of the same type as the enemy king can't check the king
     surroundingKnights
         .removeWhere((knight) => knight.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count
-    surroundingKnights.removeWhere((square) => square.piece == null);
+    // empty squares don't count, same for pieces that are not knights
+    surroundingKnights.removeWhere(
+        (square) => square.piece == null || square.piece != Pieces.knight);
 
     /// ------------------------------------getting surrounding enemy rooks and queens  (queens vertical/horizontal to the enemy king)---------
     List<Square> surroundingRooksAndQueens = [
@@ -1218,9 +1223,10 @@ class ChessController {
     // rooks or queens of the same type as the king can't check the king
     surroundingRooksAndQueensInLineOfSight.removeWhere(
         (rookOrQueen) => rookOrQueen.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count
-    surroundingRooksAndQueensInLineOfSight
-        .removeWhere((square) => square.piece == null);
+    // empty squares don't count, same for pieces that are neither rooks nor queens
+    surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
+        square.piece == null ||
+        (square.piece != Pieces.rook && square.piece != Pieces.queen));
 
     /// ----------------------------------------getting surrounding enemy bishops and queens (queens diagonal to the enemy king)----------------
     List<Square> surroundingBishopsAndQueens = _getDiagonalPieces(
@@ -1231,9 +1237,10 @@ class ChessController {
         rank: enemyKingPiece.rank);
     surroundingBishopsAndQueensInLineOfSight.removeWhere(
         (bishopOrQueen) => bishopOrQueen.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count
-    surroundingBishopsAndQueensInLineOfSight
-        .removeWhere((square) => square.piece == null);
+    // empty squares don't count, same for pieces that are neither bishops nor queens
+    surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
+        square.piece == null ||
+        (square.piece != Pieces.bishop && square.piece != Pieces.queen));
 
     ///------------------------------------------------------------------------------------
 
