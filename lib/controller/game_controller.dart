@@ -686,7 +686,8 @@ class ChessController {
     return pawnPieces;
   }
 
-  List<Square> _getKingPieces({required int rank, required Files file}) {
+  List<Square> _getKingPieces(
+      {required int rank, required Files file, bool getCastlingPieces = true}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
     int index = chessBoard.indexOf(currentPiece);
@@ -695,8 +696,10 @@ class ChessController {
     List<Square> kingPieces = [];
 
     // castling:
-    kingPieces
-        .addAll(getCastlingAvailabiltiy(pieceType: currentPiece.pieceType!));
+    getCastlingPieces
+        ? kingPieces
+            .addAll(getCastlingAvailabiltiy(pieceType: currentPiece.pieceType!))
+        : null;
 
     //right
     (file != Files.h) ? kingPieces.add(chessBoard[currentIndex + 1]) : null;
@@ -1140,14 +1143,90 @@ class ChessController {
             : blackKingsCount++;
       }
     }
-    return whiteKingsCount > 1 && blackKingsCount > 1;
+    return whiteKingsCount > 1 || blackKingsCount > 1;
   }
 
-  // bool isAnyKingAdjacentToAnotherKing() {
-  //   for (var element in chessBoard) {
-  //     if (element.piece == Pieces.king) {}
-  //   }
-  // }
+  bool isAnyKingAdjacentToAnotherKing() {
+    for (var element in chessBoard) {
+      if (element.piece == Pieces.king) {
+        List<Square> surroundingPieces =
+            _getKingPieces(rank: element.rank, file: element.file);
+        for (var square in surroundingPieces) {
+          if (square.piece == Pieces.king) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  bool isKingChecked({required PlayingTurn playingTurn}) {
+    PieceType enemyKingType =
+        playingTurn == PlayingTurn.white ? PieceType.dark : PieceType.light;
+    Square enemyKingPiece = chessBoard.firstWhere((square) =>
+        square.piece == Pieces.king && square.pieceType == enemyKingType);
+
+    /// -------------------------------------getting surrounding enemy pawns--------------------------
+    List<Square> surroundingPawns =
+        _getPawnPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+    // pawns can't check a king of the same type
+    surroundingPawns
+        .removeWhere((pawn) => pawn.pieceType == enemyKingPiece.pieceType);
+    // pawns that are on the same file as the king aren't checking the king
+    surroundingPawns.removeWhere((pawn) => pawn.file == enemyKingPiece.file);
+    surroundingPawns.removeWhere((pawn) {
+      // a black king can't be put in check by white pawns higher in rank
+      if (enemyKingPiece.pieceType == PieceType.dark &&
+          pawn.rank > enemyKingPiece.rank) {
+        return true;
+      }
+      // a white king can't be put in check by white pawns lower in rank
+      if (enemyKingPiece.pieceType == PieceType.dark &&
+          pawn.rank < enemyKingPiece.rank) {
+        return true;
+      }
+      return false;
+    });
+
+    /// -------------------------------------getting surrounding enemy knights---------------
+    List<Square> surroundingKnights =
+        _getKnightPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+    // knights of the same type as the enemy king can't check the king
+    surroundingKnights
+        .removeWhere((knight) => knight.pieceType == enemyKingPiece.pieceType);
+
+    /// ------------------------------------getting surrounding enemy rooks and queens  (queens vertical/horizontal to the enemy king)---------
+    List<Square> surroundingRooksAndQueens = [
+      ..._getHorizontalPieces(
+          rank: enemyKingPiece.rank, file: enemyKingPiece.file),
+      ..._getVerticalPieces(
+          rank: enemyKingPiece.rank, file: enemyKingPiece.file),
+    ];
+    List<Square> surroundingRooksAndQueensInLineOfSight = _getLegalMovesOnly(
+        legalAndIllegalMoves: surroundingRooksAndQueens,
+        file: enemyKingPiece.file,
+        rank: enemyKingPiece.rank);
+    // rooks or queens of the same type as the king can't check the king
+    surroundingRooksAndQueensInLineOfSight.removeWhere(
+        (rookOrQueen) => rookOrQueen.pieceType == enemyKingPiece.pieceType);
+
+    /// ----------------------------------------getting surrounding enemy bishops and queens (queens diagonal to the enemy king)----------------
+    List<Square> surroundingBishopsAndQueens = _getDiagonalPieces(
+        rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+    List<Square> surroundingBishopsAndQueensInLineOfSight = _getLegalMovesOnly(
+        legalAndIllegalMoves: surroundingBishopsAndQueens,
+        file: enemyKingPiece.file,
+        rank: enemyKingPiece.rank);
+    surroundingBishopsAndQueensInLineOfSight.removeWhere(
+        (bishopOrQueen) => bishopOrQueen.pieceType == enemyKingPiece.pieceType);
+
+    ///------------------------------------------------------------------------------------
+    return surroundingPawns.isNotEmpty ||
+        surroundingKnights.isNotEmpty ||
+        surroundingRooksAndQueensInLineOfSight.isEmpty ||
+        surroundingBishopsAndQueensInLineOfSight.isEmpty;
+  }
 }
 
 class Square {

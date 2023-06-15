@@ -22,7 +22,7 @@ Game Over
     2. for each square on the board:
         * if square is not empty && square is occupied by a king </br>
         &rarr; if king is light? lightKingsCount++: darkKingsCount++
-    3. if lightKingsCount and darkKingsCount != 1 &rarr; <span style="color:red">
+    3. if lightKingsCount or darkKingsCount != 1 &rarr; <span style="color:red">
 Game Over
 ---
 * two kings are adjacent to each other
