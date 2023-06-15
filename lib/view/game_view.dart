@@ -35,7 +35,7 @@ class _ChessBoardState extends State<ChessBoard> {
   List<int> tappedIndices = [];
   int? selectedIndex;
   int? checkedKingIndex;
-  final AudioPlayer audioPlayer = AudioPlayer();
+
   late ChessController chess;
 
   @override
@@ -45,19 +45,23 @@ class _ChessBoardState extends State<ChessBoard> {
       onCheck: (enemyKingIndex) {
         checkedKingIndex = enemyKingIndex;
       },
-      playSound: (soundType) {
+      playSound: (soundType) async {
+        AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {
           case SoundType.illegal:
-            audioPlayer.play(volume: 1, AssetSource(illegalSound));
+            await audioPlayer.play(volume: 1, AssetSource(illegalSound));
             break;
           case SoundType.pieceMoved:
-            audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
+            await audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
             break;
           case SoundType.capture:
-            audioPlayer.play(volume: 1, AssetSource(captureSound));
+            await audioPlayer.play(volume: 1, AssetSource(captureSound));
             break;
           case SoundType.kingChecked:
-            audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
+            await audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
+            break;
+          case SoundType.victory:
+            await audioPlayer.play(volume: 1, AssetSource(victorySound));
             break;
           default:
         }
@@ -200,6 +204,7 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onCapture: () {},
       onError: (error, errorString) {
+        AudioPlayer audioPlayer = AudioPlayer();
         audioPlayer.play(volume: 1, AssetSource(illegalSound));
       },
     );

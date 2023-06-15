@@ -155,6 +155,8 @@ class ChessController {
   ];
 
   bool _inMoveSelectionMode = true;
+  // prevents doing anything if the game ended
+  bool lockFurtherInteractions = false;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
@@ -204,171 +206,185 @@ class ChessController {
   PlayingTurn _playingTurn = PlayingTurn.white;
 
   handleSquareTapped({required int tappedSquareIndex}) async {
-    runZonedGuarded(() async {
-      Files tappedSquareFile = _getFileNameFromIndex(index: tappedSquareIndex);
-      int tappedSquareRank = _getRankNameFromIndex(index: tappedSquareIndex);
+    lockFurtherInteractions
+        ? null
+        : runZonedGuarded(() async {
+            Files tappedSquareFile =
+                _getFileNameFromIndex(index: tappedSquareIndex);
+            int tappedSquareRank =
+                _getRankNameFromIndex(index: tappedSquareIndex);
 
-      /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
-      _inMoveSelectionMode = _isInMoveSelectionMode(
-          playingTurn: _playingTurn,
-          tappedSquareIndex: tappedSquareIndex,
-          legalMovesIndices: _legalMovesIndices);
-
-      if (_inMoveSelectionMode) {
-        _selectedPieceIndex = tappedSquareIndex;
-        _selectedPiece = chessBoard[tappedSquareIndex];
-        _legalMovesIndices = _getLegalMovesIndices(
-          tappedSquareFile: tappedSquareFile,
-          tappedSquareRank: tappedSquareRank,
-        );
-        // preventing player who's turn is not his to play by emptying the legalMovesIndices list
-        shouldClearLegalMovesIndices(
+            /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
+            _inMoveSelectionMode = _isInMoveSelectionMode(
                 playingTurn: _playingTurn,
-                selectedPieceType: _selectedPiece?.pieceType)
-            ? _legalMovesIndices.clear()
-            : null;
+                tappedSquareIndex: tappedSquareIndex,
+                legalMovesIndices: _legalMovesIndices);
 
-        onPieceSelected(_legalMovesIndices, tappedSquareIndex);
+            if (_inMoveSelectionMode) {
+              _selectedPieceIndex = tappedSquareIndex;
+              _selectedPiece = chessBoard[tappedSquareIndex];
+              _legalMovesIndices = _getLegalMovesIndices(
+                tappedSquareFile: tappedSquareFile,
+                tappedSquareRank: tappedSquareRank,
+              );
+              // preventing player who's turn is not his to play by emptying the legalMovesIndices list
+              shouldClearLegalMovesIndices(
+                      playingTurn: _playingTurn,
+                      selectedPieceType: _selectedPiece?.pieceType)
+                  ? _legalMovesIndices.clear()
+                  : null;
 
-        _inMoveSelectionMode = _legalMovesIndices.isEmpty;
-        updateView();
-        return;
-      }
-      // checking nullability only for safely using null check operator
-      else if (_legalMovesIndices.contains(tappedSquareIndex) &&
-          _selectedPiece != null &&
-          _selectedPieceIndex != null) {
-        // pawn will be promoted to queen by default
-        Pieces promotedPawn = Pieces.queen;
-        Files selectedPieceFile =
-            _getFileNameFromIndex(index: _selectedPieceIndex!);
-        int selectedPieceRank =
-            _getRankNameFromIndex(index: _selectedPieceIndex!);
+              onPieceSelected(_legalMovesIndices, tappedSquareIndex);
 
-        _playingTurn = _playingTurn == PlayingTurn.white
-            ? PlayingTurn.black
-            : PlayingTurn.white;
-        onPlayingTurnChanged(_playingTurn);
-
-        bool didCaptureEnPassant = _didCaptureEnPassant(
-          movedPieceType: _selectedPiece?.pieceType,
-          didMovePawn: _selectedPiece!.piece == Pieces.pawn,
-          didMoveToEmptySquareOnDifferentFile:
-              selectedPieceFile != tappedSquareFile &&
-                  chessBoard[tappedSquareIndex].piece == null,
-        );
-
-        // moving the rook in case a king castled
-        if (_selectedPiece?.piece == Pieces.king) {
-          if (_selectedPiece?.pieceType == PieceType.dark &&
-              _selectedPieceIndex! == 60 &&
-              (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
-            // moving the rook and updating the board
-            if (tappedSquareIndex == 62) {
-              onPieceMoved(63, 61);
-              chessBoard[63].piece = null;
-              chessBoard[63].pieceType = null;
-              chessBoard[61].piece = Pieces.rook;
-              chessBoard[61].pieceType = PieceType.dark;
-            } else {
-              onPieceMoved(56, 59);
-              chessBoard[56].piece = null;
-              chessBoard[56].pieceType = null;
-              chessBoard[59].piece = Pieces.rook;
-              chessBoard[59].pieceType = PieceType.dark;
+              _inMoveSelectionMode = _legalMovesIndices.isEmpty;
+              updateView();
+              return;
             }
-          } else if (_selectedPiece?.pieceType == PieceType.light &&
-              _selectedPieceIndex! == 4 &&
-              (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
-            if (tappedSquareIndex == 6) {
-              onPieceMoved(7, 5);
-              chessBoard[7].piece = null;
-              chessBoard[7].pieceType = null;
-              chessBoard[5].piece = Pieces.rook;
-              chessBoard[5].pieceType = PieceType.light;
-            } else {
-              onPieceMoved(0, 3);
-              chessBoard[0].piece = null;
-              chessBoard[0].pieceType = null;
-              chessBoard[3].piece = Pieces.rook;
-              chessBoard[3].pieceType = PieceType.light;
+            // checking nullability only for safely using null check operator
+            else if (_legalMovesIndices.contains(tappedSquareIndex) &&
+                _selectedPiece != null &&
+                _selectedPieceIndex != null) {
+              // pawn will be promoted to queen by default
+              Pieces promotedPawn = Pieces.queen;
+              Files selectedPieceFile =
+                  _getFileNameFromIndex(index: _selectedPieceIndex!);
+              int selectedPieceRank =
+                  _getRankNameFromIndex(index: _selectedPieceIndex!);
+
+              _playingTurn = _playingTurn == PlayingTurn.white
+                  ? PlayingTurn.black
+                  : PlayingTurn.white;
+              onPlayingTurnChanged(_playingTurn);
+
+              bool didCaptureEnPassant = _didCaptureEnPassant(
+                movedPieceType: _selectedPiece?.pieceType,
+                didMovePawn: _selectedPiece!.piece == Pieces.pawn,
+                didMoveToEmptySquareOnDifferentFile:
+                    selectedPieceFile != tappedSquareFile &&
+                        chessBoard[tappedSquareIndex].piece == null,
+              );
+
+              // moving the rook in case a king castled
+              if (_selectedPiece?.piece == Pieces.king) {
+                if (_selectedPiece?.pieceType == PieceType.dark &&
+                    _selectedPieceIndex! == 60 &&
+                    (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
+                  // moving the rook and updating the board
+                  if (tappedSquareIndex == 62) {
+                    onPieceMoved(63, 61);
+                    chessBoard[63].piece = null;
+                    chessBoard[63].pieceType = null;
+                    chessBoard[61].piece = Pieces.rook;
+                    chessBoard[61].pieceType = PieceType.dark;
+                  } else {
+                    onPieceMoved(56, 59);
+                    chessBoard[56].piece = null;
+                    chessBoard[56].pieceType = null;
+                    chessBoard[59].piece = Pieces.rook;
+                    chessBoard[59].pieceType = PieceType.dark;
+                  }
+                } else if (_selectedPiece?.pieceType == PieceType.light &&
+                    _selectedPieceIndex! == 4 &&
+                    (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
+                  if (tappedSquareIndex == 6) {
+                    onPieceMoved(7, 5);
+                    chessBoard[7].piece = null;
+                    chessBoard[7].pieceType = null;
+                    chessBoard[5].piece = Pieces.rook;
+                    chessBoard[5].pieceType = PieceType.light;
+                  } else {
+                    onPieceMoved(0, 3);
+                    chessBoard[0].piece = null;
+                    chessBoard[0].pieceType = null;
+                    chessBoard[3].piece = Pieces.rook;
+                    chessBoard[3].pieceType = PieceType.light;
+                  }
+                }
+              }
+
+              playSound((chessBoard[tappedSquareIndex].piece != null ||
+                      didCaptureEnPassant)
+                  ? SoundType.capture
+                  : SoundType.pieceMoved);
+
+              onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
+
+              _addPawnToEnPassantCapturablePawns(
+                  fromRank: selectedPieceRank,
+                  toRank: tappedSquareRank,
+                  piece: chessBoard[_selectedPieceIndex!].piece,
+                  movedToIndex: tappedSquareIndex,
+                  pawnType: chessBoard[_selectedPieceIndex!].pieceType);
+
+              bool shouldPromotePawn = shouldPawnBePromoted(
+                  selectedPiecePiece: _selectedPiece?.piece,
+                  tappedSquareRank: tappedSquareRank);
+
+              shouldPromotePawn
+                  ? await onSelectPromotionType(
+                          _playingTurn == PlayingTurn.white
+                              ? PlayingTurn.black
+                              : PlayingTurn.white)
+                      .then((selectedPromotionType) {
+                      promotedPawn = selectedPromotionType;
+                      onPawnPromoted(tappedSquareIndex, selectedPromotionType);
+                    })
+                  : null;
+
+              // empty square that will replace the square on which the piece that we will move is at
+              Square emptySquareAtSelectedPieceIndex = Square(
+                  file: selectedPieceFile,
+                  rank: selectedPieceRank,
+                  piece: null,
+                  pieceType: null);
+              Square newSquareAtTappedIndex = Square(
+                file: tappedSquareFile,
+                rank: tappedSquareRank,
+                piece: shouldPromotePawn ? promotedPawn : _selectedPiece?.piece,
+                pieceType: _selectedPiece?.pieceType,
+              );
+              Square emptyEnPassentCapturedPawnSquare = Square(
+                  file: tappedSquareFile,
+                  rank: selectedPieceRank,
+                  piece: null,
+                  pieceType: null);
+
+              if (didCaptureEnPassant) {
+                chessBoard[_selectedPieceIndex! +
+                    (tappedSquareFile.index > selectedPieceFile.index
+                        ? 1
+                        : -1)] = emptyEnPassentCapturedPawnSquare;
+                onEnPassant(_selectedPieceIndex! +
+                    (tappedSquareFile.index > selectedPieceFile.index
+                        ? 1
+                        : -1));
+              }
+              changeCastlingAvailability(
+                  movedPiece: _selectedPiece!.piece!,
+                  movedPieceType: _selectedPiece!.pieceType!,
+                  indexPieceMovedFrom: _selectedPieceIndex!);
+
+              chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
+              chessBoard[_selectedPieceIndex!] =
+                  emptySquareAtSelectedPieceIndex;
+              if (isKingChecked(playingTurn: _playingTurn)) {
+                onCheck(chessBoard.indexWhere((piece) =>
+                    piece.pieceType != _selectedPiece?.pieceType &&
+                    piece.piece == Pieces.king));
+                if (isCheckMate(playingTurn: _playingTurn)) {
+                  onVictory(VictoryType.checkmate);
+                  playSound(SoundType.victory);
+                  lockFurtherInteractions = true;
+                }
+              }
+              updateView();
             }
-          }
-        }
-
-        playSound(
-            (chessBoard[tappedSquareIndex].piece != null || didCaptureEnPassant)
-                ? SoundType.capture
-                : SoundType.pieceMoved);
-
-        onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
-
-        _addPawnToEnPassantCapturablePawns(
-            fromRank: selectedPieceRank,
-            toRank: tappedSquareRank,
-            piece: chessBoard[_selectedPieceIndex!].piece,
-            movedToIndex: tappedSquareIndex,
-            pawnType: chessBoard[_selectedPieceIndex!].pieceType);
-
-        bool shouldPromotePawn = shouldPawnBePromoted(
-            selectedPiecePiece: _selectedPiece?.piece,
-            tappedSquareRank: tappedSquareRank);
-
-        shouldPromotePawn
-            ? await onSelectPromotionType(_playingTurn == PlayingTurn.white
-                    ? PlayingTurn.black
-                    : PlayingTurn.white)
-                .then((selectedPromotionType) {
-                promotedPawn = selectedPromotionType;
-                onPawnPromoted(tappedSquareIndex, selectedPromotionType);
-              })
-            : null;
-
-        // empty square that will replace the square on which the piece that we will move is at
-        Square emptySquareAtSelectedPieceIndex = Square(
-            file: selectedPieceFile,
-            rank: selectedPieceRank,
-            piece: null,
-            pieceType: null);
-        Square newSquareAtTappedIndex = Square(
-          file: tappedSquareFile,
-          rank: tappedSquareRank,
-          piece: shouldPromotePawn ? promotedPawn : _selectedPiece?.piece,
-          pieceType: _selectedPiece?.pieceType,
-        );
-        Square emptyEnPassentCapturedPawnSquare = Square(
-            file: tappedSquareFile,
-            rank: selectedPieceRank,
-            piece: null,
-            pieceType: null);
-
-        if (didCaptureEnPassant) {
-          chessBoard[_selectedPieceIndex! +
-                  (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
-              emptyEnPassentCapturedPawnSquare;
-          onEnPassant(_selectedPieceIndex! +
-              (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
-        }
-        changeCastlingAvailability(
-            movedPiece: _selectedPiece!.piece!,
-            movedPieceType: _selectedPiece!.pieceType!,
-            indexPieceMovedFrom: _selectedPieceIndex!);
-
-        chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
-        chessBoard[_selectedPieceIndex!] = emptySquareAtSelectedPieceIndex;
-        if (isKingChecked(playingTurn: _playingTurn)) {
-          onCheck(chessBoard.indexWhere((piece) =>
-              piece.pieceType != _selectedPiece?.pieceType &&
-              piece.piece == Pieces.king));
-        }
-        updateView();
-      }
-      onPieceSelected([], tappedSquareIndex);
-      _inMoveSelectionMode = true;
-      _legalMovesIndices.clear();
-    }, (error, stack) {
-      onError(Error, stack.toString());
-    });
+            onPieceSelected([], tappedSquareIndex);
+            _inMoveSelectionMode = true;
+            _legalMovesIndices.clear();
+          }, (error, stack) {
+            onError(Error, stack.toString());
+          });
   }
 
   bool _isInMoveSelectionMode(
@@ -1170,12 +1186,13 @@ class ChessController {
     return false;
   }
 
-  bool isKingChecked({required PlayingTurn playingTurn}) {
+  bool isKingChecked({required PlayingTurn playingTurn, Square? escapeSquare}) {
     PieceType enemyKingType =
         playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
 
-    Square enemyKingPiece = chessBoard.firstWhere((square) =>
-        square.piece == Pieces.king && square.pieceType == enemyKingType);
+    Square enemyKingPiece = escapeSquare ??
+        chessBoard.firstWhere((square) =>
+            square.piece == Pieces.king && square.pieceType == enemyKingType);
 
     /// -------------------------------------getting surrounding enemy pawns--------------------------
     List<Square> surroundingPawns =
@@ -1248,6 +1265,27 @@ class ChessController {
         surroundingKnights.isNotEmpty ||
         surroundingRooksAndQueensInLineOfSight.isNotEmpty ||
         surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
+  }
+
+  bool isCheckMate({required PlayingTurn playingTurn}) {
+    PieceType enemyKingType =
+        playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
+    Square enemyKingPiece = chessBoard.firstWhere((square) =>
+        square.piece == Pieces.king && square.pieceType == enemyKingType);
+    List<Square> kingSquares =
+        _getKingPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+    kingSquares.forEach((element) {
+      print("kingSquare at ${element.file}${element.rank}");
+    });
+    // removing non-empty squares because the king can't escape from check to those squares
+    kingSquares.removeWhere((kingSquare) => kingSquare.piece != null);
+
+    kingSquares.removeWhere((kingSquare) =>
+        isKingChecked(playingTurn: playingTurn, escapeSquare: kingSquare));
+    kingSquares.forEach((element) {
+      print("final kingSquare at ${element.file}${element.rank}");
+    });
+    return kingSquares.isEmpty;
   }
 }
 
