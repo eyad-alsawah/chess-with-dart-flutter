@@ -41,6 +41,20 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     super.initState();
     chess = ChessController.fromPosition(
+      onCheck: () async {
+        return await showDialog(
+            useRootNavigator: true,
+            context: context,
+            // barrierDismissible: false,
+            builder: (dialogContext) {
+              return const AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12))),
+                content: Center(child: Text('King is Checked')),
+              );
+            });
+      },
       playSound: (soundType) {
         switch (soundType) {
           case SoundType.illegal:
@@ -189,7 +203,9 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[capturedPawnIndex]['type'] = null;
       },
       onCapture: () {},
-      onError: (error, errorString) {},
+      onError: (error, errorString) {
+        audioPlayer.play(volume: 1, AssetSource(illegalSound));
+      },
     );
   }
 

@@ -8,7 +8,7 @@ typedef OnPieceSelected = void Function(
 typedef OnCastling = void Function(int movedRookIndex);
 typedef OnPieceMoved = void Function(int from, int to);
 typedef OnCapture = void Function();
-typedef OnError = void Function(Error error, String errorString);
+typedef OnError = void Function(Object? error, String errorString);
 typedef OnPawnPromoted = void Function(
     int promotedPieceIndex, Pieces promotedTo);
 typedef OnSelectPromotionType = Future<Pieces> Function(
@@ -16,3 +16,4 @@ typedef OnSelectPromotionType = Future<Pieces> Function(
 typedef OnEnPassant = void Function(int capturedPawnIndex);
 typedef PlaySound = void Function(SoundType soundType);
 typedef UpdateView = void Function();
+typedef OnCheck = void Function();
