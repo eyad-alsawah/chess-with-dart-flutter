@@ -73,7 +73,7 @@ class _ChessBoardState extends State<ChessBoard> {
       onVictory: (victoryType) {},
       onDraw: (drawType) {},
       onPawnPromoted: (promotedPieceIndex, promotedTo) async {
-        chessBoard[promotedPieceIndex]['piece'] = promotedTo;
+        chessBoard[promotedPieceIndex].piece = promotedTo;
       },
       onSelectPromotionType: (playingTurn) async {
         return await showDialog(
@@ -184,13 +184,10 @@ class _ChessBoardState extends State<ChessBoard> {
       onPieceMoved: (from, to) {
         int fromRank = getRankNameFromIndex(index: from);
         Files fromFile = getFileNameFromIndex(index: to);
-        Map<String, dynamic> fromSquare = chessBoard[from];
-        chessBoard[from] = {
-          "file": fromFile,
-          "rank": fromRank,
-          "piece": null,
-          "type": null
-        };
+        Square fromSquare = chessBoard[from];
+        chessBoard[from] = Square(
+            rank: fromRank, file: fromFile, piece: null, pieceType: null);
+
         chessBoard[to] = fromSquare;
         selectedIndex = null;
         tappedIndices.clear();
@@ -199,8 +196,8 @@ class _ChessBoardState extends State<ChessBoard> {
         checkedKingIndex = null;
       },
       onEnPassant: (capturedPawnIndex) {
-        chessBoard[capturedPawnIndex]['piece'] = null;
-        chessBoard[capturedPawnIndex]['type'] = null;
+        chessBoard[capturedPawnIndex].piece = null;
+        chessBoard[capturedPawnIndex].pieceType = null;
       },
       onCapture: () {},
       onError: (error, errorString) {
@@ -444,7 +441,7 @@ Widget drawInitialPieces(
             Visibility(
               visible: getImageFromBoard(index: index).isNotEmpty,
               child: Transform.rotate(
-                angle: chessBoard[index]['type'] == PieceType.light ? 0 : pi,
+                angle: chessBoard[index].pieceType == PieceType.light ? 0 : pi,
                 child: Image.asset(
                   height: boardSize * 0.08,
                   width: boardSize * 0.08,
@@ -471,32 +468,32 @@ Widget drawInitialPieces(
 }
 
 String getImageFromBoard({required int index}) {
-  Map<String, dynamic> square = chessBoard[index];
+  Square square = chessBoard[index];
   String imageAssetString = '';
-  switch (square['piece']) {
+  switch (square.piece) {
     case Pieces.pawn:
       imageAssetString =
-          square['type'] == PieceType.light ? whitePawn : blackPawn;
+          square.pieceType == PieceType.light ? whitePawn : blackPawn;
       break;
     case Pieces.king:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteKing : blackKing;
+          square.pieceType == PieceType.light ? whiteKing : blackKing;
       break;
     case Pieces.knight:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteKnight : blackKnight;
+          square.pieceType == PieceType.light ? whiteKnight : blackKnight;
       break;
     case Pieces.queen:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteQueen : blackQueen;
+          square.pieceType == PieceType.light ? whiteQueen : blackQueen;
       break;
     case Pieces.rook:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteCastle : blackCastle;
+          square.pieceType == PieceType.light ? whiteCastle : blackCastle;
       break;
     case Pieces.bishop:
       imageAssetString =
-          square['type'] == PieceType.light ? whiteBishop : blackBishop;
+          square.pieceType == PieceType.light ? whiteBishop : blackBishop;
       break;
     default:
   }

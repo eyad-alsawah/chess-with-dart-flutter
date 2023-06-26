@@ -224,9 +224,10 @@ class ChessController {
               _selectedPieceIndex = tappedSquareIndex;
               _selectedPiece = chessBoard[tappedSquareIndex];
               _legalMovesIndices = _getLegalMovesIndices(
-                tappedSquareFile: tappedSquareFile,
-                tappedSquareRank: tappedSquareRank,
-              );
+                  tappedSquareFile: tappedSquareFile,
+                  tappedSquareRank: tappedSquareRank,
+                  kingChecked: isKingSquareAttacked(playingTurn: _playingTurn));
+
               // preventing player who's turn is not his to play by emptying the legalMovesIndices list
               shouldClearLegalMovesIndices(
                       playingTurn: _playingTurn,
@@ -237,6 +238,7 @@ class ChessController {
               onPieceSelected(_legalMovesIndices, tappedSquareIndex);
 
               _inMoveSelectionMode = _legalMovesIndices.isEmpty;
+
               updateView();
               return;
             }
@@ -367,15 +369,15 @@ class ChessController {
               chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
               chessBoard[_selectedPieceIndex!] =
                   emptySquareAtSelectedPieceIndex;
-              if (isKingChecked(playingTurn: _playingTurn)) {
+              if (isKingSquareAttacked(playingTurn: _playingTurn)) {
                 onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != _selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
-                if (isCheckMate(playingTurn: _playingTurn)) {
-                  onVictory(VictoryType.checkmate);
-                  playSound(SoundType.victory);
-                  lockFurtherInteractions = true;
-                }
+                // if (isCheckMate(playingTurn: _playingTurn)) {
+                //   onVictory(VictoryType.checkmate);
+                //   playSound(SoundType.victory);
+                //   lockFurtherInteractions = true;
+                // }
               }
               updateView();
             }
@@ -896,7 +898,8 @@ class ChessController {
   List<Square> _getLegalMovesOnly(
       {required List<Square> legalAndIllegalMoves,
       required Files file,
-      required int rank}) {
+      required int rank,
+      bool kingChecked = false}) {
     List<Square> legalMoves = [];
     Square tappedPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
@@ -1095,6 +1098,50 @@ class ChessController {
       }
     }
 
+    print("kingChecked: $kingChecked at $file$rank");
+    // removing squares where the king would be attacked if he moved to
+    if (kingChecked) {
+      List<Square> movesThatWouldRemoveTheCheck = [];
+      for (var legalMove in legalMoves) {
+        int legalMoveIndex = chessBoard.indexOf(legalMove);
+
+        // creating a new square object to avoid referential value passing side effects
+        Square currentSquareAtLegalMoveIndex = Square(
+            file: chessBoard[legalMoveIndex].file,
+            rank: chessBoard[legalMoveIndex].rank,
+            piece: chessBoard[legalMoveIndex].piece,
+            pieceType: chessBoard[legalMoveIndex].pieceType);
+
+        // hypothetically moving the legal move index by assigning a Piece and PieceType to the square at that index
+        chessBoard[legalMoveIndex].piece = Pieces.pawn;
+        chessBoard[legalMoveIndex].pieceType = tappedPiece.pieceType;
+
+        bool isKingInCheckAtLegalMoveIndex = isKingSquareAttacked(
+          playingTurn: tappedPiece.pieceType == PieceType.light
+              ? PlayingTurn.white
+              : PlayingTurn.black,
+        );
+        isKingInCheckAtLegalMoveIndex
+            ? movesThatWouldRemoveTheCheck.add(legalMove)
+            : null;
+        chessBoard[legalMoveIndex] = currentSquareAtLegalMoveIndex;
+
+        print(
+            "king is ${isKingInCheckAtLegalMoveIndex ? 'still checked' : 'not checked'} if piece moved to ${legalMove.file}${legalMove.rank}");
+      }
+      // removing moves that would still keep the king in check from the legalMoves list
+      legalMoves.removeWhere(
+          (legalMove) => !movesThatWouldRemoveTheCheck.contains(legalMove));
+
+      // legalMoves.removeWhere((move) => isKingSquareAttacked(
+      //     playingTurn: tappedPiece.pieceType == PieceType.light
+      //         ? PlayingTurn.white
+      //         : PlayingTurn.black,
+      //     escapeSquare: move));
+
+      print("--------------------------------------------------------------");
+    }
+
     return legalMoves;
   }
 
@@ -1129,13 +1176,16 @@ class ChessController {
   }
 
   List<int> _getLegalMovesIndices(
-      {required Files tappedSquareFile, required int tappedSquareRank}) {
+      {required Files tappedSquareFile,
+      required int tappedSquareRank,
+      bool kingChecked = false}) {
     List<Square> legalAndIllegalMoves = _getIllegalAndLegalMoves(
         rank: tappedSquareRank, file: tappedSquareFile);
     List<Square> legalMovesOnly = _getLegalMovesOnly(
         file: tappedSquareFile,
         rank: tappedSquareRank,
-        legalAndIllegalMoves: legalAndIllegalMoves);
+        legalAndIllegalMoves: legalAndIllegalMoves,
+        kingChecked: kingChecked);
     List<int> legalMovesIndices = [];
     for (var square in legalMovesOnly) {
       int squareIndex = chessBoard.indexOf(square);
@@ -1186,7 +1236,9 @@ class ChessController {
     return false;
   }
 
-  bool isKingChecked({required PlayingTurn playingTurn, Square? escapeSquare}) {
+  bool isKingSquareAttacked(
+      {required PlayingTurn playingTurn, Square? escapeSquare}) {
+    print("------------------------------------start of isKingSquareAttacked");
     PieceType enemyKingType =
         playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
 
@@ -1260,33 +1312,76 @@ class ChessController {
         (square.piece != Pieces.bishop && square.piece != Pieces.queen));
 
     ///------------------------------------------------------------------------------------
-
+    print("------------------------------------end of isKingSquareAttacked");
     return surroundingPawns.isNotEmpty ||
         surroundingKnights.isNotEmpty ||
         surroundingRooksAndQueensInLineOfSight.isNotEmpty ||
         surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
   }
 
-  bool isCheckMate({required PlayingTurn playingTurn}) {
-    PieceType enemyKingType =
-        playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
-    Square enemyKingPiece = chessBoard.firstWhere((square) =>
-        square.piece == Pieces.king && square.pieceType == enemyKingType);
-    List<Square> kingSquares =
-        _getKingPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
-    kingSquares.forEach((element) {
-      print("kingSquare at ${element.file}${element.rank}");
-    });
-    // removing non-empty squares because the king can't escape from check to those squares
-    kingSquares.removeWhere((kingSquare) => kingSquare.piece != null);
+  // bool isCheckMate({required PlayingTurn playingTurn}) {
+  //   PieceType enemyKingType =
+  //       playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
+  //   Square enemyKingPiece = chessBoard.firstWhere((square) =>
+  //       square.piece == Pieces.king && square.pieceType == enemyKingType);
+  //   List<Square> kingSquares =
+  //       _getKingPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
 
-    kingSquares.removeWhere((kingSquare) =>
-        isKingChecked(playingTurn: playingTurn, escapeSquare: kingSquare));
-    kingSquares.forEach((element) {
-      print("final kingSquare at ${element.file}${element.rank}");
-    });
-    return kingSquares.isEmpty;
-  }
+  //   // removing squares occupied by pieces of the same type as the king because the king can't escape from check to those squares
+  //   kingSquares
+  //       .removeWhere((kingSquare) => kingSquare.pieceType == enemyKingType);
+  //   // king can't move to an attacked square
+  //   kingSquares.removeWhere((kingSquare) => isKingSquareAttacked(
+  //       playingTurn: playingTurn, escapeSquare: kingSquare));
+
+  //   // get all moves for all pieces of the checked king
+  //   // if none of the moves would remove the check then checkmate
+  //   List<Square> allEnemyPieces = chessBoard
+  //       .where((square) => square.pieceType == enemyKingType)
+  //       .toList();
+  //   List<Square> allEnemyLegalMoves = [];
+  //   List<int> allEnemyLegalMovesIndices = [];
+
+  //   List<int> movesThatProtectTheKing = [];
+  //   for (var enemyPiece in allEnemyPieces) {
+  //     List<Square> enemyPieceLegalAndIllegalMoves = _getIllegalAndLegalMoves(
+  //         rank: enemyPiece.rank, file: enemyPiece.file);
+  //     List<Square> enemyPieceLegalMovesOnly = _getLegalMovesOnly(
+  //       legalAndIllegalMoves: enemyPieceLegalAndIllegalMoves,
+  //       file: enemyPiece.file,
+  //       rank: enemyPiece.rank,
+  //     );
+  //     allEnemyLegalMoves.addAll(enemyPieceLegalMovesOnly);
+  //     allEnemyLegalMovesIndices.addAll(_getLegalMovesIndices(
+  //         tappedSquareFile: enemyPiece.file,
+  //         tappedSquareRank: enemyPiece.rank));
+  //   }
+
+  //   for (var moveIndex in allEnemyLegalMovesIndices) {
+  //     if (chessBoard[moveIndex].piece != Pieces.king) {
+  //       Square currentExistingPiece = chessBoard[moveIndex];
+  //       print("currentExistingPiece before : ${currentExistingPiece.piece}");
+  //       // hypothetically moving a piece to see if that would protect the checked king
+  //       chessBoard[moveIndex].piece = Pieces.pawn;
+  //       chessBoard[moveIndex].pieceType = enemyKingType;
+  //       if (!isKingSquareAttacked(playingTurn: playingTurn)) {
+  //         movesThatProtectTheKing.add(moveIndex);
+  //         print("currentExistingPiece after : ${currentExistingPiece.piece}");
+  //       } // resetting the board
+  //       chessBoard[moveIndex].piece = null;
+  //       chessBoard[moveIndex].pieceType = null;
+  //     }
+  //   }
+  //   for (var e in movesThatProtectTheKing) {
+  //     print(
+  //         "moving to ${chessBoard[e].file}${chessBoard[e].rank} protects the king");
+  //   }
+  //   print("movesThatProtectTheKing.length: ${movesThatProtectTheKing.length}");
+
+  //   print("allEnemyLegalMoves.length: ${allEnemyLegalMoves.length}");
+
+  //   return kingSquares.isEmpty;
+  // }
 }
 
 class Square {
@@ -1301,6 +1396,15 @@ class Square {
     required this.piece,
     required this.pieceType,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Square &&
+          file == other.file &&
+          rank == other.rank &&
+          piece == other.piece &&
+          pieceType == other.pieceType;
 }
 
 bool _isValidFen({required fenString}) {
