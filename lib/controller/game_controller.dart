@@ -94,7 +94,7 @@ class ChessController {
               _legalMovesIndices = _getLegalMovesIndices(
                   tappedSquareFile: tappedSquareFile,
                   tappedSquareRank: tappedSquareRank,
-                isKingChecked: isKingInCheck,
+                isKingChecked: isKingInCheck,fromHandleSquareTapped: true,
              );
 
               // checking for stalemate
@@ -106,6 +106,7 @@ class ChessController {
                         tappedSquareFile: square.file,
                         tappedSquareRank: square.rank,
                         isKingChecked: isKingInCheck,
+                          fromHandleSquareTapped: true,
                       )
                   );
                 }
@@ -793,6 +794,7 @@ class ChessController {
       {required List<Square> legalAndIllegalMoves,
       required Files file,
       required int rank,
+        bool fromHandleSquareTapped =false,
       bool kingChecked = false}) {
     List<Square> legalMoves = [];
     Square tappedPiece = chessBoard
@@ -992,7 +994,38 @@ class ChessController {
       }
     }
 
+    // preventing the movement of pinned pieces
+    if(fromHandleSquareTapped){
+      /// todo: refactor this to only check to check if the king will be attacked by moving only to any moves of the legalMoves list, because it is sufficient for only one move to expose the king to check, for the piece to be considered pinned
+      // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
+      bool isPiecePinned =false;
+      List<int> legalMovesIndices = [];
+      for (var move in legalMoves) {
+        int squareIndex = chessBoard.indexOf(move);
+        if (squareIndex >= 0 && squareIndex <= 63) {
+          legalMovesIndices.add(squareIndex);
+        }
+      }
+          isPiecePinned =legalMovesIndices.any((index) {
+            int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
+            Square squareAtTappedIndex = chessBoard[tappedPieceIndex];
+            Square squareAtMoveIndex = chessBoard[index];
 
+            // emptying the square we are at currently
+            chessBoard[tappedPieceIndex] = Square(piece:null,pieceType: null, file: squareAtTappedIndex.file,rank: squareAtTappedIndex.rank);
+
+            chessBoard[index] = Square(piece:squareAtTappedIndex.piece, file: chessBoard[index].file,pieceType: chessBoard[tappedPieceIndex].pieceType,rank:squareAtMoveIndex.rank);
+            // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
+            bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[index] :null);
+            // resetting the hypothetically moved pieces
+            chessBoard[index] = squareAtMoveIndex;
+            chessBoard[tappedPieceIndex] = squareAtTappedIndex;
+            return isKingAttacked;
+          });
+      isPiecePinned? legalMoves.clear():null;
+    }
+
+    // filtering legal moves to prevent moving to a place that would not remove the check
     if(kingChecked){
       // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
       List<int> legalMovesIndices = [];
@@ -1015,6 +1048,7 @@ class ChessController {
         chessBoard[index] = currentSquareAtIndex;
       }
     }
+
     return legalMoves;
   }
 
@@ -1052,6 +1086,7 @@ class ChessController {
       {required Files tappedSquareFile,
       required int tappedSquareRank,
         bool isKingChecked = false,
+        bool fromHandleSquareTapped =false,
 }) {
     List<Square> legalAndIllegalMoves = _getIllegalAndLegalMoves(
         rank: tappedSquareRank, file: tappedSquareFile);
@@ -1059,6 +1094,7 @@ class ChessController {
         file: tappedSquareFile,
         rank: tappedSquareRank,
         legalAndIllegalMoves: legalAndIllegalMoves,
+      fromHandleSquareTapped: fromHandleSquareTapped,
       kingChecked: isKingChecked
     );
     List<int> legalMovesIndices = [];
