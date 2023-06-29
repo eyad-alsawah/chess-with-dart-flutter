@@ -147,16 +147,14 @@ class ChessController {
               // moving the rook in case a king castled
               moveRookOnCastle(tappedSquareIndex: tappedSquareIndex);
 
-
-
               onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
 
               _addPawnToEnPassantCapturablePawns(
                   fromRank: selectedPieceRank,
                   toRank: tappedSquareRank,
-                  piece: chessBoard[_selectedPieceIndex!].piece,
+                  piece: _selectedPiece!.piece,
                   movedToIndex: tappedSquareIndex,
-                  pawnType: chessBoard[_selectedPieceIndex!].pieceType);
+                  pawnType: _selectedPiece!.pieceType);
 
               bool shouldPromotePawn = shouldPawnBePromoted(
                   selectedPiecePiece: _selectedPiece?.piece,
