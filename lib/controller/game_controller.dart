@@ -239,58 +239,10 @@ class ChessController {
           });
   }
 
-  void updateBoardAfterEnPassant(Files tappedSquareFile, Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
-     chessBoard[_selectedPieceIndex! +
-        (tappedSquareFile.index > selectedPieceFile.index
-            ? 1
-            : -1)] = emptyEnPassantCapturedPawnSquare;
-    onEnPassant(_selectedPieceIndex! +
-        (tappedSquareFile.index > selectedPieceFile.index
-            ? 1
-            : -1));
-  }
-
-  void moveRookOnCastle({required int tappedSquareIndex}) {
-        if (_selectedPiece?.piece == Pieces.king) {
-      if (_selectedPiece?.pieceType == PieceType.dark &&
-          _selectedPieceIndex! == 60 &&
-          (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
-        // moving the rook and updating the board
-        if (tappedSquareIndex == 62) {
-          onPieceMoved(63, 61);
-          chessBoard[63].piece = null;
-          chessBoard[63].pieceType = null;
-          chessBoard[61].piece = Pieces.rook;
-          chessBoard[61].pieceType = PieceType.dark;
-        } else {
-          onPieceMoved(56, 59);
-          chessBoard[56].piece = null;
-          chessBoard[56].pieceType = null;
-          chessBoard[59].piece = Pieces.rook;
-          chessBoard[59].pieceType = PieceType.dark;
-        }
-      } else if (_selectedPiece?.pieceType == PieceType.light &&
-          _selectedPieceIndex! == 4 &&
-          (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
-        if (tappedSquareIndex == 6) {
-          onPieceMoved(7, 5);
-          chessBoard[7].piece = null;
-          chessBoard[7].pieceType = null;
-          chessBoard[5].piece = Pieces.rook;
-          chessBoard[5].pieceType = PieceType.light;
-        } else {
-          onPieceMoved(0, 3);
-          chessBoard[0].piece = null;
-          chessBoard[0].pieceType = null;
-          chessBoard[3].piece = Pieces.rook;
-          chessBoard[3].pieceType = PieceType.light;
-        }
-      }
-    }
-  }
   preventFurtherInteractions(bool status){
     lockFurtherInteractions =status;
   }
+
   bool _isInMoveSelectionMode(
       {required int tappedSquareIndex,
       required PlayingTurn playingTurn,
@@ -464,6 +416,17 @@ class ChessController {
     return canCaptureEnPassant;
   }
 
+  void updateBoardAfterEnPassant(Files tappedSquareFile, Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
+    chessBoard[_selectedPieceIndex! +
+        (tappedSquareFile.index > selectedPieceFile.index
+            ? 1
+            : -1)] = emptyEnPassantCapturedPawnSquare;
+    onEnPassant(_selectedPieceIndex! +
+        (tappedSquareFile.index > selectedPieceFile.index
+            ? 1
+            : -1));
+  }
+
   /// --------------------------------LegalMoves getters----------------------
   ///  ------------------------------------Castling-------------------------
   bool didLightKingMove = false;
@@ -539,6 +502,44 @@ class ChessController {
     }
   }
 
+  void moveRookOnCastle({required int tappedSquareIndex}) {
+    if (_selectedPiece?.piece == Pieces.king) {
+      if (_selectedPiece?.pieceType == PieceType.dark &&
+          _selectedPieceIndex! == 60 &&
+          (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
+        // moving the rook and updating the board
+        if (tappedSquareIndex == 62) {
+          onPieceMoved(63, 61);
+          chessBoard[63].piece = null;
+          chessBoard[63].pieceType = null;
+          chessBoard[61].piece = Pieces.rook;
+          chessBoard[61].pieceType = PieceType.dark;
+        } else {
+          onPieceMoved(56, 59);
+          chessBoard[56].piece = null;
+          chessBoard[56].pieceType = null;
+          chessBoard[59].piece = Pieces.rook;
+          chessBoard[59].pieceType = PieceType.dark;
+        }
+      } else if (_selectedPiece?.pieceType == PieceType.light &&
+          _selectedPieceIndex! == 4 &&
+          (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
+        if (tappedSquareIndex == 6) {
+          onPieceMoved(7, 5);
+          chessBoard[7].piece = null;
+          chessBoard[7].pieceType = null;
+          chessBoard[5].piece = Pieces.rook;
+          chessBoard[5].pieceType = PieceType.light;
+        } else {
+          onPieceMoved(0, 3);
+          chessBoard[0].piece = null;
+          chessBoard[0].pieceType = null;
+          chessBoard[3].piece = Pieces.rook;
+          chessBoard[3].pieceType = PieceType.light;
+        }
+      }
+    }
+  }
   //------------------------------------------------
   List<Square> _getPawnPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
@@ -817,39 +818,7 @@ class ChessController {
     bool didCaptureOnDiagonalBottomRight = false;
 
     // for castling: to prevent the king from castling if any piece stands between the king and the rook
-    if (tappedPiece.piece == Pieces.king) {
-      if (tappedPiece.pieceType == PieceType.light) {
-        if (!didLightKingMove) {
-          if (chessBoard[5].piece != null || chessBoard[6].piece != null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 1),
-            );
-          }
-          if (chessBoard[1].piece != null ||
-              chessBoard[2].piece != null ||
-              chessBoard[3].piece != null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 1),
-            );
-          }
-        }
-      } else {
-        if (!didDarkKingMove) {
-          if (chessBoard[61].piece != null || chessBoard[62].piece != null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 8),
-            );
-          }
-          if (chessBoard[57].piece != null ||
-              chessBoard[58].piece != null ||
-              chessBoard[59].piece != null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 8),
-            );
-          }
-        }
-      }
-    }
+    preventCastlingIfPieceStandsBetweenRookAndKing(tappedPiece: tappedPiece, legalAndIllegalMoves: legalAndIllegalMoves);
 
     for (var square in legalAndIllegalMoves) {
       RelativeDirection relativeDirection = _getRelativeDirection(
@@ -1001,63 +970,106 @@ class ChessController {
       }
     }
 
-
-
     // filtering legal moves to prevent moving to a place that would not remove the check
     if(kingChecked){
       // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
-      List<int> legalMovesIndices = [];
-      for (var move in legalMoves) {
-        int squareIndex = chessBoard.indexOf(move);
-        if (squareIndex >= 0 && squareIndex <= 63) {
-          legalMovesIndices.add(squareIndex);
-        }
-      }
-      for(var index in legalMovesIndices){
-        Square currentSquareAtIndex = chessBoard[index];
-
-        chessBoard[index] = Square(piece:tappedPiece.piece,file: chessBoard[index].file,pieceType: tappedPiece.pieceType,rank: chessBoard[index].rank);
-        // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-        bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[index] :null);
-        if(isKingAttacked){
-           legalMoves.removeWhere((move) => move.file ==chessBoard[index].file &&move.rank ==chessBoard[index].rank);
-        }
-        // resetting the hypothetically moved piece
-        chessBoard[index] = currentSquareAtIndex;
-      }
+      preventMovingIfCheckRemains(legalMoves: legalMoves, tappedPiece: tappedPiece);
     }
-
 
     // preventing the movement of pinned pieces, unless the piece attacks the attacking piece
     if(fromHandleSquareTapped){
-      List<Square> legalMovesAttackingThePinningPiece= [];
-      // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
-      bool isPiecePinned =legalMoves.any((move) {
-        int moveIndex = chessBoard.indexOf(move);
-        int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
-        //--------------------
-        Square squareAtTappedIndex = chessBoard[tappedPieceIndex];
-        Square squareAtMoveIndex = chessBoard[moveIndex];
-
-        // emptying the square we are at currently
-        chessBoard[tappedPieceIndex] = Square(piece:null,pieceType: null, file: squareAtTappedIndex.file,rank: squareAtTappedIndex.rank);
-
-        chessBoard[moveIndex] = Square(piece:squareAtTappedIndex.piece,pieceType: squareAtTappedIndex.pieceType, file: squareAtMoveIndex.file,rank:squareAtMoveIndex.rank);
-        // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-        bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[moveIndex] :null);
-        // resetting the hypothetically moved pieces
-        chessBoard[moveIndex] = squareAtMoveIndex;
-        chessBoard[tappedPieceIndex] = squareAtTappedIndex;
-        if(!isKingAttacked ){
-          legalMovesAttackingThePinningPiece.add(move);
-        }
-        return isKingAttacked;
-      });
-      isPiecePinned? legalMoves.clear():null;
-      legalMoves.addAll(legalMovesAttackingThePinningPiece);
+      filterPinnedPieceMoves(legalMoves, tappedPiece);
     }
 
     return legalMoves;
+  }
+
+  void filterPinnedPieceMoves(List<Square> legalMoves, Square tappedPiece) {
+    List<Square> legalMovesAttackingThePinningPiece= [];
+    // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
+   for (var move in legalMoves) {
+      int moveIndex = chessBoard.indexOf(move);
+      int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
+      //--------------------
+      Square squareAtTappedIndex = chessBoard[tappedPieceIndex];
+      Square squareAtMoveIndex = chessBoard[moveIndex];
+
+      // emptying the square we are at currently
+      chessBoard[tappedPieceIndex] = Square(piece:null,pieceType: null, file: squareAtTappedIndex.file,rank: squareAtTappedIndex.rank);
+
+      chessBoard[moveIndex] = Square(piece:squareAtTappedIndex.piece,pieceType: squareAtTappedIndex.pieceType, file: squareAtMoveIndex.file,rank:squareAtMoveIndex.rank);
+      // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
+      bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[moveIndex] :null);
+      // resetting the hypothetically moved pieces
+      chessBoard[moveIndex] = squareAtMoveIndex;
+      chessBoard[tappedPieceIndex] = squareAtTappedIndex;
+      if(!isKingAttacked ){
+        legalMovesAttackingThePinningPiece.add(move);
+      }
+    }
+    bool isPiecePinned = legalMovesAttackingThePinningPiece.isEmpty;
+    isPiecePinned? legalMoves.clear():null;
+    legalMoves.addAll(legalMovesAttackingThePinningPiece);
+  }
+
+  void preventMovingIfCheckRemains({required List<Square> legalMoves, required Square tappedPiece}) {
+     // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
+    List<int> legalMovesIndices = [];
+    for (var move in legalMoves) {
+      int squareIndex = chessBoard.indexOf(move);
+      if (squareIndex >= 0 && squareIndex <= 63) {
+        legalMovesIndices.add(squareIndex);
+      }
+    }
+    for(var index in legalMovesIndices){
+      Square currentSquareAtIndex = chessBoard[index];
+
+      chessBoard[index] = Square(piece:tappedPiece.piece,file: chessBoard[index].file,pieceType: tappedPiece.pieceType,rank: chessBoard[index].rank);
+      // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
+      bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[index] :null);
+      if(isKingAttacked){
+         legalMoves.removeWhere((move) => move.file ==chessBoard[index].file &&move.rank ==chessBoard[index].rank);
+      }
+      // resetting the hypothetically moved piece
+      chessBoard[index] = currentSquareAtIndex;
+    }
+  }
+
+  void preventCastlingIfPieceStandsBetweenRookAndKing(
+      {required Square tappedPiece,required  List<Square> legalAndIllegalMoves}) {
+       if (tappedPiece.piece == Pieces.king) {
+      if (tappedPiece.pieceType == PieceType.light) {
+        if (!didLightKingMove) {
+          if (chessBoard[5].piece != null || chessBoard[6].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.g && square.rank == 1),
+            );
+          }
+          if (chessBoard[1].piece != null ||
+              chessBoard[2].piece != null ||
+              chessBoard[3].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.c && square.rank == 1),
+            );
+          }
+        }
+      } else {
+        if (!didDarkKingMove) {
+          if (chessBoard[61].piece != null || chessBoard[62].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.g && square.rank == 8),
+            );
+          }
+          if (chessBoard[57].piece != null ||
+              chessBoard[58].piece != null ||
+              chessBoard[59].piece != null) {
+            legalAndIllegalMoves.removeWhere(
+              (square) => (square.file == Files.c && square.rank == 8),
+            );
+          }
+        }
+      }
+    }
   }
 
 //-------------------------------------
@@ -1157,10 +1169,8 @@ class ChessController {
 
   bool isKingSquareAttacked(
       {required PlayingTurn playingTurn, Square? escapeSquare}) {
-    // print("------------------------------------start of isKingSquareAttacked");
     PieceType enemyKingType =
         playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
-
     Square enemyKingPiece = escapeSquare ??
         chessBoard.firstWhere((square) =>
             square.piece == Pieces.king && square.pieceType == enemyKingType);
