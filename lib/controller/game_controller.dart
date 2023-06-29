@@ -97,26 +97,26 @@ class ChessController {
                 isKingChecked: isKingInCheck,fromHandleSquareTapped: true,
              );
 
-              // // checking for stalemate
-              // List<int> allLegalMovesIndices =[];
-              // for(var square in chessBoard){
-              //   if(square.pieceType ==  chessBoard[tappedSquareIndex].pieceType){
-              //     allLegalMovesIndices.addAll(
-              //         _getLegalMovesIndices(
-              //           tappedSquareFile: square.file,
-              //           tappedSquareRank: square.rank,
-              //           isKingChecked: isKingInCheck,
-              //             fromHandleSquareTapped: true,
-              //         )
-              //     );
-              //   }
-              // }
-              // // player has no legal move and an empty square was not tapped
-              // if(allLegalMovesIndices.isEmpty &&chessBoard[tappedSquareIndex].pieceType!=null ){
-              //   preventFurtherInteractions(true);
-              //   playSound(SoundType.draw);
-              //   onDraw(DrawType.stalemate);
-              // }
+              // checking for stalemate
+              List<int> allLegalMovesIndices =[];
+              for(var square in chessBoard){
+                if(square.pieceType ==  chessBoard[tappedSquareIndex].pieceType){
+                  allLegalMovesIndices.addAll(
+                      _getLegalMovesIndices(
+                        tappedSquareFile: square.file,
+                        tappedSquareRank: square.rank,
+                        isKingChecked: isKingInCheck,
+                          fromHandleSquareTapped: true,
+                      )
+                  );
+                }
+              }
+              // player has no legal move and an empty square was not tapped
+              if(allLegalMovesIndices.isEmpty &&chessBoard[tappedSquareIndex].pieceType!=null ){
+                preventFurtherInteractions(true);
+                playSound(SoundType.draw);
+                onDraw(DrawType.stalemate);
+              }
               //------------------------------------------
 
               // preventing player who's turn is not his to play by emptying the legalMovesIndices list
@@ -223,11 +223,11 @@ class ChessController {
                 onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != _selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
-           if(isCheckmate(attackedPlayer: _playingTurn)){
-             preventFurtherInteractions(true);
-             onVictory(VictoryType.checkmate);
-             playSound(SoundType.victory);
-           }
+              if(isCheckmate(attackedPlayer: _playingTurn)){
+                    preventFurtherInteractions(true);
+                     onVictory(VictoryType.checkmate);
+                     playSound(SoundType.victory);
+              }
               }
               updateView();
             }
@@ -1260,10 +1260,13 @@ class ChessController {
       PieceType attackedPlayerType = attackedPlayer == PlayingTurn.white? PieceType.light:PieceType.dark;
       List<Square>  attackedPlayerPieces =[];
       for (var square in chessBoard) {
-        if(square.piece == Pieces.king){kingSquare =square;}else{
-          square.pieceType == attackedPlayerType ? attackedPlayerPieces.add(square):null;
+        if(square.pieceType == attackedPlayerType){
+          if(square.piece == Pieces.king ){
+            kingSquare =square;
+          }else{
+            attackedPlayerPieces.add(square);
+          }
         }
-
       }
       List<Square> attackedPlayerLegalMoves = [];
       List<int> attackedPlayerLegalMovesIndices = [];
