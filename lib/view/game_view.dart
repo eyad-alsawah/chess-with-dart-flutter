@@ -63,6 +63,9 @@ class _ChessBoardState extends State<ChessBoard> {
           case SoundType.victory:
             await audioPlayer.play(volume: 1, AssetSource(victorySound));
             break;
+          case SoundType.draw:
+            await audioPlayer.play(volume: 1, AssetSource(drawSound));
+            break;
           default:
         }
       },

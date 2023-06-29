@@ -97,27 +97,9 @@ class ChessController {
                 isKingChecked: isKingInCheck,fromHandleSquareTapped: true,
              );
 
-              // // checking for stalemate
-              // List<int> allLegalMovesIndices =[];
-              // for(var square in chessBoard){
-              //   if(square.pieceType ==  chessBoard[tappedSquareIndex].pieceType){
-              //     allLegalMovesIndices.addAll(
-              //         _getLegalMovesIndices(
-              //           tappedSquareFile: square.file,
-              //           tappedSquareRank: square.rank,
-              //           isKingChecked: isKingInCheck,
-              //             fromHandleSquareTapped: true,
-              //         )
-              //     );
-              //   }
-              // }
-              // // player has no legal move and an empty square was not tapped
-              // if(allLegalMovesIndices.isEmpty &&chessBoard[tappedSquareIndex].pieceType!=null ){
-              //   preventFurtherInteractions(true);
-              //   playSound(SoundType.draw);
-              //   onDraw(DrawType.stalemate);
-              // }
-              //------------------------------------------
+
+
+              //-----------------
 
               // preventing player who's turn is not his to play by emptying the legalMovesIndices list
               shouldClearLegalMovesIndices(
@@ -137,6 +119,7 @@ class ChessController {
             else if (_legalMovesIndices.contains(tappedSquareIndex) &&
                 _selectedPiece != null &&
                 _selectedPieceIndex != null) {
+              late SoundType soundToPlay;
               // pawn will be promoted to queen by default
               Pieces promotedPawn = Pieces.queen;
               Files selectedPieceFile =
@@ -157,13 +140,14 @@ class ChessController {
                         chessBoard[tappedSquareIndex].piece == null,
               );
 
+              soundToPlay = (chessBoard[tappedSquareIndex].piece != null ||
+                  didCaptureEnPassant)
+                  ? SoundType.capture
+                  : SoundType.pieceMoved;
               // moving the rook in case a king castled
               moveRookOnCastle(tappedSquareIndex: tappedSquareIndex);
 
-              playSound((chessBoard[tappedSquareIndex].piece != null ||
-                      didCaptureEnPassant)
-                  ? SoundType.capture
-                  : SoundType.pieceMoved);
+
 
               onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
 
@@ -229,6 +213,13 @@ class ChessController {
                      playSound(SoundType.victory);
               }
               }
+
+           if( checkForStaleMate(opponentKingType: _selectedPiece?.pieceType ==PieceType.light? PieceType.dark:PieceType.light)){
+             soundToPlay = SoundType.draw;
+           }
+
+           playSound(soundToPlay);
+
               updateView();
             }
             onPieceSelected([], tappedSquareIndex);
@@ -237,6 +228,31 @@ class ChessController {
           }, (error, stack) {
             onError(Error, stack.toString());
           });
+  }
+
+  bool checkForStaleMate({required PieceType opponentKingType}) {
+    int opponentKingIndex = chessBoard.indexWhere((square) => square.piece ==Pieces.king &&square.pieceType == opponentKingType);
+     // checking for stalemate
+    List<int> allLegalMovesIndices =[];
+    for(var square in chessBoard){
+      if(square.pieceType ==  chessBoard[opponentKingIndex].pieceType){
+        allLegalMovesIndices.addAll(
+            _getLegalMovesIndices(
+              tappedSquareFile: square.file,
+              tappedSquareRank: square.rank,
+              isKingChecked: isKingInCheck,
+                fromHandleSquareTapped: true,
+            )
+        );
+      }
+    }
+    // player has no legal move and an empty square was not tapped
+    if(allLegalMovesIndices.isEmpty &&chessBoard[opponentKingIndex].pieceType!=null ){
+      preventFurtherInteractions(true);
+      onDraw(DrawType.stalemate);
+      return true;
+    }
+    return false;
   }
 
   preventFurtherInteractions(bool status){
