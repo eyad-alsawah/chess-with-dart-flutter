@@ -97,26 +97,26 @@ class ChessController {
                 isKingChecked: isKingInCheck,fromHandleSquareTapped: true,
              );
 
-              // checking for stalemate
-              List<int> allLegalMovesIndices =[];
-              for(var square in chessBoard){
-                if(square.pieceType ==  chessBoard[tappedSquareIndex].pieceType){
-                  allLegalMovesIndices.addAll(
-                      _getLegalMovesIndices(
-                        tappedSquareFile: square.file,
-                        tappedSquareRank: square.rank,
-                        isKingChecked: isKingInCheck,
-                          fromHandleSquareTapped: true,
-                      )
-                  );
-                }
-              }
-              // player has no legal move and an empty square was not tapped
-              if(allLegalMovesIndices.isEmpty &&chessBoard[tappedSquareIndex].pieceType!=null ){
-                preventFurtherInteractions(true);
-                playSound(SoundType.draw);
-                onDraw(DrawType.stalemate);
-              }
+              // // checking for stalemate
+              // List<int> allLegalMovesIndices =[];
+              // for(var square in chessBoard){
+              //   if(square.pieceType ==  chessBoard[tappedSquareIndex].pieceType){
+              //     allLegalMovesIndices.addAll(
+              //         _getLegalMovesIndices(
+              //           tappedSquareFile: square.file,
+              //           tappedSquareRank: square.rank,
+              //           isKingChecked: isKingInCheck,
+              //             fromHandleSquareTapped: true,
+              //         )
+              //     );
+              //   }
+              // }
+              // // player has no legal move and an empty square was not tapped
+              // if(allLegalMovesIndices.isEmpty &&chessBoard[tappedSquareIndex].pieceType!=null ){
+              //   preventFurtherInteractions(true);
+              //   playSound(SoundType.draw);
+              //   onDraw(DrawType.stalemate);
+              // }
               //------------------------------------------
 
               // preventing player who's turn is not his to play by emptying the legalMovesIndices list
@@ -994,36 +994,7 @@ class ChessController {
       }
     }
 
-    // preventing the movement of pinned pieces
-    if(fromHandleSquareTapped){
-      /// todo: refactor this to only check to check if the king will be attacked by moving only to any moves of the legalMoves list, because it is sufficient for only one move to expose the king to check, for the piece to be considered pinned
-      // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
-      bool isPiecePinned =false;
-      List<int> legalMovesIndices = [];
-      for (var move in legalMoves) {
-        int squareIndex = chessBoard.indexOf(move);
-        if (squareIndex >= 0 && squareIndex <= 63) {
-          legalMovesIndices.add(squareIndex);
-        }
-      }
-          isPiecePinned =legalMovesIndices.any((index) {
-            int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
-            Square squareAtTappedIndex = chessBoard[tappedPieceIndex];
-            Square squareAtMoveIndex = chessBoard[index];
 
-            // emptying the square we are at currently
-            chessBoard[tappedPieceIndex] = Square(piece:null,pieceType: null, file: squareAtTappedIndex.file,rank: squareAtTappedIndex.rank);
-
-            chessBoard[index] = Square(piece:squareAtTappedIndex.piece, file: chessBoard[index].file,pieceType: chessBoard[tappedPieceIndex].pieceType,rank:squareAtMoveIndex.rank);
-            // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-            bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[index] :null);
-            // resetting the hypothetically moved pieces
-            chessBoard[index] = squareAtMoveIndex;
-            chessBoard[tappedPieceIndex] = squareAtTappedIndex;
-            return isKingAttacked;
-          });
-      isPiecePinned? legalMoves.clear():null;
-    }
 
     // filtering legal moves to prevent moving to a place that would not remove the check
     if(kingChecked){
@@ -1047,6 +1018,36 @@ class ChessController {
         // resetting the hypothetically moved piece
         chessBoard[index] = currentSquareAtIndex;
       }
+    }
+
+
+    // preventing the movement of pinned pieces, unless the piece attacks the attacking piece
+    if(fromHandleSquareTapped){
+      List<Square> legalMovesAttackingThePinningPiece= [];
+      // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
+      bool isPiecePinned =legalMoves.any((move) {
+        int moveIndex = chessBoard.indexOf(move);
+        int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
+        //--------------------
+        Square squareAtTappedIndex = chessBoard[tappedPieceIndex];
+        Square squareAtMoveIndex = chessBoard[moveIndex];
+
+        // emptying the square we are at currently
+        chessBoard[tappedPieceIndex] = Square(piece:null,pieceType: null, file: squareAtTappedIndex.file,rank: squareAtTappedIndex.rank);
+
+        chessBoard[moveIndex] = Square(piece:squareAtTappedIndex.piece,pieceType: squareAtTappedIndex.pieceType, file: squareAtMoveIndex.file,rank:squareAtMoveIndex.rank);
+        // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
+        bool  isKingAttacked = isKingSquareAttacked(playingTurn: tappedPiece.pieceType ==PieceType.light?PlayingTurn.white:PlayingTurn.black,escapeSquare:tappedPiece.piece ==Pieces.king? chessBoard[moveIndex] :null);
+        // resetting the hypothetically moved pieces
+        chessBoard[moveIndex] = squareAtMoveIndex;
+        chessBoard[tappedPieceIndex] = squareAtTappedIndex;
+        if(!isKingAttacked ){
+          legalMovesAttackingThePinningPiece.add(move);
+        }
+        return isKingAttacked;
+      });
+      isPiecePinned? legalMoves.clear():null;
+      legalMoves.addAll(legalMovesAttackingThePinningPiece);
     }
 
     return legalMoves;
