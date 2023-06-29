@@ -158,42 +158,7 @@ class ChessController {
               );
 
               // moving the rook in case a king castled
-              if (_selectedPiece?.piece == Pieces.king) {
-                if (_selectedPiece?.pieceType == PieceType.dark &&
-                    _selectedPieceIndex! == 60 &&
-                    (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
-                  // moving the rook and updating the board
-                  if (tappedSquareIndex == 62) {
-                    onPieceMoved(63, 61);
-                    chessBoard[63].piece = null;
-                    chessBoard[63].pieceType = null;
-                    chessBoard[61].piece = Pieces.rook;
-                    chessBoard[61].pieceType = PieceType.dark;
-                  } else {
-                    onPieceMoved(56, 59);
-                    chessBoard[56].piece = null;
-                    chessBoard[56].pieceType = null;
-                    chessBoard[59].piece = Pieces.rook;
-                    chessBoard[59].pieceType = PieceType.dark;
-                  }
-                } else if (_selectedPiece?.pieceType == PieceType.light &&
-                    _selectedPieceIndex! == 4 &&
-                    (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
-                  if (tappedSquareIndex == 6) {
-                    onPieceMoved(7, 5);
-                    chessBoard[7].piece = null;
-                    chessBoard[7].pieceType = null;
-                    chessBoard[5].piece = Pieces.rook;
-                    chessBoard[5].pieceType = PieceType.light;
-                  } else {
-                    onPieceMoved(0, 3);
-                    chessBoard[0].piece = null;
-                    chessBoard[0].pieceType = null;
-                    chessBoard[3].piece = Pieces.rook;
-                    chessBoard[3].pieceType = PieceType.light;
-                  }
-                }
-              }
+              moveRookOnCastle(tappedSquareIndex: tappedSquareIndex);
 
               playSound((chessBoard[tappedSquareIndex].piece != null ||
                       didCaptureEnPassant)
@@ -243,14 +208,7 @@ class ChessController {
                   pieceType: null);
 
               if (didCaptureEnPassant) {
-                chessBoard[_selectedPieceIndex! +
-                    (tappedSquareFile.index > selectedPieceFile.index
-                        ? 1
-                        : -1)] = emptyEnPassantCapturedPawnSquare;
-                onEnPassant(_selectedPieceIndex! +
-                    (tappedSquareFile.index > selectedPieceFile.index
-                        ? 1
-                        : -1));
+                updateBoardAfterEnPassant(tappedSquareFile, selectedPieceFile, emptyEnPassantCapturedPawnSquare);
               }
               changeCastlingAvailability(
                   movedPiece: _selectedPiece!.piece!,
@@ -270,7 +228,6 @@ class ChessController {
              onVictory(VictoryType.checkmate);
              playSound(SoundType.victory);
            }
-
               }
               updateView();
             }
@@ -280,6 +237,56 @@ class ChessController {
           }, (error, stack) {
             onError(Error, stack.toString());
           });
+  }
+
+  void updateBoardAfterEnPassant(Files tappedSquareFile, Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
+     chessBoard[_selectedPieceIndex! +
+        (tappedSquareFile.index > selectedPieceFile.index
+            ? 1
+            : -1)] = emptyEnPassantCapturedPawnSquare;
+    onEnPassant(_selectedPieceIndex! +
+        (tappedSquareFile.index > selectedPieceFile.index
+            ? 1
+            : -1));
+  }
+
+  void moveRookOnCastle({required int tappedSquareIndex}) {
+        if (_selectedPiece?.piece == Pieces.king) {
+      if (_selectedPiece?.pieceType == PieceType.dark &&
+          _selectedPieceIndex! == 60 &&
+          (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
+        // moving the rook and updating the board
+        if (tappedSquareIndex == 62) {
+          onPieceMoved(63, 61);
+          chessBoard[63].piece = null;
+          chessBoard[63].pieceType = null;
+          chessBoard[61].piece = Pieces.rook;
+          chessBoard[61].pieceType = PieceType.dark;
+        } else {
+          onPieceMoved(56, 59);
+          chessBoard[56].piece = null;
+          chessBoard[56].pieceType = null;
+          chessBoard[59].piece = Pieces.rook;
+          chessBoard[59].pieceType = PieceType.dark;
+        }
+      } else if (_selectedPiece?.pieceType == PieceType.light &&
+          _selectedPieceIndex! == 4 &&
+          (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
+        if (tappedSquareIndex == 6) {
+          onPieceMoved(7, 5);
+          chessBoard[7].piece = null;
+          chessBoard[7].pieceType = null;
+          chessBoard[5].piece = Pieces.rook;
+          chessBoard[5].pieceType = PieceType.light;
+        } else {
+          onPieceMoved(0, 3);
+          chessBoard[0].piece = null;
+          chessBoard[0].pieceType = null;
+          chessBoard[3].piece = Pieces.rook;
+          chessBoard[3].pieceType = PieceType.light;
+        }
+      }
+    }
   }
   preventFurtherInteractions(bool status){
     lockFurtherInteractions =status;
@@ -385,8 +392,8 @@ class ChessController {
   }
 
   /// ---------------------------------En Passant---------------
-  int? _enPassentCapturableLightPawnIndex;
-  int? _enPassentCapturableDarkPawnIndex;
+  int? _enPassantCapturableLightPawnIndex;
+  int? _enPassantCapturableDarkPawnIndex;
 
   void _addPawnToEnPassantCapturablePawns(
       {required int fromRank,
@@ -397,9 +404,9 @@ class ChessController {
     if (piece == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
       if (pawnType == PieceType.light) {
-        _enPassentCapturableLightPawnIndex = movedToIndex;
+        _enPassantCapturableLightPawnIndex = movedToIndex;
       } else {
-        _enPassentCapturableDarkPawnIndex = movedToIndex;
+        _enPassantCapturableDarkPawnIndex = movedToIndex;
       }
     }
   }
@@ -408,9 +415,9 @@ class ChessController {
     required PieceType? movedPieceType,
   }) {
     if (movedPieceType == PieceType.light) {
-      _enPassentCapturableDarkPawnIndex = null;
+      _enPassantCapturableDarkPawnIndex = null;
     } else if (movedPieceType == PieceType.dark) {
-      _enPassentCapturableLightPawnIndex = null;
+      _enPassantCapturableLightPawnIndex = null;
     } else {
       print(
           "this condition will only be reached if player tapped on empty square in selection mode which shouldn't happen because in handleTap we are checking if we pressed on a highlighted index in selection mode");
@@ -437,8 +444,8 @@ class ChessController {
   }) {
     bool canCaptureEnPassant = false;
     int? indexToCheck = selectedPawnType == PieceType.light
-        ? _enPassentCapturableDarkPawnIndex
-        : _enPassentCapturableLightPawnIndex;
+        ? _enPassantCapturableDarkPawnIndex
+        : _enPassantCapturableLightPawnIndex;
 
     if ((selectedPawnType == PieceType.light && fromRank == 5) ||
         (selectedPawnType == PieceType.dark && fromRank == 4)) {
@@ -466,7 +473,7 @@ class ChessController {
   bool didDarkKingSideRookMove = false;
   bool didDarkQueenSideRookMove = false;
 
-  List<Square> getCastlingAvailabiltiy({required PieceType pieceType}) {
+  List<Square> getCastlingAvailability({required PieceType pieceType}) {
     List<Square> castlingAvailability;
     if (pieceType == PieceType.light) {
       if (didLightKingMove) {
@@ -624,7 +631,7 @@ class ChessController {
     // castling:
     getCastlingPieces
         ? kingPieces
-            .addAll(getCastlingAvailabiltiy(pieceType: currentPiece.pieceType!))
+            .addAll(getCastlingAvailability(pieceType: currentPiece.pieceType!))
         : null;
 
     //right
