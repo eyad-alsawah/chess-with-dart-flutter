@@ -976,18 +976,15 @@ class ChessController {
       preventMovingIfCheckRemains(legalMoves: legalMoves, tappedPiece: tappedPiece);
     }
 
-    // preventing the movement of pinned pieces, unless the piece attacks the attacking piece
-    if(fromHandleSquareTapped){
-      filterPinnedPieceMoves(legalMoves, tappedPiece);
-    }
+    filterMoveThatExposeKingToCheck(legalMoves, tappedPiece,fromHandleSquareTapped);
 
     return legalMoves;
   }
 
-  void filterPinnedPieceMoves(List<Square> legalMoves, Square tappedPiece) {
+  void filterMoveThatExposeKingToCheck(List<Square> legalMoves, Square tappedPiece,bool fromHandleSquareTapped) {
+  if(fromHandleSquareTapped){
     List<Square> legalMovesAttackingThePinningPiece= [];
-    // fromHandleSquareTapped is used to prevent an infinite loop of calling getLegalMovesOnly from the isKingSquareAttacked method
-   for (var move in legalMoves) {
+    for (var move in legalMoves) {
       int moveIndex = chessBoard.indexOf(move);
       int tappedPieceIndex = chessBoard.indexWhere((square) => square.rank ==tappedPiece.rank && square.file == tappedPiece.file);
       //--------------------
@@ -1007,6 +1004,7 @@ class ChessController {
     }
     legalMoves.clear();
     legalMoves.addAll(legalMovesAttackingThePinningPiece);
+  }
   }
 
   void preventMovingIfCheckRemains({required List<Square> legalMoves, required Square tappedPiece}) {
