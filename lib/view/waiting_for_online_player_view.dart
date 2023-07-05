@@ -1,4 +1,5 @@
 import 'package:chess/controller/online_game_controller.dart';
+import 'package:chess/model/messages.dart';
 import 'package:flutter/material.dart';
 
 class WaitingForOnlinePlayerView extends StatefulWidget {
@@ -16,7 +17,7 @@ class _WaitingForOnlinePlayerViewState
   @override
   void initState() {
     super.initState();
-    onlineGameController.listenForMessages();
+    onlineGameController.init();
   }
 
   @override
@@ -29,9 +30,7 @@ class _WaitingForOnlinePlayerViewState
           Center(
             child: IconButton(
                 onPressed: () {
-                  onlineGameController.sendBroadcastMessage(
-                      type: MessageType.gameInitiationRequest,
-                      message: onlineGameController.availableGamesCheckMessage);
+                  onlineGameController.createGame();
                 },
                 icon: const Icon(Icons.send)),
           ),
