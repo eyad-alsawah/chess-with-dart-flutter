@@ -1,5 +1,5 @@
-import 'package:chess/controller/enums.dart';
 import 'package:chess/view/game_view.dart';
+import 'package:chess/view/waiting_for_online_player_view.dart';
 import 'package:flutter/material.dart';
 
 class HomeView extends StatefulWidget {
@@ -10,37 +10,57 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  String squareName = "";
-  List<String> movementHistory = [];
-  String currentPlayingTurn = "White's Turn";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 38, 37, 33),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFB58863),
+        title: const Text(
+          'Choose Game Type',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      backgroundColor: const Color.fromARGB(255, 116, 101, 77),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ChessBoard(
-            playingAs: PlayingAs.white,
-            size: 375,
-            onTap: (name) {},
-            onPlayingTurnChanged: (playingTurn) {
-              currentPlayingTurn = playingTurn == PlayingTurn.white
-                  ? "White's Turn"
-                  : "Black's Turn";
-              setState(() {});
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
+                style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                  Color(0xFFF0D9B5),
+                )),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return GameView(
+                      playOnline: false,
+                    );
+                  }));
+                },
+                child: const Center(
+                  child: Text(
+                    'Play On Same Device',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                )),
           ),
-          Center(
-            child: Text(
-              currentPlayingTurn,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
+                style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                  Color(0xFFB58863),
+                )),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const WaitingForOnlinePlayerView();
+                  }));
+                },
+                child: const Center(
+                  child: Text('Play Online'),
+                )),
           ),
         ],
       ),
