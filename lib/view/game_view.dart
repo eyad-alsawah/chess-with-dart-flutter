@@ -3,8 +3,8 @@ import 'package:chess/view/game_widget.dart';
 import 'package:flutter/material.dart';
 
 class GameView extends StatefulWidget {
-  bool playOnline;
-  GameView({super.key, this.playOnline = false});
+  final bool playOnline;
+  const GameView({super.key, this.playOnline = false});
 
   @override
   State<GameView> createState() => _GameViewState();

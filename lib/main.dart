@@ -1,4 +1,3 @@
-import 'package:chess/view/game_view.dart';
 import 'package:chess/view/home_view.dart';
 import 'package:flutter/material.dart';
 

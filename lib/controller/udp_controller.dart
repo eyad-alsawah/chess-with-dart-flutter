@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:uuid/uuid.dart';
-
 import '../model/messages.dart';
 
 class UdpConnection {
