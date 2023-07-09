@@ -21,6 +21,10 @@ class UdpMessage {
         return ChatMessage.fromJson(json);
       case MessageType.gameInitiationRequest:
         return GameInitiationRequest.fromJson(json);
+      case MessageType.gameAnnounciation:
+        return AnnounceAvailableGame.fromJson(json);
+      case MessageType.getAvailableGames:
+        return GetAvailableGames.fromJson(json);
       default:
         throw ArgumentError('Invalid message type');
     }
@@ -30,11 +34,63 @@ class UdpMessage {
     return {
       'type': type.toString().split('.').last,
       'uuid': uuid,
-      'createdAt': createdAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
     };
   }
 }
 
+//-----------------------------------------------------------------
+class AnnounceAvailableGame extends UdpMessage {
+  AnnounceAvailableGame({
+    required String uuid,
+    required DateTime createdAt,
+  }) : super(
+          type: MessageType.gameAnnounciation,
+          uuid: uuid,
+          createdAt: createdAt,
+        );
+
+  factory AnnounceAvailableGame.fromJson(Map<String, dynamic> json) {
+    return AnnounceAvailableGame(
+      uuid: json['uuid'],
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = super.toJson();
+
+    return json;
+  }
+}
+
+class GetAvailableGames extends UdpMessage {
+  GetAvailableGames({
+    required String uuid,
+    required DateTime createdAt,
+  }) : super(
+          type: MessageType.getAvailableGames,
+          uuid: uuid,
+          createdAt: createdAt,
+        );
+
+  factory GetAvailableGames.fromJson(Map<String, dynamic> json) {
+    return GetAvailableGames(
+      uuid: json['uuid'],
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = super.toJson();
+
+    return json;
+  }
+}
+
+//-----------------------------------------
 class GameInitiationRequest extends UdpMessage {
   final String text;
 
@@ -51,7 +107,7 @@ class GameInitiationRequest extends UdpMessage {
   factory GameInitiationRequest.fromJson(Map<String, dynamic> json) {
     return GameInitiationRequest(
       uuid: json['uuid'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: DateTime.parse(json['created_at']),
       text: json['text'],
     );
   }
@@ -80,7 +136,7 @@ class ChatMessage extends UdpMessage {
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       uuid: json['uuid'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: DateTime.parse(json['created_at']),
       imageUrl: json['imageUrl'],
     );
   }
@@ -89,6 +145,31 @@ class ChatMessage extends UdpMessage {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = super.toJson();
     json['imageUrl'] = imageUrl;
+    return json;
+  }
+}
+
+class JoinGame extends UdpMessage {
+  JoinGame({
+    required String uuid,
+    required DateTime createdAt,
+  }) : super(
+          type: MessageType.chatMessage,
+          uuid: uuid,
+          createdAt: createdAt,
+        );
+
+  factory JoinGame.fromJson(Map<String, dynamic> json) {
+    return JoinGame(
+      uuid: json['uuid'],
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = super.toJson();
+
     return json;
   }
 }

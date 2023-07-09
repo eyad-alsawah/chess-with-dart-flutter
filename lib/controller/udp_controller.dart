@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:logger/logger.dart';
 
 import '../model/messages.dart';
 
 class UdpConnection {
   // used to detect duplicate messages
   String lastMessageCreationTime = '';
+  Logger logger = Logger(printer: PrettyPrinter());
 
   final StreamController<UdpMessage> messagesStreamController =
       StreamController<UdpMessage>();
@@ -19,6 +21,7 @@ class UdpConnection {
 
       // Convert the UDP message to JSON
       Map<String, dynamic> messageMap = message.toJson();
+
       String messageMapStringified = json.encode(messageMap);
 
       // Convert the message to bytes
@@ -67,16 +70,18 @@ class UdpConnection {
           // Process the received broadcast message
           String message = String.fromCharCodes(datagram.data);
           Map<String, dynamic> messageDecoded = json.decode(message);
+
           String currentMessageCreationTime = messageDecoded['created_at'];
           bool isMessageDuplicated =
               lastMessageCreationTime == currentMessageCreationTime;
           lastMessageCreationTime = messageDecoded['created_at'];
           if (isLocalAddress) {
-            print('Received message from self. Skipping...');
+            logger.w('Received message from self. Skipping...');
             return; // Skip processing the message
           } else if (isMessageDuplicated) {
-            print('Duplicated message');
+            logger.w('Duplicated message');
           } else {
+            logger.i('Received a new message: $messageDecoded');
             UdpMessage udpMessage = UdpMessage.fromJson(messageDecoded);
             // Emit the messageObject to the stream
             messagesStreamController.add(udpMessage);

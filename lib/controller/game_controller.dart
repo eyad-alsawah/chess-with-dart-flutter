@@ -233,6 +233,7 @@ class ChessController {
           });
   }
 
+  // status checking
   bool checkForStaleMate({required PieceType opponentKingType}) {
     int opponentKingIndex = chessBoard.indexWhere((square) =>
         square.piece == Pieces.king && square.pieceType == opponentKingType);
@@ -258,10 +259,12 @@ class ChessController {
     return false;
   }
 
+  // view related
   preventFurtherInteractions(bool status) {
     lockFurtherInteractions = status;
   }
 
+  // turns managing
   bool _isInMoveSelectionMode(
       {required int tappedSquareIndex,
       required PlayingTurn playingTurn,
@@ -283,6 +286,7 @@ class ChessController {
     return inMoveSelectionMode;
   }
 
+  // moves getting
   bool shouldClearLegalMovesIndices(
       {required PieceType? selectedPieceType,
       required PlayingTurn playingTurn}) {
@@ -294,6 +298,7 @@ class ChessController {
     return shouldClearLegalMovesIndices;
   }
 
+  // move validation
   bool shouldPawnBePromoted(
       {required Pieces? selectedPiecePiece, required tappedSquareRank}) {
     return selectedPiecePiece == Pieces.pawn &&
@@ -301,6 +306,7 @@ class ChessController {
   }
 
   // ---------------------------------------------------------------------------
+  //  moves getting related
   Files _getFileNameFromIndex({required int index}) {
     List<Files> files = [
       Files.a,
@@ -324,6 +330,7 @@ class ChessController {
     return rank;
   }
 
+  // moves getter
   List<Square> _getIllegalAndLegalMoves(
       {required int rank, required Files file}) {
     Square tappedPiece = chessBoard
@@ -406,6 +413,7 @@ class ChessController {
     return didCaptureEnPassent;
   }
 
+  // move validation
   bool _canCaptureEnPassant({
     required int fromIndex,
     required int toIndex,
@@ -435,6 +443,8 @@ class ChessController {
     return canCaptureEnPassant;
   }
 
+
+  // ui related state management
   void updateBoardAfterEnPassant(Files tappedSquareFile,
       Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
     chessBoard[_selectedPieceIndex! +
@@ -518,7 +528,7 @@ class ChessController {
       }
     }
   }
-
+  // ui related state management
   void moveRookOnCastle({required int tappedSquareIndex}) {
     if (_selectedPiece?.piece == Pieces.king) {
       if (_selectedPiece?.pieceType == PieceType.dark &&
