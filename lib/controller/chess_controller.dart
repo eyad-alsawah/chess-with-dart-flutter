@@ -10,16 +10,13 @@ import 'package:chess/controller/legal_moves_controller.dart';
 import 'package:chess/utils/typedefs.dart';
 import 'package:chess/model/model.dart';
 
-
-
 class ChessController {
+  // -------------- callbacks------------------
   final OnDraw onDraw;
-  //-------------
   final OnCheck onCheck;
   final OnVictory onVictory;
   final OnPlayingTurnChanged onPlayingTurnChanged;
   final OnPieceSelected onPieceSelected;
-
   final OnPieceMoved onPieceMoved;
   final OnError onError;
   final OnPawnPromoted onPawnPromoted;
@@ -27,21 +24,17 @@ class ChessController {
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
-
-
-//-------------------------------------------
+  // ----------------------------------
   final bool playRemotely;
-
   bool _inMoveSelectionMode = true;
-
   // prevents doing anything if the game ended
   static bool lockFurtherInteractions = false;
+  // ------------------------------------
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
     this.playRemotely = false,
     required this.onCheck,
-
     required String initialPosition,
     PlayingTurn? playAs,
     required this.onVictory,
@@ -50,7 +43,6 @@ class ChessController {
     required this.onPlayingTurnChanged,
     required this.onPieceMoved,
     required this.onError,
-
     required this.onPawnPromoted,
     required this.onSelectPromotionType,
     required this.onEnPassant,
@@ -59,52 +51,30 @@ class ChessController {
   }) : assert(_isValidFen(fenString: initialPosition),
             'initialPosition must be a valid FEN String');
 
-  //------------------------------
+
   start() {}
-
   pause() {}
-
   resume() {}
-
   offerDraw() {}
-
   resign() {}
-
-  //------------------------------
   toggleLegalMovesHighlight() {}
-
   highlightLegalMovesForAllPieces() {}
-
-  //--------------------------------
   exportGame() {}
-
   saveGame() {}
-
   loadGame() {}
-
-  //-------------------------------
   requestTimerPause() {}
-
-  //-----------------------------------
   getCurrentPlayingTurn() {}
-
   offerUndoMove() {}
+
   LegalMoves legalMoves = LegalMoves();
-
-  //---------------------------------
   IllegalMoves illegalMoves = IllegalMoves();
-
-   EnPassant enPassant = EnPassant();
-
-   CastlingController castlingController =CastlingController();
-   GameStatus gameStatus =GameStatus();
-
-
+  EnPassant enPassant = EnPassant();
+  CastlingController castlingController =CastlingController();
+  GameStatus gameStatus =GameStatus();
 
   List<int> _legalMovesIndices = [];
   static int? selectedPieceIndex;
   Square? selectedPiece;
-
   // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
   PlayingTurn _playingTurn = PlayingTurn.white;
   static bool isKingInCheck = false;
@@ -271,51 +241,40 @@ class ChessController {
           });
   }
 
+  bool _isInMoveSelectionMode(
+      {required int tappedSquareIndex,
+        required PlayingTurn playingTurn,
+        required List<int> legalMovesIndices}) {
+    bool inMoveSelectionMode =
+    // pressing on an empty square or on a square occupied by an enemy piece that is not in the legal moves should not change the value to false
+    ((chessBoard[tappedSquareIndex].pieceType == null ||
+        (chessBoard[tappedSquareIndex].pieceType ==
+            PieceType.light &&
+            _playingTurn != PlayingTurn.white) ||
+        (chessBoard[tappedSquareIndex].pieceType ==
+            PieceType.dark &&
+            _playingTurn != PlayingTurn.black)) &&
+        !legalMovesIndices.contains(tappedSquareIndex)) ||
+        (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
+            _playingTurn == PlayingTurn.white) ||
+        (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
+            _playingTurn == PlayingTurn.black);
+    return inMoveSelectionMode;
+  }
+  bool shouldClearLegalMovesIndices(
+      {required PieceType? selectedPieceType,
+        required PlayingTurn playingTurn}) {
+    bool shouldClearLegalMovesIndices =
+    ((selectedPiece?.pieceType == PieceType.light &&
+        _playingTurn != PlayingTurn.white) ||
+        (selectedPiece?.pieceType == PieceType.dark &&
+            _playingTurn != PlayingTurn.black));
+    return shouldClearLegalMovesIndices;
+  }
   static preventFurtherInteractions(bool status) {
     lockFurtherInteractions = status;
   }
-
-  // turns managing
-  bool _isInMoveSelectionMode(
-      {required int tappedSquareIndex,
-      required PlayingTurn playingTurn,
-      required List<int> legalMovesIndices}) {
-    bool inMoveSelectionMode =
-        // pressing on an empty square or on a square occupied by an enemy piece that is not in the legal moves should not change the value to false
-        ((chessBoard[tappedSquareIndex].pieceType == null ||
-                    (chessBoard[tappedSquareIndex].pieceType ==
-                            PieceType.light &&
-                        _playingTurn != PlayingTurn.white) ||
-                    (chessBoard[tappedSquareIndex].pieceType ==
-                            PieceType.dark &&
-                        _playingTurn != PlayingTurn.black)) &&
-                !legalMovesIndices.contains(tappedSquareIndex)) ||
-            (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
-                _playingTurn == PlayingTurn.white) ||
-            (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
-                _playingTurn == PlayingTurn.black);
-    return inMoveSelectionMode;
-  }
-
-  // moves getting
-  bool shouldClearLegalMovesIndices(
-      {required PieceType? selectedPieceType,
-      required PlayingTurn playingTurn}) {
-    bool shouldClearLegalMovesIndices =
-        ((selectedPiece?.pieceType == PieceType.light &&
-                _playingTurn != PlayingTurn.white) ||
-            (selectedPiece?.pieceType == PieceType.dark &&
-                _playingTurn != PlayingTurn.black));
-    return shouldClearLegalMovesIndices;
-  }
-
-  // move validation
-  bool shouldPawnBePromoted(
-      {required Pieces? selectedPiecePiece, required tappedSquareRank}) {
-    return selectedPiecePiece == Pieces.pawn &&
-        (tappedSquareRank == 1 || tappedSquareRank == 8);
-  }
-
+  //--------------------------------
   Files _getFileNameFromIndex({required int index}) {
     List<Files> files = [
       Files.a,
@@ -332,13 +291,17 @@ class ChessController {
     Files file = files[index - 8 * (rank - 1) - 1];
     return file;
   }
-
   int _getRankNameFromIndex({required int index}) {
     index++;
     int rank = (index / 8).ceil();
     return rank;
   }
-
+  // ---------------------
+  bool shouldPawnBePromoted(
+      {required Pieces? selectedPiecePiece, required tappedSquareRank}) {
+    return selectedPiecePiece == Pieces.pawn &&
+        (tappedSquareRank == 1 || tappedSquareRank == 8);
+  }
   void moveRookOnCastle({required int tappedSquareIndex}) {
     if (selectedPiece?.piece == Pieces.king) {
       if (selectedPiece?.pieceType == PieceType.dark &&
