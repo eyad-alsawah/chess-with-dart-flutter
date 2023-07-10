@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 import 'package:chess/controller/chess_controller.dart';
 import 'package:chess/utils/image_assets.dart';

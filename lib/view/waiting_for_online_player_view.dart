@@ -40,9 +40,9 @@ class _WaitingForOnlinePlayerViewState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 143, 109, 51),
+        backgroundColor: const Color.fromARGB(255, 143, 109, 51),
       ),
-      backgroundColor: Color.fromARGB(255, 168, 149, 117),
+      backgroundColor: const Color.fromARGB(255, 168, 149, 117),
       body: RefreshIndicator(
         onRefresh: onRefresh,
         child: Padding(

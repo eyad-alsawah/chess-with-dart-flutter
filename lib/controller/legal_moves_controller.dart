@@ -1,6 +1,7 @@
 import 'package:chess/controller/castling_controller.dart';
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/chess_controller.dart';
+
 import 'package:chess/controller/game_status_controller.dart';
 import 'package:chess/controller/illegal_moves_controller.dart';
 import 'package:chess/model/model.dart';

@@ -1,27 +1,13 @@
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 import 'package:chess/controller/chess_controller.dart';
 import 'package:chess/controller/illegal_moves_controller.dart';
 import 'package:chess/controller/legal_moves_controller.dart';
 import 'package:chess/model/model.dart';
 
-
-
 class GameStatus{
-  // static final GameStatus _singleton = GameStatus._internal((drawType) {},);
-  //
-  // factory GameStatus({required OnDraw onDraw}) {
-  //
-  //   return _singleton;
-  // }
-  //
-  // GameStatus._internal(this.onDraw);
-
-  //-----------------------------
-  // final OnDraw onDraw;
   IllegalMoves illegalMoves = IllegalMoves();
   LegalMoves legalMoves = LegalMoves();
-
-
 
   bool doesOnlyOneKingExists() {
     int kingsCount = 0;
@@ -139,6 +125,7 @@ class GameStatus{
     return kingMovesThatWouldProtectHim.isEmpty &&
         movesThatProtectTheKing.isEmpty;
   }
+
   bool checkForStaleMate({required PieceType opponentKingType}) {
     int opponentKingIndex = chessBoard.indexWhere((square) =>
     square.piece == Pieces.king && square.pieceType == opponentKingType);
@@ -166,7 +153,7 @@ class GameStatus{
 
 }
 
-
+// this method was moved outside the GameStatus class because I was getting stack overflow due to circular dependency between GameStatus and LegalMovesController
 bool isKingSquareAttacked(
     {required PlayingTurn playingTurn, Square? escapeSquare}) {
   IllegalMoves illegalMoves =IllegalMoves();

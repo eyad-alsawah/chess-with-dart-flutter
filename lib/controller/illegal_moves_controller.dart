@@ -1,30 +1,12 @@
 import 'package:chess/controller/castling_controller.dart';
 import 'package:chess/controller/en_passant_controller.dart';
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/chess_controller.dart';
+
 
 import 'package:chess/model/model.dart';
 
 class IllegalMoves{
-
-
-
-  //
-  // static final IllegalMoves _singleton = IllegalMoves._internal();
-  //
-  // factory IllegalMoves() {
-  //
-  //   return _singleton;
-  // }
-  //
-  // IllegalMoves._internal();
-  //
-
-
-
-
-
-
   EnPassant enPassant =EnPassant();
   CastlingController castlingController = CastlingController();
 
@@ -65,6 +47,8 @@ class IllegalMoves{
     }
     return moves;
   }
+
+
   List<Square> getPawnPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);
@@ -298,7 +282,6 @@ class IllegalMoves{
     return horizontalPieces;
   }
 
-//----------------------
   List<Square> getVerticalPieces({required int rank, required Files file}) {
     Square currentPiece = chessBoard
         .firstWhere((element) => element.rank == rank && element.file == file);

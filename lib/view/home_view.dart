@@ -34,7 +34,7 @@ class _HomeViewState extends State<HomeView> {
                 )),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return GameView(
+                    return const GameView(
                       playOnline: false,
                     );
                   }));

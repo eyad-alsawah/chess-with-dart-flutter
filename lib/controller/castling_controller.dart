@@ -1,30 +1,42 @@
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/chess_controller.dart';
+
 import 'package:chess/model/model.dart';
 
 class CastlingController{
-  //
-  // static final CastlingController _singleton = CastlingController._internal();
-  //
-  // factory CastlingController() {
-  //
-  //   return _singleton;
-  // }
-  //
-  // CastlingController._internal();
-  //
-
-
-
-
-
-
   static bool didLightKingMove = false;
   static bool didDarkKingMove = false;
   static bool didLightKingSideRookMove = false;
   static bool didLightQueenSideRookMove = false;
   static bool didDarkKingSideRookMove = false;
   static bool didDarkQueenSideRookMove = false;
+
+  List<Square> getCastlingAvailability({required PieceType pieceType}) {
+    List<Square> castlingAvailability;
+    if (pieceType == PieceType.light) {
+      if (didLightKingMove) {
+        castlingAvailability = [];
+      } else if (didLightKingSideRookMove) {
+        castlingAvailability = didLightQueenSideRookMove ? [] : [chessBoard[2]];
+      } else {
+        castlingAvailability = didLightQueenSideRookMove
+            ? [chessBoard[6]]
+            : [chessBoard[2], chessBoard[6]];
+      }
+    } else {
+      if (didDarkKingMove) {
+        castlingAvailability = [];
+      } else if (didDarkKingSideRookMove) {
+        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[58]];
+      } else {
+        castlingAvailability = didDarkQueenSideRookMove
+            ? [chessBoard[62]]
+            : [chessBoard[58], chessBoard[62]];
+      }
+    }
+    return castlingAvailability;
+  }
+
   void preventCastlingIfPieceStandsBetweenRookAndKing(
       {required Square tappedPiece,
         required List<Square> legalAndIllegalMoves}) {
@@ -61,31 +73,6 @@ class CastlingController{
         }
       }
     }
-  }
-  List<Square> getCastlingAvailability({required PieceType pieceType}) {
-    List<Square> castlingAvailability;
-    if (pieceType == PieceType.light) {
-      if (didLightKingMove) {
-        castlingAvailability = [];
-      } else if (didLightKingSideRookMove) {
-        castlingAvailability = didLightQueenSideRookMove ? [] : [chessBoard[2]];
-      } else {
-        castlingAvailability = didLightQueenSideRookMove
-            ? [chessBoard[6]]
-            : [chessBoard[2], chessBoard[6]];
-      }
-    } else {
-      if (didDarkKingMove) {
-        castlingAvailability = [];
-      } else if (didDarkKingSideRookMove) {
-        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[58]];
-      } else {
-        castlingAvailability = didDarkQueenSideRookMove
-            ? [chessBoard[62]]
-            : [chessBoard[58], chessBoard[62]];
-      }
-    }
-    return castlingAvailability;
   }
 
   void changeCastlingAvailability(

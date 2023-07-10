@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chess/controller/castling_controller.dart';
 import 'package:chess/controller/en_passant_controller.dart';
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 import 'package:chess/controller/game_status_controller.dart';
 import 'package:chess/controller/illegal_moves_controller.dart';
@@ -378,28 +379,6 @@ class ChessController {
   }
 }
 
-class Square {
-  Files file;
-  int rank;
-  Pieces? piece;
-  PieceType? pieceType;
-
-  Square({
-    required this.file,
-    required this.rank,
-    required this.piece,
-    required this.pieceType,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Square &&
-          file == other.file &&
-          rank == other.rank &&
-          piece == other.piece &&
-          pieceType == other.pieceType;
-}
 
 bool _isValidFen({required fenString}) {
   return true;

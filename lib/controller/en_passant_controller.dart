@@ -1,28 +1,12 @@
+import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 import 'package:chess/controller/chess_controller.dart';
 
 import 'package:chess/model/model.dart';
 
-
 class EnPassant{
-
-  // static final EnPassant _singleton = EnPassant._internal(onEnPassant: (int capturedPawnIndex) {  });
-  //
-  // factory EnPassant() {
-  //
-  //   return _singleton;
-  // }
-  //
-  // EnPassant._internal({required this.onEnPassant});
-  //
-  //
-  // OnEnPassant onEnPassant;
-
   static int? _enPassantCapturableLightPawnIndex;
   static int? _enPassantCapturableDarkPawnIndex;
-
-
-
 
   void addPawnToEnPassantCapturablePawns(
       {required int fromRank,
@@ -64,7 +48,7 @@ class EnPassant{
     return didCaptureEnPassent;
   }
 
-  // move validation
+
   bool canCaptureEnPassant({
     required int fromIndex,
     required int toIndex,
@@ -94,8 +78,6 @@ class EnPassant{
     return canCaptureEnPassant;
   }
 
-
-
   void updateBoardAfterEnPassant(Files tappedSquareFile,
       Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
     chessBoard[ChessController.selectedPieceIndex! +
@@ -104,6 +86,3 @@ class EnPassant{
   }
 
 }
-
-//-----------------------------------
-typedef GetSelectedPieceIndex = int? Function();
