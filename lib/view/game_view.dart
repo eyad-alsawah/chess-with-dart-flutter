@@ -1,4 +1,4 @@
-import 'package:chess/controller/enums.dart';
+import 'package:chess/utils/enums.dart';
 import 'package:chess/view/game_widget.dart';
 import 'package:flutter/material.dart';
 

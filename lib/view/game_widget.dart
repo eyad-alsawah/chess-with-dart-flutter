@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chess/controller/enums.dart';
-import 'package:chess/controller/game_controller.dart';
+import 'package:chess/utils/enums.dart';
+import 'package:chess/controller/chess_controller.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';
@@ -180,7 +180,7 @@ class _ChessBoardState extends State<ChessBoard> {
         selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
-      onCastling: (movedRookIndex) {},
+
       onPlayingTurnChanged: (playingTurn) {
         widget.onPlayingTurnChanged(playingTurn);
       },
@@ -202,7 +202,7 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[capturedPawnIndex].piece = null;
         chessBoard[capturedPawnIndex].pieceType = null;
       },
-      onCapture: () {},
+
       onError: (error, errorString) {
         AudioPlayer audioPlayer = AudioPlayer();
         audioPlayer.play(volume: 1, AssetSource(illegalSound));
