@@ -1,52 +1,54 @@
+import 'package:chess/controllers/online_controllers/abstract_online_game_controller.dart';
+import 'package:chess/controllers/online_controllers/udp_controller/udp_connection.dart';
 
-
-import 'package:chess/controller/udp_controller.dart';
 import 'package:chess/model/messages.dart';
 
 import 'package:uuid/uuid.dart';
-
-class OnlineGameController {
+class UdpGameController implements AbstractOnlineGameController {
   UdpConnection udpConnection = UdpConnection();
   String uuid = const Uuid().v1();
-  List<String> availableGames = [];
-  //-------------------callbacks--------------
+
   final OnNewGameAvailable onNewGameAvailable;
-  //----------------------------
 
-  OnlineGameController({required this.onNewGameAvailable});
+  UdpGameController({required this.onNewGameAvailable});
 
-  /// ----------------------------------------------Joining a game--------------------------------
+  @override
   void getAvailableGames() {
     udpConnection.sendBroadcastMessage(
         message: GetAvailableGames(
-      uuid: uuid,
-      createdAt: DateTime.now(),
-    ));
+          uuid: uuid,
+          createdAt: DateTime.now(),
+        ));
   }
 
-  void joinGame({required String uuid}) {}
+  @override
+  void joinGame({required String uuid}) {
+    // Implementation for joining a game
+  }
 
-  /// -----------------------------------------------Creating a game-------------------------------------------
+  @override
   void announceAvailableGame() {
     udpConnection.sendBroadcastMessage(
         message: AnnounceAvailableGame(
-      uuid: uuid,
-      createdAt: DateTime.now(),
-    ));
+          uuid: uuid,
+          createdAt: DateTime.now(),
+        ));
   }
 
+  @override
   void move() {
     udpConnection.sendBroadcastMessage(
         message: GameInitiationRequest(
             uuid: uuid, createdAt: DateTime.now(), text: 'text'));
   }
 
+  @override
   void init() {
     udpConnection.listenForMessages();
     mapMessageToFunction();
   }
 
-  ///---------------------------------------------
+  @override
   void mapMessageToFunction() {
     udpConnection.messagesStreamController.stream.listen((message) {
       switch (message.type) {
@@ -62,7 +64,6 @@ class OnlineGameController {
     });
   }
 }
-//-----------------------------------------------
 
 enum MessageType {
   gameAnnounciation,
@@ -73,5 +74,4 @@ enum MessageType {
   unknown,
 }
 
-//-----------------callbacks----------------------------
 typedef OnNewGameAvailable = Function(String gameId);

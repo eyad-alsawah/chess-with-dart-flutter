@@ -38,6 +38,8 @@ dependencies:
   audioplayers: ^4.1.0
   uuid: ^3.0.7
   logger: ^1.4.0
+  flutter_webrtc: ^0.9.35
+  cloud_firestore: ^4.8.2
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,4 @@
-import 'package:chess/controller/online_game_controller.dart';
+import 'package:chess/controllers/online_controllers/udp_controller/udp_game_controller.dart';
 
 class UdpMessage {
   final MessageType type;

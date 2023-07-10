@@ -1,8 +1,12 @@
 import 'package:chess/view/home_view.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+
   runApp(const ChessApp());
 }
 

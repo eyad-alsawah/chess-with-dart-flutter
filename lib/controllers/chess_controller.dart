@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:chess/controller/castling_controller.dart';
-import 'package:chess/controller/en_passant_controller.dart';
+import 'package:chess/controllers/castling_controller.dart';
+import 'package:chess/controllers/en_passant_controller.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/game_status_controller.dart';
-import 'package:chess/controller/illegal_moves_controller.dart';
-import 'package:chess/controller/legal_moves_controller.dart';
+import 'package:chess/controllers/game_status_controller.dart';
+import 'package:chess/controllers/illegal_moves_controller.dart';
+import 'package:chess/controllers/legal_moves_controller.dart';
 import 'package:chess/utils/typedefs.dart';
 import 'package:chess/model/model.dart';
 
@@ -24,7 +24,9 @@ class ChessController {
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
+
   // ----------------------------------
+  final PlayingTurn? initialPlayingTurn;
   final bool playRemotely;
   bool _inMoveSelectionMode = true;
   // prevents doing anything if the game ended
@@ -36,7 +38,7 @@ class ChessController {
     this.playRemotely = false,
     required this.onCheck,
     required String initialPosition,
-    PlayingTurn? playAs,
+    this.initialPlayingTurn,
     required this.onVictory,
     required this.onDraw,
     required this.onPieceSelected,
@@ -48,8 +50,7 @@ class ChessController {
     required this.onEnPassant,
     required this.playSound,
     required this.updateView,
-  }) : assert(_isValidFen(fenString: initialPosition),
-            'initialPosition must be a valid FEN String');
+  });
 
 
   start() {}
@@ -76,7 +77,7 @@ class ChessController {
   static int? selectedPieceIndex;
   Square? selectedPiece;
   // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
-  PlayingTurn _playingTurn = PlayingTurn.white;
+  PlayingTurn _playingTurn =PlayingTurn.white;
   static bool isKingInCheck = false;
 
   handleSquareTapped({required int tappedSquareIndex}) async {

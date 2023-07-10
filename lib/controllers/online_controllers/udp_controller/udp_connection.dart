@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:chess/model/messages.dart';
 import 'package:logger/logger.dart';
-
-import '../model/messages.dart';
 
 class UdpConnection {
   // used to detect duplicate messages

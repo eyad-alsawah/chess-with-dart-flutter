@@ -1,15 +1,12 @@
-import 'package:chess/controller/castling_controller.dart';
+import 'package:chess/controllers/castling_controller.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 
-import 'package:chess/controller/game_status_controller.dart';
-import 'package:chess/controller/illegal_moves_controller.dart';
+import 'package:chess/controllers/game_status_controller.dart';
+import 'package:chess/controllers/illegal_moves_controller.dart';
 import 'package:chess/model/model.dart';
 
 class LegalMoves{
-
-
-
 
   CastlingController castlingController = CastlingController();
   IllegalMoves illegalMoves =IllegalMoves();

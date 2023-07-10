@@ -1,8 +1,8 @@
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/chess_controller.dart';
-import 'package:chess/controller/illegal_moves_controller.dart';
-import 'package:chess/controller/legal_moves_controller.dart';
+import 'package:chess/controllers/chess_controller.dart';
+import 'package:chess/controllers/illegal_moves_controller.dart';
+import 'package:chess/controllers/legal_moves_controller.dart';
 import 'package:chess/model/model.dart';
 
 class GameStatus{

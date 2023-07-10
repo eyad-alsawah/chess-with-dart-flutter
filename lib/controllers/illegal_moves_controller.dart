@@ -1,5 +1,5 @@
-import 'package:chess/controller/castling_controller.dart';
-import 'package:chess/controller/en_passant_controller.dart';
+import 'package:chess/controllers/castling_controller.dart';
+import 'package:chess/controllers/en_passant_controller.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
 

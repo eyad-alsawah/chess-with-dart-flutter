@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/enums.dart';
-import 'package:chess/controller/chess_controller.dart';
+import 'package:chess/controllers/chess_controller.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +16,13 @@ List<String> filesNotation = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 List<String> ranksNotation = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
 class ChessBoard extends StatefulWidget {
-  final PlayingAs playingAs;
+  final PlayingTurn playingTurn;
   final ValueChanged<String> onTap;
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final double size;
   const ChessBoard(
       {super.key,
-      required this.playingAs,
+      required this.playingTurn,
       required this.size,
       required this.onTap,
       required this.onPlayingTurnChanged});
@@ -43,6 +43,7 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     super.initState();
     chess = ChessController.fromPosition(
+      initialPlayingTurn: widget.playingTurn,
       onCheck: (enemyKingIndex) {
         checkedKingIndex = enemyKingIndex;
       },
@@ -209,6 +210,7 @@ class _ChessBoardState extends State<ChessBoard> {
         audioPlayer.play(volume: 1, AssetSource(illegalSound));
       },
     );
+
   }
 
   @override
@@ -216,131 +218,62 @@ class _ChessBoardState extends State<ChessBoard> {
     return SizedBox(
       width: widget.size,
       height: widget.size,
-      child: Column(
-        children: [
-          SizedBox(
-            height: widget.size * 0.08,
-            child: Row(
-              children: [
-                SizedBox(
-                  width: widget.size * 0.08,
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: 8,
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      return SizedBox(
-                        width: widget.size * 0.1,
-                        child: Center(
-                          child: Transform.rotate(
-                            angle: pi,
-                            child: FittedBox(
-                              child: Text(
-                                filesNotation[index],
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700),
+      child: Transform.rotate(
+        angle: widget.playingTurn ==PlayingTurn.white? 0: pi,
+        child: Column(
+          children: [
+            SizedBox(
+              height: widget.size * 0.08,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: widget.size * 0.08,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 8,
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: widget.size * 0.1,
+                          child: Center(
+                            child: Transform.rotate(
+                              angle: pi,
+                              child: FittedBox(
+                                child: Text(
+                                  filesNotation[index],
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              SizedBox(
-                height: widget.size * 0.8,
-                width: widget.size * 0.08,
-                child: ListView.builder(
-                    itemCount: 8,
-                    reverse: widget.playingAs == PlayingAs.white,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      return SizedBox(
-                        height: widget.size * 0.1,
-                        width: widget.size * 0.08,
-                        child: Center(
-                          child: FittedBox(
-                            child: Text(
-                              ranksNotation[index],
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-              Stack(
-                children: [
-                  SizedBox(
-                    width: widget.size * 0.8,
-                    height: widget.size * 0.8,
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      reverse: true,
-                      itemCount: 64,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 8,
-                      ),
-                      itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          tappedIndices.clear();
-                          chess.handleSquareTapped(tappedSquareIndex: index);
-
-                          widget.onTap(squareName);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: (checkedKingIndex != null &&
-                                    index == checkedKingIndex)
-                                ? Colors.red
-                                : (index == selectedIndex &&
-                                        selectedIndex != null)
-                                    ? Colors.lightGreen
-                                    : getSquareColor(
-                                        ignoreTappedIndices: true,
-                                        index: index,
-                                        tappedIndices: tappedIndices),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
-                  drawInitialPieces(
-                      playingAs: PlayingAs.white,
-                      boardSize: 375,
-                      tappedIndices: tappedIndices),
                 ],
               ),
-              SizedBox(
-                height: widget.size * 0.8,
-                width: widget.size * 0.08,
-                child: ListView.builder(
-                    itemCount: 8,
-                    reverse: widget.playingAs == PlayingAs.white,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      return SizedBox(
-                        height: widget.size * 0.1,
-                        width: widget.size * 0.08,
-                        child: Center(
-                          child: Transform.rotate(
-                            angle: pi,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  height: widget.size * 0.8,
+                  width: widget.size * 0.08,
+                  child: ListView.builder(
+                      itemCount: 8,
+                      reverse: widget.playingTurn == PlayingTurn.white,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          height: widget.size * 0.1,
+                          width: widget.size * 0.08,
+                          child: Center(
                             child: FittedBox(
                               child: Text(
                                 ranksNotation[index],
@@ -351,47 +284,119 @@ class _ChessBoardState extends State<ChessBoard> {
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: widget.size * 0.08,
-            child: Row(
-              children: [
-                SizedBox(
-                  width: widget.size * 0.08,
+                        );
+                      }),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: 8,
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      return SizedBox(
-                        width: widget.size * 0.1,
-                        child: Center(
-                          child: FittedBox(
-                            child: Text(
-                              filesNotation[index],
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700),
+                Stack(
+                  children: [
+                    SizedBox(
+                      width: widget.size * 0.8,
+                      height: widget.size * 0.8,
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        reverse: true,
+                        itemCount: 64,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 8,
+                        ),
+                        itemBuilder: (context, index) => GestureDetector(
+                          onTap: () {
+                            tappedIndices.clear();
+                            chess.handleSquareTapped(tappedSquareIndex: index);
+
+                            widget.onTap(squareName);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: (checkedKingIndex != null &&
+                                      index == checkedKingIndex)
+                                  ? Colors.red
+                                  : (index == selectedIndex &&
+                                          selectedIndex != null)
+                                      ? Colors.lightGreen
+                                      : getSquareColor(
+                                          ignoreTappedIndices: true,
+                                          index: index,
+                                          tappedIndices: tappedIndices),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    drawInitialPieces(
+                        playingAs: PlayingAs.white,
+                        boardSize: 375,
+                        tappedIndices: tappedIndices),
+                  ],
+                ),
+                SizedBox(
+                  height: widget.size * 0.8,
+                  width: widget.size * 0.08,
+                  child: ListView.builder(
+                      itemCount: 8,
+                      reverse: widget.playingTurn == PlayingAs.white,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          height: widget.size * 0.1,
+                          width: widget.size * 0.08,
+                          child: Center(
+                            child: Transform.rotate(
+                              angle: pi,
+                              child: FittedBox(
+                                child: Text(
+                                  ranksNotation[index],
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                 ),
               ],
             ),
-          ),
-        ],
+            SizedBox(
+              height: widget.size * 0.08,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: widget.size * 0.08,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 8,
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: widget.size * 0.1,
+                          child: Center(
+                            child: FittedBox(
+                              child: Text(
+                                filesNotation[index],
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
