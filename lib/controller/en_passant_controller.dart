@@ -95,15 +95,12 @@ class EnPassant{
   }
 
 
-  // ui related state management
+
   void updateBoardAfterEnPassant(Files tappedSquareFile,
       Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
     chessBoard[ChessController.selectedPieceIndex! +
         (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
         emptyEnPassantCapturedPawnSquare;
-    /// todo: fix this callback
-    // onEnPassant(ChessController.selectedPieceIndex! +
-    //     (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
   }
 
 }

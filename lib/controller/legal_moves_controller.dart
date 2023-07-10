@@ -9,9 +9,9 @@ class LegalMoves{
 
 
 
-  IllegalMoves illegalMoves = IllegalMoves();
+
   CastlingController castlingController = CastlingController();
-  GameStatus gameStatus = GameStatus();
+  IllegalMoves illegalMoves =IllegalMoves();
 
   List<Square> getLegalMovesOnly(
       {required List<Square> legalAndIllegalMoves,
@@ -224,7 +224,7 @@ class LegalMoves{
             file: squareAtMoveIndex.file,
             rank: squareAtMoveIndex.rank);
         // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-        bool isKingAttacked = gameStatus.isKingSquareAttacked(
+        bool isKingAttacked = isKingSquareAttacked(
             playingTurn: tappedPiece.pieceType == PieceType.light
                 ? PlayingTurn.white
                 : PlayingTurn.black,
@@ -260,7 +260,7 @@ class LegalMoves{
           pieceType: tappedPiece.pieceType,
           rank: chessBoard[index].rank);
       // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-      bool isKingAttacked = gameStatus.isKingSquareAttacked(
+      bool isKingAttacked = isKingSquareAttacked(
           playingTurn: tappedPiece.pieceType == PieceType.light
               ? PlayingTurn.white
               : PlayingTurn.black,

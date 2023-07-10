@@ -9,7 +9,7 @@ import 'package:chess/controller/legal_moves_controller.dart';
 import 'package:chess/utils/typedefs.dart';
 import 'package:chess/model/model.dart';
 
-//--------------Main Game Controller-------------------
+
 
 class ChessController {
   final OnDraw onDraw;
@@ -226,6 +226,8 @@ class ChessController {
               if (didCaptureEnPassant) {
                 enPassant.updateBoardAfterEnPassant(tappedSquareFile,
                     selectedPieceFile, emptyEnPassantCapturedPawnSquare);
+                onEnPassant(selectedPieceIndex! +
+                    (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
               }
               castlingController.changeCastlingAvailability(
                   movedPiece: selectedPiece!.piece!,
@@ -236,7 +238,7 @@ class ChessController {
               chessBoard[selectedPieceIndex!] =
                   emptySquareAtSelectedPieceIndex;
               isKingInCheck =
-                  gameStatus.isKingSquareAttacked(playingTurn: _playingTurn);
+                  isKingSquareAttacked(playingTurn: _playingTurn);
               if (isKingInCheck) {
                 onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != selectedPiece?.pieceType &&
@@ -252,6 +254,7 @@ class ChessController {
                   opponentKingType: selectedPiece?.pieceType == PieceType.light
                       ? PieceType.dark
                       : PieceType.light)) {
+                 onDraw(DrawType.stalemate);
                 soundToPlay = SoundType.draw;
               }
 

@@ -61,88 +61,6 @@ class GameStatus{
     return false;
   }
 
-  bool isKingSquareAttacked(
-      {required PlayingTurn playingTurn, Square? escapeSquare}) {
-    PieceType enemyKingType =
-    playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
-    Square enemyKingPiece = escapeSquare ??
-        chessBoard.firstWhere((square) =>
-        square.piece == Pieces.king && square.pieceType == enemyKingType);
-
-    /// -------------------------------------getting surrounding enemy pawns--------------------------
-    List<Square> surroundingEnemyPawns =
-    illegalMoves.getPawnPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
-    // pawns can't check a king of the same type
-    surroundingEnemyPawns
-        .removeWhere((pawn) => pawn.pieceType == enemyKingPiece.pieceType);
-    // pawns that are on the same file as the king aren't checking the king
-    surroundingEnemyPawns
-        .removeWhere((pawn) => pawn.file == enemyKingPiece.file);
-    surroundingEnemyPawns.removeWhere((pawn) {
-      // a black king can't be put in check by white pawns higher in rank
-      if (enemyKingPiece.pieceType == PieceType.dark &&
-          pawn.rank > enemyKingPiece.rank) {
-        return true;
-      }
-      // a white king can't be put in check by white pawns lower in rank
-      if (enemyKingPiece.pieceType == PieceType.light &&
-          pawn.rank < enemyKingPiece.rank) {
-        return true;
-      }
-      return false;
-    });
-
-    /// -------------------------------------getting surrounding enemy knights---------------
-    List<Square> surroundingKnights =
-    illegalMoves.getKnightPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
-    // knights of the same type as the enemy king can't check the king
-    surroundingKnights
-        .removeWhere((knight) => knight.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count, same for pieces that are not knights
-    surroundingKnights.removeWhere(
-            (square) => square.piece == null || square.piece != Pieces.knight);
-
-    /// ------------------------------------getting surrounding enemy rooks and queens  (queens vertical/horizontal to the enemy king)---------
-    List<Square> surroundingRooksAndQueens = [
-      ...illegalMoves.getHorizontalPieces(
-          rank: enemyKingPiece.rank, file: enemyKingPiece.file),
-      ...illegalMoves.getVerticalPieces(
-          rank: enemyKingPiece.rank, file: enemyKingPiece.file),
-    ];
-    List<Square> surroundingRooksAndQueensInLineOfSight = legalMoves.getLegalMovesOnly(
-        legalAndIllegalMoves: surroundingRooksAndQueens,
-        file: enemyKingPiece.file,
-        rank: enemyKingPiece.rank);
-    // rooks or queens of the same type as the king can't check the king
-    surroundingRooksAndQueensInLineOfSight.removeWhere(
-            (rookOrQueen) => rookOrQueen.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count, same for pieces that are neither rooks nor queens
-    surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
-    square.piece == null ||
-        (square.piece != Pieces.rook && square.piece != Pieces.queen));
-
-    /// ----------------------------------------getting surrounding enemy bishops and queens (queens diagonal to the enemy king)----------------
-    List<Square> surroundingBishopsAndQueens = illegalMoves.getDiagonalPieces(
-        rank: enemyKingPiece.rank, file: enemyKingPiece.file);
-    List<Square> surroundingBishopsAndQueensInLineOfSight = legalMoves.getLegalMovesOnly(
-        legalAndIllegalMoves: surroundingBishopsAndQueens,
-        file: enemyKingPiece.file,
-        rank: enemyKingPiece.rank);
-    surroundingBishopsAndQueensInLineOfSight.removeWhere(
-            (bishopOrQueen) => bishopOrQueen.pieceType == enemyKingPiece.pieceType);
-    // empty squares don't count, same for pieces that are neither bishops nor queens
-    surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
-    square.piece == null ||
-        (square.piece != Pieces.bishop && square.piece != Pieces.queen));
-
-    ///------------------------------------------------------------------------------------
-
-    return surroundingEnemyPawns.isNotEmpty ||
-        surroundingKnights.isNotEmpty ||
-        surroundingRooksAndQueensInLineOfSight.isNotEmpty ||
-        surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
-  }
-
   bool isCheckmate({required PlayingTurn attackedPlayer}) {
     List<int> movesThatProtectTheKing = [];
     // a late initialization error should not occur, unless the logic is wrong
@@ -240,11 +158,96 @@ class GameStatus{
     if (allLegalMovesIndices.isEmpty &&
         chessBoard[opponentKingIndex].pieceType != null) {
       ChessController.preventFurtherInteractions(true);
-      /// todo: fix this callback
-    // onDraw(DrawType.stalemate);
+
       return true;
     }
     return false;
   }
 
+}
+
+
+bool isKingSquareAttacked(
+    {required PlayingTurn playingTurn, Square? escapeSquare}) {
+  IllegalMoves illegalMoves =IllegalMoves();
+  LegalMoves legalMoves =LegalMoves();
+
+  PieceType enemyKingType =
+  playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
+  Square enemyKingPiece = escapeSquare ??
+      chessBoard.firstWhere((square) =>
+      square.piece == Pieces.king && square.pieceType == enemyKingType);
+
+  /// -------------------------------------getting surrounding enemy pawns--------------------------
+  List<Square> surroundingEnemyPawns =
+  illegalMoves.getPawnPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+  // pawns can't check a king of the same type
+  surroundingEnemyPawns
+      .removeWhere((pawn) => pawn.pieceType == enemyKingPiece.pieceType);
+  // pawns that are on the same file as the king aren't checking the king
+  surroundingEnemyPawns
+      .removeWhere((pawn) => pawn.file == enemyKingPiece.file);
+  surroundingEnemyPawns.removeWhere((pawn) {
+    // a black king can't be put in check by white pawns higher in rank
+    if (enemyKingPiece.pieceType == PieceType.dark &&
+        pawn.rank > enemyKingPiece.rank) {
+      return true;
+    }
+    // a white king can't be put in check by white pawns lower in rank
+    if (enemyKingPiece.pieceType == PieceType.light &&
+        pawn.rank < enemyKingPiece.rank) {
+      return true;
+    }
+    return false;
+  });
+
+  /// -------------------------------------getting surrounding enemy knights---------------
+  List<Square> surroundingKnights =
+  illegalMoves.getKnightPieces(rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+  // knights of the same type as the enemy king can't check the king
+  surroundingKnights
+      .removeWhere((knight) => knight.pieceType == enemyKingPiece.pieceType);
+  // empty squares don't count, same for pieces that are not knights
+  surroundingKnights.removeWhere(
+          (square) => square.piece == null || square.piece != Pieces.knight);
+
+  /// ------------------------------------getting surrounding enemy rooks and queens  (queens vertical/horizontal to the enemy king)---------
+  List<Square> surroundingRooksAndQueens = [
+    ...illegalMoves.getHorizontalPieces(
+        rank: enemyKingPiece.rank, file: enemyKingPiece.file),
+    ...illegalMoves.getVerticalPieces(
+        rank: enemyKingPiece.rank, file: enemyKingPiece.file),
+  ];
+  List<Square> surroundingRooksAndQueensInLineOfSight = legalMoves.getLegalMovesOnly(
+      legalAndIllegalMoves: surroundingRooksAndQueens,
+      file: enemyKingPiece.file,
+      rank: enemyKingPiece.rank);
+  // rooks or queens of the same type as the king can't check the king
+  surroundingRooksAndQueensInLineOfSight.removeWhere(
+          (rookOrQueen) => rookOrQueen.pieceType == enemyKingPiece.pieceType);
+  // empty squares don't count, same for pieces that are neither rooks nor queens
+  surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
+  square.piece == null ||
+      (square.piece != Pieces.rook && square.piece != Pieces.queen));
+
+  /// ----------------------------------------getting surrounding enemy bishops and queens (queens diagonal to the enemy king)----------------
+  List<Square> surroundingBishopsAndQueens = illegalMoves.getDiagonalPieces(
+      rank: enemyKingPiece.rank, file: enemyKingPiece.file);
+  List<Square> surroundingBishopsAndQueensInLineOfSight = legalMoves.getLegalMovesOnly(
+      legalAndIllegalMoves: surroundingBishopsAndQueens,
+      file: enemyKingPiece.file,
+      rank: enemyKingPiece.rank);
+  surroundingBishopsAndQueensInLineOfSight.removeWhere(
+          (bishopOrQueen) => bishopOrQueen.pieceType == enemyKingPiece.pieceType);
+  // empty squares don't count, same for pieces that are neither bishops nor queens
+  surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
+  square.piece == null ||
+      (square.piece != Pieces.bishop && square.piece != Pieces.queen));
+
+  ///------------------------------------------------------------------------------------
+
+  return surroundingEnemyPawns.isNotEmpty ||
+      surroundingKnights.isNotEmpty ||
+      surroundingRooksAndQueensInLineOfSight.isNotEmpty ||
+      surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
 }
