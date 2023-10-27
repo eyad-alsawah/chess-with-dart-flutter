@@ -10,6 +10,7 @@ class SharedState {
 
   // Public static method to access the instance
   static SharedState get instance => _instance;
+  //----------------------------------------------------------------------------
 
   List<int> legalMovesIndices = [];
   int? selectedPieceIndex;

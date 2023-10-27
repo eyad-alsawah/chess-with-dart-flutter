@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
@@ -47,28 +47,28 @@ class _ChessBoardState extends State<ChessBoard> {
         checkedKingIndex = enemyKingIndex;
       },
       playSound: (soundType) async {
-        AudioPlayer audioPlayer = AudioPlayer();
-        switch (soundType) {
-          case SoundType.illegal:
-            await audioPlayer.play(volume: 1, AssetSource(illegalSound));
-            break;
-          case SoundType.pieceMoved:
-            await audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
-            break;
-          case SoundType.capture:
-            await audioPlayer.play(volume: 1, AssetSource(captureSound));
-            break;
-          case SoundType.kingChecked:
-            await audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
-            break;
-          case SoundType.victory:
-            await audioPlayer.play(volume: 1, AssetSource(victorySound));
-            break;
-          case SoundType.draw:
-            await audioPlayer.play(volume: 1, AssetSource(drawSound));
-            break;
-          default:
-        }
+        // AudioPlayer audioPlayer = AudioPlayer();
+        // switch (soundType) {
+        //   case SoundType.illegal:
+        //     await audioPlayer.play(volume: 1, AssetSource(illegalSound));
+        //     break;
+        //   case SoundType.pieceMoved:
+        //     await audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
+        //     break;
+        //   case SoundType.capture:
+        //     await audioPlayer.play(volume: 1, AssetSource(captureSound));
+        //     break;
+        //   case SoundType.kingChecked:
+        //     await audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
+        //     break;
+        //   case SoundType.victory:
+        //     await audioPlayer.play(volume: 1, AssetSource(victorySound));
+        //     break;
+        //   case SoundType.draw:
+        //     await audioPlayer.play(volume: 1, AssetSource(drawSound));
+        //     break;
+        //   default:
+        // }
       },
       updateView: () {
         setState(() {});
@@ -204,8 +204,8 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[capturedPawnIndex].pieceType = null;
       },
       onError: (error, errorString) {
-        AudioPlayer audioPlayer = AudioPlayer();
-        audioPlayer.play(volume: 1, AssetSource(illegalSound));
+        // AudioPlayer audioPlayer = AudioPlayer();
+        // audioPlayer.play(volume: 1, AssetSource(illegalSound));
       },
     );
   }
