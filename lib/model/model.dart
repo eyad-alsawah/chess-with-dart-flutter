@@ -1,5 +1,5 @@
-import 'package:chess/controller/enums.dart';
-import 'package:chess/controller/game_controller.dart';
+import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/game_controller.dart';
 
 List<Square> chessBoard = [
   // -------------------------------First Rank------------------

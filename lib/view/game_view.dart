@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 
-import 'package:chess/controller/enums.dart';
-import 'package:chess/controller/game_controller.dart';
+import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/game_controller.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';

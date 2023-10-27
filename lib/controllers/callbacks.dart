@@ -1,4 +1,4 @@
-import 'package:chess/controller/typedefs.dart';
+import 'package:chess/controllers/typedefs.dart';
 
 class Callbacks {
   // Private constructor

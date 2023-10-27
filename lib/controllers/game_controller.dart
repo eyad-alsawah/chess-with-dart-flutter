@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:chess/controller/enums.dart';
-import 'package:chess/controller/shared_state.dart';
-import 'package:chess/controller/typedefs.dart';
+import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/model.dart';
 
 import 'callbacks.dart';
