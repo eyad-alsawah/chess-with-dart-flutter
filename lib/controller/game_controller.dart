@@ -5,6 +5,8 @@ import 'package:chess/controller/shared_state.dart';
 import 'package:chess/controller/typedefs.dart';
 import 'package:chess/model/model.dart';
 
+import 'callbacks.dart';
+
 //--------------Main Game Controller-------------------
 class ChessController {
   final OnCheck onCheck;
@@ -20,15 +22,31 @@ class ChessController {
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
-  final OnCapture onCapture;
+
 //-------------------------------------------
 
   SharedState sharedState = SharedState.instance;
+  Callbacks callbacks = Callbacks.instance;
+
+  void registerCallbacksListeners() {
+    callbacks.onCheck = onCheck;
+    callbacks.onVictory = onVictory;
+    callbacks.onDraw = onDraw;
+    callbacks.onPlayingTurnChanged = onPlayingTurnChanged;
+    callbacks.onPieceSelected = onPieceSelected;
+    callbacks.onCastling = onCastling;
+    callbacks.onPieceMoved = onPieceMoved;
+    callbacks.onError = onError;
+    callbacks.onPawnPromoted = onPawnPromoted;
+    callbacks.onSelectPromotionType = onSelectPromotionType;
+    callbacks.onEnPassant = onEnPassant;
+    callbacks.playSound = playSound;
+    callbacks.updateView = updateView;
+  }
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
     required this.onCheck,
-    required this.onCapture,
     required String initialPosition,
     PlayingTurn? playAs,
     required this.onVictory,
@@ -43,9 +61,12 @@ class ChessController {
     required this.onEnPassant,
     required this.playSound,
     required this.updateView,
-  }) : assert(_isValidFen(fenString: initialPosition),
-            'initialPosition must be a valid FEN String');
-  //------------------------------
+  }) {
+    registerCallbacksListeners();
+    assert(_isValidFen(fenString: initialPosition),
+        'initialPosition must be a valid FEN String');
+    //------------------------------
+  }
   start() {}
   pause() {}
   resume() {}
@@ -100,12 +121,13 @@ class ChessController {
                   ? sharedState.legalMovesIndices.clear()
                   : null;
 
-              onPieceSelected(sharedState.legalMovesIndices, tappedSquareIndex);
+              callbacks.onPieceSelected(
+                  sharedState.legalMovesIndices, tappedSquareIndex);
 
               sharedState.inMoveSelectionMode =
                   sharedState.legalMovesIndices.isEmpty;
 
-              updateView();
+              callbacks.updateView();
               return;
             }
             // checking nullability only for safely using null check operator
@@ -125,7 +147,7 @@ class ChessController {
                   sharedState.playingTurn == PlayingTurn.white
                       ? PlayingTurn.black
                       : PlayingTurn.white;
-              onPlayingTurnChanged(sharedState.playingTurn);
+              callbacks.onPlayingTurnChanged(sharedState.playingTurn);
 
               bool didCaptureEnPassant = _didCaptureEnPassant(
                 movedPieceType: sharedState.selectedPiece?.pieceType,
@@ -142,7 +164,8 @@ class ChessController {
               // moving the rook in case a king castled
               moveRookOnCastle(tappedSquareIndex: tappedSquareIndex);
 
-              onPieceMoved(sharedState.selectedPieceIndex!, tappedSquareIndex);
+              callbacks.onPieceMoved(
+                  sharedState.selectedPieceIndex!, tappedSquareIndex);
 
               _addPawnToEnPassantCapturablePawns(
                   fromRank: selectedPieceRank,
@@ -156,13 +179,15 @@ class ChessController {
                   tappedSquareRank: tappedSquareRank);
 
               shouldPromotePawn
-                  ? await onSelectPromotionType(
+                  ? await callbacks
+                      .onSelectPromotionType(
                           sharedState.playingTurn == PlayingTurn.white
                               ? PlayingTurn.black
                               : PlayingTurn.white)
                       .then((selectedPromotionType) {
                       promotedPawn = selectedPromotionType;
-                      onPawnPromoted(tappedSquareIndex, selectedPromotionType);
+                      callbacks.onPawnPromoted(
+                          tappedSquareIndex, selectedPromotionType);
                     })
                   : null;
 
@@ -201,13 +226,13 @@ class ChessController {
               sharedState.isKingInCheck =
                   isKingSquareAttacked(playingTurn: sharedState.playingTurn);
               if (sharedState.isKingInCheck) {
-                onCheck(chessBoard.indexWhere((piece) =>
+                callbacks.onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != sharedState.selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
                 if (isCheckmate(attackedPlayer: sharedState.playingTurn)) {
                   preventFurtherInteractions(true);
-                  onVictory(VictoryType.checkmate);
-                  playSound(SoundType.victory);
+                  callbacks.onVictory(VictoryType.checkmate);
+                  callbacks.playSound(SoundType.victory);
                 }
               }
 
@@ -219,15 +244,15 @@ class ChessController {
                 soundToPlay = SoundType.draw;
               }
 
-              playSound(soundToPlay);
+              callbacks.playSound(soundToPlay);
 
-              updateView();
+              callbacks.updateView();
             }
-            onPieceSelected([], tappedSquareIndex);
+            callbacks.onPieceSelected([], tappedSquareIndex);
             sharedState.inMoveSelectionMode = true;
             sharedState.legalMovesIndices.clear();
           }, (error, stack) {
-            onError(Error, stack.toString());
+            callbacks.onError(Error, stack.toString());
           });
   }
 
@@ -250,7 +275,7 @@ class ChessController {
     if (allLegalMovesIndices.isEmpty &&
         chessBoard[opponentKingIndex].pieceType != null) {
       preventFurtherInteractions(true);
-      onDraw(DrawType.stalemate);
+      callbacks.onDraw(DrawType.stalemate);
       return true;
     }
     return false;
@@ -411,7 +436,7 @@ class ChessController {
     chessBoard[sharedState.selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
         emptyEnPassantCapturedPawnSquare;
-    onEnPassant(sharedState.selectedPieceIndex! +
+    callbacks.onEnPassant(sharedState.selectedPieceIndex! +
         (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
   }
 
@@ -495,13 +520,13 @@ class ChessController {
           (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
         // moving the rook and updating the board
         if (tappedSquareIndex == 62) {
-          onPieceMoved(63, 61);
+          callbacks.onPieceMoved(63, 61);
           chessBoard[63].piece = null;
           chessBoard[63].pieceType = null;
           chessBoard[61].piece = Pieces.rook;
           chessBoard[61].pieceType = PieceType.dark;
         } else {
-          onPieceMoved(56, 59);
+          callbacks.onPieceMoved(56, 59);
           chessBoard[56].piece = null;
           chessBoard[56].pieceType = null;
           chessBoard[59].piece = Pieces.rook;
@@ -511,13 +536,13 @@ class ChessController {
           sharedState.selectedPieceIndex! == 4 &&
           (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
         if (tappedSquareIndex == 6) {
-          onPieceMoved(7, 5);
+          callbacks.onPieceMoved(7, 5);
           chessBoard[7].piece = null;
           chessBoard[7].pieceType = null;
           chessBoard[5].piece = Pieces.rook;
           chessBoard[5].pieceType = PieceType.light;
         } else {
-          onPieceMoved(0, 3);
+          callbacks.onPieceMoved(0, 3);
           chessBoard[0].piece = null;
           chessBoard[0].pieceType = null;
           chessBoard[3].piece = Pieces.rook;
