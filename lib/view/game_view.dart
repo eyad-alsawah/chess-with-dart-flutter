@@ -9,6 +9,7 @@ import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chess/model/model.dart';
+import 'package:just_audio/just_audio.dart';
 
 enum PlayingAs { white, black }
 
@@ -38,6 +39,7 @@ class _ChessBoardState extends State<ChessBoard> {
   int? checkedKingIndex;
 
   late ChessController chess;
+  final audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -47,28 +49,39 @@ class _ChessBoardState extends State<ChessBoard> {
         checkedKingIndex = enemyKingIndex;
       },
       playSound: (soundType) async {
-        // AudioPlayer audioPlayer = AudioPlayer();
-        // switch (soundType) {
-        //   case SoundType.illegal:
-        //     await audioPlayer.play(volume: 1, AssetSource(illegalSound));
-        //     break;
-        //   case SoundType.pieceMoved:
-        //     await audioPlayer.play(volume: 1, AssetSource(pieceMovedSound));
-        //     break;
-        //   case SoundType.capture:
-        //     await audioPlayer.play(volume: 1, AssetSource(captureSound));
-        //     break;
-        //   case SoundType.kingChecked:
-        //     await audioPlayer.play(volume: 1, AssetSource(kingCheckedSound));
-        //     break;
-        //   case SoundType.victory:
-        //     await audioPlayer.play(volume: 1, AssetSource(victorySound));
-        //     break;
-        //   case SoundType.draw:
-        //     await audioPlayer.play(volume: 1, AssetSource(drawSound));
-        //     break;
-        //   default:
-        // }
+        AudioPlayer audioPlayer = AudioPlayer();
+
+        switch (soundType) {
+          case SoundType.illegal:
+            audioPlayer.setAsset(illegalSound);
+
+            break;
+          case SoundType.pieceMoved:
+            audioPlayer.setAsset(pieceMovedSound);
+
+            break;
+          case SoundType.capture:
+            audioPlayer.setAsset(captureSound);
+
+            break;
+          case SoundType.kingChecked:
+            audioPlayer.setAsset(kingCheckedSound);
+
+            break;
+          case SoundType.victory:
+            audioPlayer.setAsset(victorySound);
+
+            break;
+          case SoundType.draw:
+            audioPlayer.setAsset(drawSound);
+
+            break;
+          default:
+        }
+        if (audioPlayer.audioSource != null) {
+          print("audioSource: ${audioPlayer.audioSource?.sequence}");
+          audioPlayer.play();
+        }
       },
       updateView: () {
         setState(() {});
