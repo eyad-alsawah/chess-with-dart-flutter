@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chess/controller/callbacks.dart';
+
 import 'package:chess/controller/enums.dart';
 import 'package:chess/controller/game_controller.dart';
 import 'package:chess/utils/image_assets.dart';
@@ -38,7 +38,6 @@ class _ChessBoardState extends State<ChessBoard> {
   int? checkedKingIndex;
 
   late ChessController chess;
-  Callbacks callbacks = Callbacks.instance;
 
   @override
   void initState() {
