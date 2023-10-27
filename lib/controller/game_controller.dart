@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:chess/controller/enums.dart';
+import 'package:chess/controller/shared_state.dart';
 import 'package:chess/controller/typedefs.dart';
 import 'package:chess/model/model.dart';
-
-import '../main.dart';
 
 //--------------Main Game Controller-------------------
 class ChessController {
@@ -24,9 +23,7 @@ class ChessController {
   final OnCapture onCapture;
 //-------------------------------------------
 
-  bool _inMoveSelectionMode = true;
-  // prevents doing anything if the game ended
-  bool lockFurtherInteractions = false;
+  SharedState sharedState = SharedState.instance;
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
@@ -69,14 +66,8 @@ class ChessController {
 
   //---------------------------------
 
-  List<int> _legalMovesIndices = [];
-  int? _selectedPieceIndex;
-  Square? _selectedPiece;
-  // initial playingTurn is set to white, (todo: change this if [fromPosition] constructor was called)
-  PlayingTurn _playingTurn = PlayingTurn.white;
-  bool isKingInCheck = false;
   handleSquareTapped({required int tappedSquareIndex}) async {
-    lockFurtherInteractions
+    sharedState.lockFurtherInteractions
         ? null
         : runZonedGuarded(() async {
             Files tappedSquareFile =
@@ -85,18 +76,18 @@ class ChessController {
                 _getRankNameFromIndex(index: tappedSquareIndex);
 
             /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
-            _inMoveSelectionMode = _isInMoveSelectionMode(
-                playingTurn: _playingTurn,
+            sharedState.inMoveSelectionMode = _isInMoveSelectionMode(
+                playingTurn: sharedState.playingTurn,
                 tappedSquareIndex: tappedSquareIndex,
-                legalMovesIndices: _legalMovesIndices);
+                legalMovesIndices: sharedState.legalMovesIndices);
 
-            if (_inMoveSelectionMode) {
-              _selectedPieceIndex = tappedSquareIndex;
-              _selectedPiece = chessBoard[tappedSquareIndex];
-              _legalMovesIndices = _getLegalMovesIndices(
+            if (sharedState.inMoveSelectionMode) {
+              sharedState.selectedPieceIndex = tappedSquareIndex;
+              sharedState.selectedPiece = chessBoard[tappedSquareIndex];
+              sharedState.legalMovesIndices = _getLegalMovesIndices(
                 tappedSquareFile: tappedSquareFile,
                 tappedSquareRank: tappedSquareRank,
-                isKingChecked: isKingInCheck,
+                isKingChecked: sharedState.isKingInCheck,
                 fromHandleSquareTapped: true,
               );
 
@@ -104,38 +95,41 @@ class ChessController {
 
               // preventing player who's turn is not his to play by emptying the legalMovesIndices list
               shouldClearLegalMovesIndices(
-                      playingTurn: _playingTurn,
-                      selectedPieceType: _selectedPiece?.pieceType)
-                  ? _legalMovesIndices.clear()
+                      playingTurn: sharedState.playingTurn,
+                      selectedPieceType: sharedState.selectedPiece?.pieceType)
+                  ? sharedState.legalMovesIndices.clear()
                   : null;
 
-              onPieceSelected(_legalMovesIndices, tappedSquareIndex);
+              onPieceSelected(sharedState.legalMovesIndices, tappedSquareIndex);
 
-              _inMoveSelectionMode = _legalMovesIndices.isEmpty;
+              sharedState.inMoveSelectionMode =
+                  sharedState.legalMovesIndices.isEmpty;
 
               updateView();
               return;
             }
             // checking nullability only for safely using null check operator
-            else if (_legalMovesIndices.contains(tappedSquareIndex) &&
-                _selectedPiece != null &&
-                _selectedPieceIndex != null) {
+            else if (sharedState.legalMovesIndices
+                    .contains(tappedSquareIndex) &&
+                sharedState.selectedPiece != null &&
+                sharedState.selectedPieceIndex != null) {
               late SoundType soundToPlay;
               // pawn will be promoted to queen by default
               Pieces promotedPawn = Pieces.queen;
               Files selectedPieceFile =
-                  _getFileNameFromIndex(index: _selectedPieceIndex!);
+                  _getFileNameFromIndex(index: sharedState.selectedPieceIndex!);
               int selectedPieceRank =
-                  _getRankNameFromIndex(index: _selectedPieceIndex!);
+                  _getRankNameFromIndex(index: sharedState.selectedPieceIndex!);
 
-              _playingTurn = _playingTurn == PlayingTurn.white
-                  ? PlayingTurn.black
-                  : PlayingTurn.white;
-              onPlayingTurnChanged(_playingTurn);
+              sharedState.playingTurn =
+                  sharedState.playingTurn == PlayingTurn.white
+                      ? PlayingTurn.black
+                      : PlayingTurn.white;
+              onPlayingTurnChanged(sharedState.playingTurn);
 
               bool didCaptureEnPassant = _didCaptureEnPassant(
-                movedPieceType: _selectedPiece?.pieceType,
-                didMovePawn: _selectedPiece!.piece == Pieces.pawn,
+                movedPieceType: sharedState.selectedPiece?.pieceType,
+                didMovePawn: sharedState.selectedPiece!.piece == Pieces.pawn,
                 didMoveToEmptySquareOnDifferentFile:
                     selectedPieceFile != tappedSquareFile &&
                         chessBoard[tappedSquareIndex].piece == null,
@@ -148,22 +142,22 @@ class ChessController {
               // moving the rook in case a king castled
               moveRookOnCastle(tappedSquareIndex: tappedSquareIndex);
 
-              onPieceMoved(_selectedPieceIndex!, tappedSquareIndex);
+              onPieceMoved(sharedState.selectedPieceIndex!, tappedSquareIndex);
 
               _addPawnToEnPassantCapturablePawns(
                   fromRank: selectedPieceRank,
                   toRank: tappedSquareRank,
-                  piece: _selectedPiece!.piece,
+                  piece: sharedState.selectedPiece!.piece,
                   movedToIndex: tappedSquareIndex,
-                  pawnType: _selectedPiece!.pieceType);
+                  pawnType: sharedState.selectedPiece!.pieceType);
 
               bool shouldPromotePawn = shouldPawnBePromoted(
-                  selectedPiecePiece: _selectedPiece?.piece,
+                  selectedPiecePiece: sharedState.selectedPiece?.piece,
                   tappedSquareRank: tappedSquareRank);
 
               shouldPromotePawn
                   ? await onSelectPromotionType(
-                          _playingTurn == PlayingTurn.white
+                          sharedState.playingTurn == PlayingTurn.white
                               ? PlayingTurn.black
                               : PlayingTurn.white)
                       .then((selectedPromotionType) {
@@ -181,8 +175,10 @@ class ChessController {
               Square newSquareAtTappedIndex = Square(
                 file: tappedSquareFile,
                 rank: tappedSquareRank,
-                piece: shouldPromotePawn ? promotedPawn : _selectedPiece?.piece,
-                pieceType: _selectedPiece?.pieceType,
+                piece: shouldPromotePawn
+                    ? promotedPawn
+                    : sharedState.selectedPiece?.piece,
+                pieceType: sharedState.selectedPiece?.pieceType,
               );
               Square emptyEnPassantCapturedPawnSquare = Square(
                   file: tappedSquareFile,
@@ -195,19 +191,20 @@ class ChessController {
                     emptyEnPassantCapturedPawnSquare);
               }
               changeCastlingAvailability(
-                  movedPiece: _selectedPiece!.piece!,
-                  movedPieceType: _selectedPiece!.pieceType!,
-                  indexPieceMovedFrom: _selectedPieceIndex!);
+                  movedPiece: sharedState.selectedPiece!.piece!,
+                  movedPieceType: sharedState.selectedPiece!.pieceType!,
+                  indexPieceMovedFrom: sharedState.selectedPieceIndex!);
 
               chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
-              chessBoard[_selectedPieceIndex!] =
+              chessBoard[sharedState.selectedPieceIndex!] =
                   emptySquareAtSelectedPieceIndex;
-              isKingInCheck = isKingSquareAttacked(playingTurn: _playingTurn);
-              if (isKingInCheck) {
+              sharedState.isKingInCheck =
+                  isKingSquareAttacked(playingTurn: sharedState.playingTurn);
+              if (sharedState.isKingInCheck) {
                 onCheck(chessBoard.indexWhere((piece) =>
-                    piece.pieceType != _selectedPiece?.pieceType &&
+                    piece.pieceType != sharedState.selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
-                if (isCheckmate(attackedPlayer: _playingTurn)) {
+                if (isCheckmate(attackedPlayer: sharedState.playingTurn)) {
                   preventFurtherInteractions(true);
                   onVictory(VictoryType.checkmate);
                   playSound(SoundType.victory);
@@ -215,9 +212,10 @@ class ChessController {
               }
 
               if (checkForStaleMate(
-                  opponentKingType: _selectedPiece?.pieceType == PieceType.light
-                      ? PieceType.dark
-                      : PieceType.light)) {
+                  opponentKingType:
+                      sharedState.selectedPiece?.pieceType == PieceType.light
+                          ? PieceType.dark
+                          : PieceType.light)) {
                 soundToPlay = SoundType.draw;
               }
 
@@ -226,8 +224,8 @@ class ChessController {
               updateView();
             }
             onPieceSelected([], tappedSquareIndex);
-            _inMoveSelectionMode = true;
-            _legalMovesIndices.clear();
+            sharedState.inMoveSelectionMode = true;
+            sharedState.legalMovesIndices.clear();
           }, (error, stack) {
             onError(Error, stack.toString());
           });
@@ -243,7 +241,7 @@ class ChessController {
         allLegalMovesIndices.addAll(_getLegalMovesIndices(
           tappedSquareFile: square.file,
           tappedSquareRank: square.rank,
-          isKingChecked: isKingInCheck,
+          isKingChecked: sharedState.isKingInCheck,
           fromHandleSquareTapped: true,
         ));
       }
@@ -259,7 +257,7 @@ class ChessController {
   }
 
   preventFurtherInteractions(bool status) {
-    lockFurtherInteractions = status;
+    sharedState.lockFurtherInteractions = status;
   }
 
   bool _isInMoveSelectionMode(
@@ -271,15 +269,15 @@ class ChessController {
         ((chessBoard[tappedSquareIndex].pieceType == null ||
                     (chessBoard[tappedSquareIndex].pieceType ==
                             PieceType.light &&
-                        _playingTurn != PlayingTurn.white) ||
+                        sharedState.playingTurn != PlayingTurn.white) ||
                     (chessBoard[tappedSquareIndex].pieceType ==
                             PieceType.dark &&
-                        _playingTurn != PlayingTurn.black)) &&
+                        sharedState.playingTurn != PlayingTurn.black)) &&
                 !legalMovesIndices.contains(tappedSquareIndex)) ||
             (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
-                _playingTurn == PlayingTurn.white) ||
+                sharedState.playingTurn == PlayingTurn.white) ||
             (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
-                _playingTurn == PlayingTurn.black);
+                sharedState.playingTurn == PlayingTurn.black);
     return inMoveSelectionMode;
   }
 
@@ -287,10 +285,10 @@ class ChessController {
       {required PieceType? selectedPieceType,
       required PlayingTurn playingTurn}) {
     bool shouldClearLegalMovesIndices =
-        ((_selectedPiece?.pieceType == PieceType.light &&
-                _playingTurn != PlayingTurn.white) ||
-            (_selectedPiece?.pieceType == PieceType.dark &&
-                _playingTurn != PlayingTurn.black));
+        ((sharedState.selectedPiece?.pieceType == PieceType.light &&
+                sharedState.playingTurn != PlayingTurn.white) ||
+            (sharedState.selectedPiece?.pieceType == PieceType.dark &&
+                sharedState.playingTurn != PlayingTurn.black));
     return shouldClearLegalMovesIndices;
   }
 
@@ -338,8 +336,6 @@ class ChessController {
   }
 
   /// ---------------------------------En Passant---------------
-  int? _enPassantCapturableLightPawnIndex;
-  int? _enPassantCapturableDarkPawnIndex;
 
   void _addPawnToEnPassantCapturablePawns(
       {required int fromRank,
@@ -350,9 +346,9 @@ class ChessController {
     if (piece == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
       if (pawnType == PieceType.light) {
-        _enPassantCapturableLightPawnIndex = movedToIndex;
+        sharedState.enPassantCapturableLightPawnIndex = movedToIndex;
       } else {
-        _enPassantCapturableDarkPawnIndex = movedToIndex;
+        sharedState.enPassantCapturableDarkPawnIndex = movedToIndex;
       }
     }
   }
@@ -361,9 +357,9 @@ class ChessController {
     required PieceType? movedPieceType,
   }) {
     if (movedPieceType == PieceType.light) {
-      _enPassantCapturableDarkPawnIndex = null;
+      sharedState.enPassantCapturableDarkPawnIndex = null;
     } else if (movedPieceType == PieceType.dark) {
-      _enPassantCapturableLightPawnIndex = null;
+      sharedState.enPassantCapturableLightPawnIndex = null;
     } else {
       print(
           "this condition will only be reached if player tapped on empty square in selection mode which shouldn't happen because in handleTap we are checking if we pressed on a highlighted index in selection mode");
@@ -390,8 +386,8 @@ class ChessController {
   }) {
     bool canCaptureEnPassant = false;
     int? indexToCheck = selectedPawnType == PieceType.light
-        ? _enPassantCapturableDarkPawnIndex
-        : _enPassantCapturableLightPawnIndex;
+        ? sharedState.enPassantCapturableDarkPawnIndex
+        : sharedState.enPassantCapturableLightPawnIndex;
 
     if ((selectedPawnType == PieceType.light && fromRank == 5) ||
         (selectedPawnType == PieceType.dark && fromRank == 4)) {
@@ -412,41 +408,37 @@ class ChessController {
 
   void updateBoardAfterEnPassant(Files tappedSquareFile,
       Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
-    chessBoard[_selectedPieceIndex! +
+    chessBoard[sharedState.selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
         emptyEnPassantCapturedPawnSquare;
-    onEnPassant(_selectedPieceIndex! +
+    onEnPassant(sharedState.selectedPieceIndex! +
         (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
   }
 
   /// --------------------------------LegalMoves getters----------------------
   ///  ------------------------------------Castling-------------------------
-  bool didLightKingMove = false;
-  bool didDarkKingMove = false;
-  bool didLightKingSideRookMove = false;
-  bool didLightQueenSideRookMove = false;
-  bool didDarkKingSideRookMove = false;
-  bool didDarkQueenSideRookMove = false;
 
   List<Square> getCastlingAvailability({required PieceType pieceType}) {
     List<Square> castlingAvailability;
     if (pieceType == PieceType.light) {
-      if (didLightKingMove) {
+      if (sharedState.didLightKingMove) {
         castlingAvailability = [];
-      } else if (didLightKingSideRookMove) {
-        castlingAvailability = didLightQueenSideRookMove ? [] : [chessBoard[2]];
+      } else if (sharedState.didLightKingSideRookMove) {
+        castlingAvailability =
+            sharedState.didLightQueenSideRookMove ? [] : [chessBoard[2]];
       } else {
-        castlingAvailability = didLightQueenSideRookMove
+        castlingAvailability = sharedState.didLightQueenSideRookMove
             ? [chessBoard[6]]
             : [chessBoard[2], chessBoard[6]];
       }
     } else {
-      if (didDarkKingMove) {
+      if (sharedState.didDarkKingMove) {
         castlingAvailability = [];
-      } else if (didDarkKingSideRookMove) {
-        castlingAvailability = didDarkQueenSideRookMove ? [] : [chessBoard[58]];
+      } else if (sharedState.didDarkKingSideRookMove) {
+        castlingAvailability =
+            sharedState.didDarkQueenSideRookMove ? [] : [chessBoard[58]];
       } else {
-        castlingAvailability = didDarkQueenSideRookMove
+        castlingAvailability = sharedState.didDarkQueenSideRookMove
             ? [chessBoard[62]]
             : [chessBoard[58], chessBoard[62]];
       }
@@ -459,10 +451,12 @@ class ChessController {
       required PieceType movedPieceType,
       required int indexPieceMovedFrom}) {
     // checking if castling is possible in the first place before checking all the other conditions
-    bool canWhiteKingCastle = !didLightKingMove &&
-        (!didLightKingSideRookMove || !didLightQueenSideRookMove);
-    bool canBlackKingCastle = !didDarkKingMove &&
-        (!didDarkKingSideRookMove || !didDarkQueenSideRookMove);
+    bool canWhiteKingCastle = !sharedState.didLightKingMove &&
+        (!sharedState.didLightKingSideRookMove ||
+            !sharedState.didLightQueenSideRookMove);
+    bool canBlackKingCastle = !sharedState.didDarkKingMove &&
+        (!sharedState.didDarkKingSideRookMove ||
+            !sharedState.didDarkQueenSideRookMove);
 
     if (movedPieceType == PieceType.dark && !canBlackKingCastle) {
       return;
@@ -473,31 +467,31 @@ class ChessController {
     // todo: check castling availability on the start of the game by checking the existing pieces on the squares like the a1 and h8 for example
     if (movedPiece == Pieces.king) {
       if (movedPieceType == PieceType.light) {
-        didLightKingMove = true;
+        sharedState.didLightKingMove = true;
       } else {
-        didDarkKingMove = true;
+        sharedState.didDarkKingMove = true;
       }
     } else if (movedPiece == Pieces.rook) {
       if (movedPieceType == PieceType.light) {
         if (indexPieceMovedFrom == 0) {
-          didLightQueenSideRookMove = true;
+          sharedState.didLightQueenSideRookMove = true;
         } else if (indexPieceMovedFrom == 7) {
-          didLightKingSideRookMove = true;
+          sharedState.didLightKingSideRookMove = true;
         }
       } else {
         if (indexPieceMovedFrom == 56) {
-          didDarkQueenSideRookMove = true;
+          sharedState.didDarkQueenSideRookMove = true;
         } else if (indexPieceMovedFrom == 63) {
-          didDarkKingSideRookMove = true;
+          sharedState.didDarkKingSideRookMove = true;
         }
       }
     }
   }
 
   void moveRookOnCastle({required int tappedSquareIndex}) {
-    if (_selectedPiece?.piece == Pieces.king) {
-      if (_selectedPiece?.pieceType == PieceType.dark &&
-          _selectedPieceIndex! == 60 &&
+    if (sharedState.selectedPiece?.piece == Pieces.king) {
+      if (sharedState.selectedPiece?.pieceType == PieceType.dark &&
+          sharedState.selectedPieceIndex! == 60 &&
           (tappedSquareIndex == 62 || tappedSquareIndex == 58)) {
         // moving the rook and updating the board
         if (tappedSquareIndex == 62) {
@@ -513,8 +507,8 @@ class ChessController {
           chessBoard[59].piece = Pieces.rook;
           chessBoard[59].pieceType = PieceType.dark;
         }
-      } else if (_selectedPiece?.pieceType == PieceType.light &&
-          _selectedPieceIndex! == 4 &&
+      } else if (sharedState.selectedPiece?.pieceType == PieceType.light &&
+          sharedState.selectedPieceIndex! == 4 &&
           (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
         if (tappedSquareIndex == 6) {
           onPieceMoved(7, 5);
@@ -1059,7 +1053,7 @@ class ChessController {
       required List<Square> legalAndIllegalMoves}) {
     if (tappedPiece.piece == Pieces.king) {
       if (tappedPiece.pieceType == PieceType.light) {
-        if (!didLightKingMove) {
+        if (!sharedState.didLightKingMove) {
           if (chessBoard[5].piece != null || chessBoard[6].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 1),
@@ -1074,7 +1068,7 @@ class ChessController {
           }
         }
       } else {
-        if (!didDarkKingMove) {
+        if (!sharedState.didDarkKingMove) {
           if (chessBoard[61].piece != null || chessBoard[62].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 8),
