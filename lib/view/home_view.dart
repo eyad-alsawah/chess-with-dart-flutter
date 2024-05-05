@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/view/game_view.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class _HomeViewState extends State<HomeView> {
   String squareName = "";
   List<String> movementHistory = [];
   String currentPlayingTurn = "White's Turn";
+  Key uniqueKey = UniqueKey();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +23,36 @@ class _HomeViewState extends State<HomeView> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: GestureDetector(
+              onTap: () {
+                uniqueKey = UniqueKey();
+                squareName = "";
+                movementHistory = [];
+                currentPlayingTurn = "White's Turn";
+                SharedState.instance.reset();
+                setState(() {});
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Reset Game',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(
+                    Icons.restart_alt_rounded,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 50),
           ChessBoard(
+            key: uniqueKey,
             playingAs: PlayingAs.white,
             size: 375,
             onTap: (name) {},

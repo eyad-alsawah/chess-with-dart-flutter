@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
+import 'package:chess/model/initial_model_state.dart';
 import 'package:chess/model/model.dart';
 
 //--------------Main Game Controller-------------------
@@ -232,6 +233,10 @@ class ChessController {
           }, (error, stack) {
             callbacks.onError(Error, stack.toString());
           });
+  }
+
+  void reset() {
+    chessBoard = initialChessBoard;
   }
 }
 

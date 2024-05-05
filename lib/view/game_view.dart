@@ -21,12 +21,13 @@ class ChessBoard extends StatefulWidget {
   final ValueChanged<String> onTap;
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final double size;
-  const ChessBoard(
-      {super.key,
-      required this.playingAs,
-      required this.size,
-      required this.onTap,
-      required this.onPlayingTurnChanged});
+  const ChessBoard({
+    super.key,
+    required this.playingAs,
+    required this.size,
+    required this.onTap,
+    required this.onPlayingTurnChanged,
+  });
 
   @override
   State<ChessBoard> createState() => _ChessBoardState();
@@ -39,7 +40,7 @@ class _ChessBoardState extends State<ChessBoard> {
   int? checkedKingIndex;
 
   late ChessController chess;
-  final audioPlayer = AudioPlayer();
+  AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   void initState() {
