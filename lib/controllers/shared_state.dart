@@ -1,8 +1,8 @@
 import 'package:chess/model/initial_model_state.dart';
 import 'package:chess/model/model.dart';
+import 'package:chess/model/square.dart';
 
 import 'enums.dart';
-import 'game_controller.dart';
 
 class SharedState {
   // Private constructor
@@ -34,25 +34,23 @@ class SharedState {
   bool didDarkKingSideRookMove = false;
   bool didDarkQueenSideRookMove = false;
 
-
- void reset() {
-  legalMovesIndices.clear();
-  selectedPieceIndex = null;
-  selectedPiece = null;
-  playingTurn = PlayingTurn.white;
-  isKingInCheck = false;
-  enPassantCapturableLightPawnIndex = null;
-  enPassantCapturableDarkPawnIndex = null;
-  inMoveSelectionMode = true;
-  lockFurtherInteractions = false;
-  didLightKingMove = false;
-  didDarkKingMove = false;
-  didLightKingSideRookMove = false;
-  didLightQueenSideRookMove = false;
-  didDarkKingSideRookMove = false;
-  didDarkQueenSideRookMove = false;
-  chessBoard.clear();
-  chessBoard.addAll(initialChessBoard);
-}
-
+  void reset() {
+    legalMovesIndices.clear();
+    selectedPieceIndex = null;
+    selectedPiece = null;
+    playingTurn = PlayingTurn.white;
+    isKingInCheck = false;
+    enPassantCapturableLightPawnIndex = null;
+    enPassantCapturableDarkPawnIndex = null;
+    inMoveSelectionMode = true;
+    lockFurtherInteractions = false;
+    didLightKingMove = false;
+    didDarkKingMove = false;
+    didLightKingSideRookMove = false;
+    didLightQueenSideRookMove = false;
+    didDarkKingSideRookMove = false;
+    didDarkQueenSideRookMove = false;
+    chessBoard.clear();
+    chessBoard.addAll(initialChessBoard);
+  }
 }
