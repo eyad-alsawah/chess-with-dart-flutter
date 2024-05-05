@@ -11,12 +11,17 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  String squareName = "";
-  List<String> movementHistory = [];
-  String currentPlayingTurn = "White's Turn";
+  void scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _previewController.jumpTo(_previewController.position.maxScrollExtent);
+    });
+  }
+
+  final ScrollController _previewController = ScrollController();
   Key uniqueKey = UniqueKey();
   @override
   Widget build(BuildContext context) {
+    scrollToEnd();
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 38, 37, 33),
       body: Column(
@@ -26,11 +31,8 @@ class _HomeViewState extends State<HomeView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 uniqueKey = UniqueKey();
-                squareName = "";
-                movementHistory = [];
-                currentPlayingTurn = "White's Turn";
                 SharedState.instance.reset();
                 setState(() {});
               },
@@ -57,21 +59,64 @@ class _HomeViewState extends State<HomeView> {
             size: 375,
             onTap: (name) {},
             onPlayingTurnChanged: (playingTurn) {
-              currentPlayingTurn = playingTurn == PlayingTurn.white
-                  ? "White's Turn"
-                  : "Black's Turn";
+              SharedState.instance.currentPlayingTurn =
+                  playingTurn == PlayingTurn.white
+                      ? "White's Turn"
+                      : "Black's Turn";
               setState(() {});
             },
           ),
           Center(
             child: Text(
-              currentPlayingTurn,
+              SharedState.instance.currentPlayingTurn,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ),
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  SharedState.instance.replay(ReplayType.previous);
+                  setState(() {});
+                },
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              ),
+              Flexible(
+                child: Container(
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.white)),
+                  height: 50,
+                  child: ListView.builder(
+                    controller: _previewController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: stateImages.length,
+                    itemBuilder: (context, index) => Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: index == stateImages.length-1?  Colors.red:Colors.black),
+                        image: DecorationImage(
+                          image: MemoryImage(stateImages[index]),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  SharedState.instance.replay(ReplayType.next);
+                  setState(() {});
+                },
+                icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+              )
+            ],
           ),
         ],
       ),

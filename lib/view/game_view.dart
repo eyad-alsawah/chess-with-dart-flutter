@@ -4,7 +4,9 @@ import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/global_keys.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/utils/sound_assets.dart';
 import 'package:flutter/material.dart';
@@ -35,20 +37,17 @@ class ChessBoard extends StatefulWidget {
 }
 
 class _ChessBoardState extends State<ChessBoard> {
-  String squareName = "";
-  List<int> tappedIndices = [];
-  int? selectedIndex;
-  int? checkedKingIndex;
-
+  late SharedState state;
   late ChessController chess;
   AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   void initState() {
+    state = SharedState.instance;
     super.initState();
     chess = ChessController.fromPosition(
       onCheck: (enemyKingIndex) {
-        checkedKingIndex = enemyKingIndex;
+        state.checkedKingIndex = enemyKingIndex;
       },
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
@@ -81,7 +80,6 @@ class _ChessBoardState extends State<ChessBoard> {
           default:
         }
         if (audioPlayer.audioSource != null) {
-          print("audioSource: ${audioPlayer.audioSource?.sequence}");
           audioPlayer.play();
         }
       },
@@ -189,11 +187,11 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onPieceSelected:
           (highlightedLegalMovesIndices, selectedPieceIndex) async {
-        selectedIndex = null;
+        state.selectedIndex = null;
         highlightedLegalMovesIndices.isEmpty
-            ? tappedIndices.clear()
-            : tappedIndices.addAll(highlightedLegalMovesIndices);
-        selectedIndex =
+            ? state.tappedIndices.clear()
+            : state.tappedIndices.addAll(highlightedLegalMovesIndices);
+        state.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
       onCastling: (movedRookIndex) {},
@@ -208,11 +206,12 @@ class _ChessBoardState extends State<ChessBoard> {
             rank: fromRank, file: fromFile, piece: null, pieceType: null);
 
         chessBoard[to] = fromSquare;
-        selectedIndex = null;
-        tappedIndices.clear();
+        state.selectedIndex = null;
+        state.tappedIndices.clear();
 
         // todo: change the place of this to ensure that its value won't be null after we set it to an Int
-        checkedKingIndex = null;
+        state.checkedKingIndex = null;
+        SharedState.instance.storeState();
       },
       onEnPassant: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex].piece = null;
@@ -297,48 +296,51 @@ class _ChessBoardState extends State<ChessBoard> {
                       );
                     }),
               ),
-              Stack(
-                children: [
-                  SizedBox(
-                    width: widget.size * 0.8,
-                    height: widget.size * 0.8,
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      reverse: true,
-                      itemCount: 64,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 8,
-                      ),
-                      itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          tappedIndices.clear();
-                          chess.handleSquareTapped(tappedSquareIndex: index);
+              RepaintBoundary(
+                key: GlobalKeys.captureKey,
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: widget.size * 0.8,
+                      height: widget.size * 0.8,
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        reverse: true,
+                        itemCount: 64,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 8,
+                        ),
+                        itemBuilder: (context, index) => GestureDetector(
+                          onTap: () {
+                            state.tappedIndices.clear();
+                            chess.handleSquareTapped(tappedSquareIndex: index);
 
-                          widget.onTap(squareName);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: (checkedKingIndex != null &&
-                                    index == checkedKingIndex)
-                                ? Colors.red
-                                : (index == selectedIndex &&
-                                        selectedIndex != null)
-                                    ? Colors.lightGreen
-                                    : getSquareColor(
-                                        ignoreTappedIndices: true,
-                                        index: index,
-                                        tappedIndices: tappedIndices),
+                            widget.onTap(state.squareName);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: (state.checkedKingIndex != null &&
+                                      index == state.checkedKingIndex)
+                                  ? Colors.red
+                                  : (index == state.selectedIndex &&
+                                          state.selectedIndex != null)
+                                      ? Colors.lightGreen
+                                      : getSquareColor(
+                                          ignoreTappedIndices: true,
+                                          index: index,
+                                          tappedIndices: state.tappedIndices),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  drawInitialPieces(
-                      playingAs: PlayingAs.white,
-                      boardSize: 375,
-                      tappedIndices: tappedIndices),
-                ],
+                    drawInitialPieces(
+                        playingAs: PlayingAs.white,
+                        boardSize: 375,
+                        tappedIndices: state.tappedIndices),
+                  ],
+                ),
               ),
               SizedBox(
                 height: widget.size * 0.8,

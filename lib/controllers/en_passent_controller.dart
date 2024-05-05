@@ -1,7 +1,7 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/model/global_state.dart';
-
 import 'package:chess/model/model.dart';
+
 import 'package:chess/model/square.dart';
 
 class EnPassantController {
