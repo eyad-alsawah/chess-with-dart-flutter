@@ -23,6 +23,7 @@ class ChessBoard extends StatefulWidget {
   final PlayingAs playingAs;
   final ValueChanged<String> onTap;
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;
+  final VoidCallback onUpdateView;
   final double size;
   const ChessBoard({
     super.key,
@@ -30,6 +31,7 @@ class ChessBoard extends StatefulWidget {
     required this.size,
     required this.onTap,
     required this.onPlayingTurnChanged,
+    required this.onUpdateView,
   });
 
   @override
@@ -84,7 +86,7 @@ class _ChessBoardState extends State<ChessBoard> {
         }
       },
       updateView: () {
-        setState(() {});
+        widget.onUpdateView();
       },
       initialPosition: "initialPosition",
       onVictory: (victoryType) {},

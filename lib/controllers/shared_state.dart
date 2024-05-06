@@ -48,7 +48,7 @@ class SharedState {
   //---------------home_view--------------
   String currentPlayingTurn = "White's Turn";
 
-  void reset() async {
+  Future<void> reset() async {
     stateList.clear();
     stateImages.clear();
     Uint8List? stateImage = await capture(GlobalKeys.captureKey);
@@ -93,8 +93,8 @@ class SharedState {
     //------------------game view--------------
     squareName = "";
     tappedIndices = [];
-    selectedIndex =null;
-    checkedKingIndex=null;
+    selectedIndex = null;
+    checkedKingIndex = null;
     //------------------home_view----------------------
     currentPlayingTurn = "White's Turn";
     chessBoard.clear();

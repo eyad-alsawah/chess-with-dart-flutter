@@ -18,11 +18,23 @@ class _HomeViewState extends State<HomeView> {
   }
 
   final ScrollController _previewController = ScrollController();
-  Key uniqueKey = UniqueKey();
   @override
   Widget build(BuildContext context) {
     scrollToEnd();
     return Scaffold(
+      appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: const Color.fromARGB(255, 38, 37, 33)),
+      drawer: const Drawer(
+        backgroundColor: Color.fromARGB(255, 38, 37, 33),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Divider(),
+            ],
+          ),
+        ),
+      ),
       backgroundColor: const Color.fromARGB(255, 38, 37, 33),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -32,8 +44,7 @@ class _HomeViewState extends State<HomeView> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: GestureDetector(
               onTap: () async {
-                uniqueKey = UniqueKey();
-                SharedState.instance.reset();
+                await SharedState.instance.reset();
                 setState(() {});
               },
               child: const Row(
@@ -54,7 +65,6 @@ class _HomeViewState extends State<HomeView> {
           ),
           const SizedBox(height: 50),
           ChessBoard(
-            key: uniqueKey,
             playingAs: PlayingAs.white,
             size: 375,
             onTap: (name) {},
@@ -63,6 +73,8 @@ class _HomeViewState extends State<HomeView> {
                   playingTurn == PlayingTurn.white
                       ? "White's Turn"
                       : "Black's Turn";
+            },
+            onUpdateView: () {
               setState(() {});
             },
           ),
@@ -100,7 +112,10 @@ class _HomeViewState extends State<HomeView> {
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                        border: Border.all(color: index == stateImages.length-1?  Colors.red:Colors.black),
+                        border: Border.all(
+                            color: index == stateImages.length - 1
+                                ? Colors.red
+                                : Colors.black),
                         image: DecorationImage(
                           image: MemoryImage(stateImages[index]),
                         ),
