@@ -23,4 +23,5 @@ class Callbacks {
   late PlaySound playSound;
   late UpdateView updateView;
   late OnCapture onCapture;
+  late OnDebugHighlight onDebugHighlight;
 }

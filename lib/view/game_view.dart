@@ -24,6 +24,7 @@ class ChessBoard extends StatefulWidget {
   final ValueChanged<String> onTap;
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final VoidCallback onUpdateView;
+  final VoidCallback onVictory;
   final double size;
   const ChessBoard({
     super.key,
@@ -32,6 +33,7 @@ class ChessBoard extends StatefulWidget {
     required this.onTap,
     required this.onPlayingTurnChanged,
     required this.onUpdateView,
+    required this.onVictory,
   });
 
   @override
@@ -42,12 +44,18 @@ class _ChessBoardState extends State<ChessBoard> {
   late SharedState state;
   late ChessController chess;
   AudioPlayer audioPlayer = AudioPlayer();
+  List<int> debugHighlightIndices = [];
 
   @override
   void initState() {
     state = SharedState.instance;
     super.initState();
     chess = ChessController.fromPosition(
+      onDebugHighlight: (highlightedIndices, index) {
+        debugHighlightIndices.clear();
+        debugHighlightIndices = highlightedIndices;
+        setState(() {});
+      },
       onCheck: (enemyKingIndex) {
         state.checkedKingIndex = enemyKingIndex;
       },
@@ -89,7 +97,9 @@ class _ChessBoardState extends State<ChessBoard> {
         widget.onUpdateView();
       },
       initialPosition: "initialPosition",
-      onVictory: (victoryType) {},
+      onVictory: (victoryType) {
+        widget.onVictory();
+      },
       onDraw: (drawType) {},
       onPawnPromoted: (promotedPieceIndex, promotedTo) async {
         chessBoard[promotedPieceIndex].piece = promotedTo;
@@ -202,12 +212,23 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onPieceMoved: (from, to) async {
         int fromRank = getRankNameFromIndex(index: from);
-        Files fromFile = getFileNameFromIndex(index: to);
+        Files fromFile = getFileNameFromIndex(index: from);
+        //-----------------destination----
+        int toRank = getRankNameFromIndex(index: to);
+        Files toFile = getFileNameFromIndex(index: to);
+        //--------------------------------
         Square fromSquare = chessBoard[from];
         chessBoard[from] = Square(
-            rank: fromRank, file: fromFile, piece: null, pieceType: null);
-
-        chessBoard[to] = fromSquare;
+          rank: fromRank,
+          file: fromFile,
+          piece: null,
+          pieceType: null,
+        );
+        chessBoard[to] = Square(
+            rank: toRank,
+            file: toFile,
+            piece: fromSquare.piece,
+            pieceType: fromSquare.pieceType);
         state.selectedIndex = null;
         state.tappedIndices.clear();
 
@@ -230,6 +251,7 @@ class _ChessBoardState extends State<ChessBoard> {
 
   @override
   Widget build(BuildContext context) {
+    // debugHighlightIndices.clear();
     return SizedBox(
       width: widget.size,
       height: widget.size,
@@ -324,16 +346,19 @@ class _ChessBoardState extends State<ChessBoard> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: (state.checkedKingIndex != null &&
-                                      index == state.checkedKingIndex)
-                                  ? Colors.red
-                                  : (index == state.selectedIndex &&
-                                          state.selectedIndex != null)
-                                      ? Colors.lightGreen
-                                      : getSquareColor(
-                                          ignoreTappedIndices: true,
-                                          index: index,
-                                          tappedIndices: state.tappedIndices),
+                              color: debugHighlightIndices.contains(index)
+                                  ? Colors.blue
+                                  : (state.checkedKingIndex != null &&
+                                          index == state.checkedKingIndex)
+                                      ? Colors.red
+                                      : (index == state.selectedIndex &&
+                                              state.selectedIndex != null)
+                                          ? Colors.lightGreen
+                                          : getSquareColor(
+                                              ignoreTappedIndices: true,
+                                              index: index,
+                                              tappedIndices:
+                                                  state.tappedIndices),
                             ),
                           ),
                         ),

@@ -17,3 +17,8 @@ typedef OnEnPassant = void Function(int capturedPawnIndex);
 typedef PlaySound = void Function(SoundType soundType);
 typedef UpdateView = void Function();
 typedef OnCheck = void Function(int checkedKingIndex);
+// used to highlight indices
+typedef OnDebugHighlight = void Function(
+  List<int> highlightedIndices,
+  int index,
+);

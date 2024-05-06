@@ -54,7 +54,9 @@ class GameStatusController {
   }
 
   bool isKingSquareAttacked(
-      {required PlayingTurn playingTurn, Square? escapeSquare}) {
+      {required PlayingTurn playingTurn,
+      Square? escapeSquare,
+      bool debugHighlight = false}) {
     PieceType enemyKingType =
         playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
     Square enemyKingPiece = escapeSquare ??
@@ -123,6 +125,7 @@ class GameStatusController {
             legalAndIllegalMoves: surroundingBishopsAndQueens,
             file: enemyKingPiece.file,
             rank: enemyKingPiece.rank);
+
     surroundingBishopsAndQueensInLineOfSight.removeWhere(
         (bishopOrQueen) => bishopOrQueen.pieceType == enemyKingPiece.pieceType);
     // empty squares don't count, same for pieces that are neither bishops nor queens
@@ -138,7 +141,7 @@ class GameStatusController {
         surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
   }
 
-  bool isCheckmate({required PlayingTurn attackedPlayer}) {
+  Future<bool> isCheckmate({required PlayingTurn attackedPlayer}) async {
     List<int> movesThatProtectTheKing = [];
     // a late initialization error should not occur, unless the logic is wrong
     late Square kingSquare;
@@ -158,6 +161,8 @@ class GameStatusController {
         }
       }
     }
+
+    // callbacks.onDebugHighlight([1,2,3,4]);
     List<Square> attackedPlayerLegalMoves = [];
     List<int> attackedPlayerLegalMovesIndices = [];
     for (var piece in attackedPlayerPieces) {
@@ -169,6 +174,7 @@ class GameStatusController {
           rank: piece.rank);
       List<int> legalMovesIndices = legalMovesController.getLegalMovesIndices(
           tappedSquareFile: piece.file, tappedSquareRank: piece.rank);
+
       attackedPlayerLegalMoves.addAll(legalMovesOnly);
       attackedPlayerLegalMovesIndices.addAll(legalMovesIndices);
     }
@@ -187,6 +193,8 @@ class GameStatusController {
       if (isKingSquareAttacked(playingTurn: attackedPlayer)) {
         movesThatProtectTheKing.removeWhere((moveIndex) => moveIndex == index);
       }
+      // callbacks.onDebugHighlight([], index);
+      // await Future.delayed(Duration(milliseconds: 1000));
       chessBoard[index] = currentSquareAtIndex;
     }
 
@@ -196,23 +204,30 @@ class GameStatusController {
 
     List<int> kingMovesThatWouldProtectHim = [];
     kingMovesThatWouldProtectHim.addAll(kingLegalMovesIndices);
+
     for (var index in kingLegalMovesIndices) {
-      Square currentSquare = Square(
-          file: chessBoard[index].file,
-          rank: chessBoard[index].rank,
-          piece: chessBoard[index].piece,
-          pieceType: chessBoard[index].pieceType);
-      chessBoard[index] = Square(
-          file: chessBoard[index].file,
-          rank: chessBoard[index].rank,
-          piece: Pieces.king,
-          pieceType: attackedPlayerType);
-      if (isKingSquareAttacked(playingTurn: attackedPlayer)) {
+      int kingSquareIndex = chessBoard.indexOf(kingSquare);
+      // emptying the square the king is currently on
+      chessBoard[kingSquareIndex].piece = null;
+      chessBoard[kingSquareIndex].pieceType = null;
+      // moving the king to the new square
+      chessBoard[index].piece = Pieces.king;
+      chessBoard[index].pieceType = attackedPlayerType;
+      //-----------------------
+      if (isKingSquareAttacked(
+          playingTurn: attackedPlayer, debugHighlight: true)) {
         kingMovesThatWouldProtectHim
             .removeWhere((moveIndex) => moveIndex == index);
       }
-      chessBoard[index] = currentSquare;
+      // resetting the square to an empty square
+      chessBoard[index].piece = null;
+      chessBoard[index].pieceType = null;
+      // moving the king back to its original square
+      chessBoard[kingSquareIndex].piece = Pieces.king;
+      chessBoard[kingSquareIndex].pieceType = attackedPlayerType;
+      //----------------------------------
     }
+
     return kingMovesThatWouldProtectHim.isEmpty &&
         movesThatProtectTheKing.isEmpty;
   }

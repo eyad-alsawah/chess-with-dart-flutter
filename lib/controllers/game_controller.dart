@@ -20,7 +20,7 @@ class ChessController {
   final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
-
+  final OnDebugHighlight onDebugHighlight;
 //-------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -38,6 +38,7 @@ class ChessController {
     callbacks.onEnPassant = onEnPassant;
     callbacks.playSound = playSound;
     callbacks.updateView = updateView;
+    callbacks.onDebugHighlight = onDebugHighlight;
   }
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
@@ -57,6 +58,7 @@ class ChessController {
     required this.onEnPassant,
     required this.playSound,
     required this.updateView,
+    required this.onDebugHighlight,
   }) {
     registerCallbacksListeners();
   }
@@ -207,7 +209,7 @@ class ChessController {
                 callbacks.onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != sharedState.selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
-                if (gameStatusController.isCheckmate(
+                if (await gameStatusController.isCheckmate(
                     attackedPlayer: sharedState.playingTurn)) {
                   helperMethods.preventFurtherInteractions(true);
                   callbacks.onVictory(VictoryType.checkmate);

@@ -57,6 +57,16 @@ class HelperMethods {
     return shouldClearLegalMovesIndices;
   }
 
+  List<int> squaresToIndices(List<Square> squares){
+    List<int> indices=[];
+    for (var move in squares) {
+      int squareIndex = chessBoard.indexOf(move);
+      if (squareIndex >= 0 && squareIndex <= 63) {
+        indices.add(squareIndex);
+      }
+    }
+    return indices;
+  }
   //----------------------------------------------------------------------------
   RelativeDirection getRelativeDirection(
       {required Square targetSquare, required Square currentSquare}) {
