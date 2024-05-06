@@ -200,7 +200,7 @@ class _ChessBoardState extends State<ChessBoard> {
       onPlayingTurnChanged: (playingTurn) {
         widget.onPlayingTurnChanged(playingTurn);
       },
-      onPieceMoved: (from, to) {
+      onPieceMoved: (from, to) async {
         int fromRank = getRankNameFromIndex(index: from);
         Files fromFile = getFileNameFromIndex(index: to);
         Square fromSquare = chessBoard[from];
@@ -213,7 +213,9 @@ class _ChessBoardState extends State<ChessBoard> {
 
         // todo: change the place of this to ensure that its value won't be null after we set it to an Int
         state.checkedKingIndex = null;
-        SharedState.instance.storeState();
+        await SharedState.instance
+            .storeState()
+            .then((value) => widget.onUpdateView());
       },
       onEnPassant: (capturedPawnIndex) {
         chessBoard[capturedPawnIndex].piece = null;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:chess/model/initial_model_state.dart';
@@ -7,6 +8,7 @@ import 'package:chess/utils/capture_widget.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
 import 'package:chess/utils/global_keys.dart';
+import 'package:flutter/material.dart';
 
 import 'enums.dart';
 
@@ -51,10 +53,6 @@ class SharedState {
   Future<void> reset() async {
     stateList.clear();
     stateImages.clear();
-    Uint8List? stateImage = await capture(GlobalKeys.captureKey);
-    if (stateImage != null) {
-      stateImages.add(stateImage);
-    }
 
     stateList.add(GameState(
         currentChessBoard: initialChessBoard.deepCopy(),
@@ -101,11 +99,16 @@ class SharedState {
     chessBoard.addAll(initialChessBoard);
   }
 
-  void storeState() async {
-    Uint8List? stateImage = await capture(GlobalKeys.captureKey);
-    if (stateImage != null) {
-      stateImages.add(stateImage);
-    }
+  Future<void> storeState() async {
+    // using a complete to only resolve the future once a  PostFrameCallback is received.
+    Completer<void> completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      Uint8List? stateImage = await capture(GlobalKeys.captureKey);
+      if (stateImage != null) {
+        stateImages.add(stateImage);
+        completer.complete();
+      }
+    });
 
     movesCount++;
     stateIndex++;
@@ -127,6 +130,8 @@ class SharedState {
         currentPlayingTurn: currentPlayingTurn));
     ColoredPrinter.printColored(
         "Storing current state, stored states: ${stateList.length}");
+
+    return completer.future;
   }
 
   void replay(ReplayType replayType) {
