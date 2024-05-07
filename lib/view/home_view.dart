@@ -112,6 +112,7 @@ class _HomeViewState extends State<HomeView> {
                 IconButton(
                   onPressed: () {
                     SharedState.instance.replay(ReplayType.previous);
+
                     setState(() {});
                   },
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),

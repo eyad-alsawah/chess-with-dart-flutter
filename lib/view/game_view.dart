@@ -211,27 +211,8 @@ class _ChessBoardState extends State<ChessBoard> {
         widget.onPlayingTurnChanged(playingTurn);
       },
       onPieceMoved: (from, to) async {
-        int fromRank = getRankNameFromIndex(index: from);
-        Files fromFile = getFileNameFromIndex(index: from);
-        //-----------------destination----
-        int toRank = getRankNameFromIndex(index: to);
-        Files toFile = getFileNameFromIndex(index: to);
-        //--------------------------------
-        Square fromSquare = chessBoard[from];
-        chessBoard[from] = Square(
-          rank: fromRank,
-          file: fromFile,
-          piece: null,
-          pieceType: null,
-        );
-        chessBoard[to] = Square(
-            rank: toRank,
-            file: toFile,
-            piece: fromSquare.piece,
-            pieceType: fromSquare.pieceType);
         state.selectedIndex = null;
         state.tappedIndices.clear();
-
         // todo: change the place of this to ensure that its value won't be null after we set it to an Int
         state.checkedKingIndex = null;
         await SharedState.instance
@@ -243,8 +224,9 @@ class _ChessBoardState extends State<ChessBoard> {
         chessBoard[capturedPawnIndex].pieceType = null;
       },
       onError: (error, errorString) {
-        // AudioPlayer audioPlayer = AudioPlayer();
-        // audioPlayer.play(volume: 1, AssetSource(illegalSound));
+        AudioPlayer audioPlayer = AudioPlayer();
+        audioPlayer.setAsset(illegalSound);
+        audioPlayer.play();
       },
     );
   }

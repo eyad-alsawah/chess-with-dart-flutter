@@ -209,7 +209,7 @@ class ChessController {
                 callbacks.onCheck(chessBoard.indexWhere((piece) =>
                     piece.pieceType != sharedState.selectedPiece?.pieceType &&
                     piece.piece == Pieces.king));
-                if (await gameStatusController.isCheckmate(
+                if (gameStatusController.isCheckmate(
                     attackedPlayer: sharedState.playingTurn)) {
                   helperMethods.preventFurtherInteractions(true);
                   callbacks.onVictory(VictoryType.checkmate);

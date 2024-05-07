@@ -103,14 +103,17 @@ class GameStatusController {
       ...basicMovesController.getVerticalPieces(
           rank: enemyKingPiece.rank, file: enemyKingPiece.file),
     ];
+
     List<Square> surroundingRooksAndQueensInLineOfSight =
         legalMovesController.getLegalMovesOnly(
             legalAndIllegalMoves: surroundingRooksAndQueens,
             file: enemyKingPiece.file,
             rank: enemyKingPiece.rank);
+
     // rooks or queens of the same type as the king can't check the king
     surroundingRooksAndQueensInLineOfSight.removeWhere(
         (rookOrQueen) => rookOrQueen.pieceType == enemyKingPiece.pieceType);
+
     // empty squares don't count, same for pieces that are neither rooks nor queens
     surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
         square.piece == null ||
@@ -141,7 +144,7 @@ class GameStatusController {
         surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
   }
 
-  Future<bool> isCheckmate({required PlayingTurn attackedPlayer}) async {
+  bool isCheckmate({required PlayingTurn attackedPlayer}) {
     List<int> movesThatProtectTheKing = [];
     // a late initialization error should not occur, unless the logic is wrong
     late Square kingSquare;
@@ -162,7 +165,6 @@ class GameStatusController {
       }
     }
 
-    // callbacks.onDebugHighlight([1,2,3,4]);
     List<Square> attackedPlayerLegalMoves = [];
     List<int> attackedPlayerLegalMovesIndices = [];
     for (var piece in attackedPlayerPieces) {
@@ -193,8 +195,6 @@ class GameStatusController {
       if (isKingSquareAttacked(playingTurn: attackedPlayer)) {
         movesThatProtectTheKing.removeWhere((moveIndex) => moveIndex == index);
       }
-      // callbacks.onDebugHighlight([], index);
-      // await Future.delayed(Duration(milliseconds: 1000));
       chessBoard[index] = currentSquareAtIndex;
     }
 
@@ -207,6 +207,12 @@ class GameStatusController {
 
     for (var index in kingLegalMovesIndices) {
       int kingSquareIndex = chessBoard.indexOf(kingSquare);
+      // the square we will temporarily move the king to for testing if the check remains.
+      Square originalSquare = Square(
+          file: chessBoard[index].file,
+          rank: chessBoard[index].rank,
+          piece: chessBoard[index].piece,
+          pieceType: chessBoard[index].pieceType);
       // emptying the square the king is currently on
       chessBoard[kingSquareIndex].piece = null;
       chessBoard[kingSquareIndex].pieceType = null;
@@ -219,9 +225,8 @@ class GameStatusController {
         kingMovesThatWouldProtectHim
             .removeWhere((moveIndex) => moveIndex == index);
       }
-      // resetting the square to an empty square
-      chessBoard[index].piece = null;
-      chessBoard[index].pieceType = null;
+      // resetting the square to its original state
+      chessBoard[index] = originalSquare;
       // moving the king back to its original square
       chessBoard[kingSquareIndex].piece = Pieces.king;
       chessBoard[kingSquareIndex].pieceType = attackedPlayerType;

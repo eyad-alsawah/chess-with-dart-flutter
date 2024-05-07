@@ -13,6 +13,7 @@ class CastlingController {
   // Public static method to access the instance
   static CastlingController get instance => _instance;
   //----------------------------------------------------------------------------
+  // todo: handle cases where there aren't rooks on the start of the game
   List<Square> getCastlingAvailability({required PieceType pieceType}) {
     List<Square> castlingAvailability;
     if (pieceType == PieceType.light) {
