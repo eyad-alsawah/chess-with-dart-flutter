@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/view/game_view.dart';
+import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
@@ -36,15 +37,14 @@ class _HomeViewState extends State<HomeView> {
       appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: const Color.fromARGB(255, 38, 37, 33)),
-      drawer: const Drawer(
-        backgroundColor: Color.fromARGB(255, 38, 37, 33),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Divider(),
-            ],
-          ),
-        ),
+      drawer: DrawerWidget(
+        updateView: () => setState(() {}),
+        onResetGame: () async {
+          await SharedState.instance.reset();
+          setState(() {});
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pop();
+        },
       ),
       backgroundColor: const Color.fromARGB(255, 38, 37, 33),
       body: ConfettiWidget(
@@ -56,29 +56,6 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: GestureDetector(
-                onTap: () async {
-                  await SharedState.instance.reset();
-                  setState(() {});
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Reset Game',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(
-                      Icons.restart_alt_rounded,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 50),
             ChessBoard(
               playingAs: PlayingAs.white,

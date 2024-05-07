@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/global_keys.dart';
 import 'package:chess/utils/image_assets.dart';
@@ -443,10 +444,10 @@ Color getSquareColor(
     squareColor = Colors.red;
   } else if (currentRow % 2 == 0) {
     squareColor =
-        index % 2 == 0 ? const Color(0xFFB58863) : const Color(0xFFF0D9B5);
+        index % 2 == 0 ? ColorManager.darkSquare : ColorManager.lightSquare;
   } else {
     squareColor =
-        index % 2 == 0 ? const Color(0xFFF0D9B5) : const Color(0xFFB58863);
+        index % 2 == 0 ? ColorManager.lightSquare : ColorManager.darkSquare;
   }
   return squareColor;
 }
