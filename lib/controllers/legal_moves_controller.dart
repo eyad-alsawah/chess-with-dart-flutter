@@ -3,6 +3,7 @@ import 'package:chess/model/global_state.dart';
 import 'package:chess/model/model.dart';
 
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/index_to_square_map.dart';
 
 class LegalMovesController {
   // Private constructor
@@ -309,14 +310,15 @@ class LegalMovesController {
     if (tappedPiece.piece == Pieces.king) {
       if (tappedPiece.pieceType == PieceType.light) {
         if (!sharedState.didLightKingMove) {
-          if (chessBoard[5].piece != null || chessBoard[6].piece != null) {
+          if (chessBoard[ChessSquare.f1.index].piece != null ||
+              chessBoard[ChessSquare.g1.index].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 1),
             );
           }
-          if (chessBoard[1].piece != null ||
-              chessBoard[2].piece != null ||
-              chessBoard[3].piece != null) {
+          if (chessBoard[ChessSquare.b1.index].piece != null ||
+              chessBoard[ChessSquare.c1.index].piece != null ||
+              chessBoard[ChessSquare.d1.index].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.c && square.rank == 1),
             );
@@ -324,14 +326,15 @@ class LegalMovesController {
         }
       } else {
         if (!sharedState.didDarkKingMove) {
-          if (chessBoard[61].piece != null || chessBoard[62].piece != null) {
+          if (chessBoard[ChessSquare.f8.index].piece != null ||
+              chessBoard[ChessSquare.g8.index].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.g && square.rank == 8),
             );
           }
-          if (chessBoard[57].piece != null ||
-              chessBoard[58].piece != null ||
-              chessBoard[59].piece != null) {
+          if (chessBoard[ChessSquare.b8.index].piece != null ||
+              chessBoard[ChessSquare.c8.index].piece != null ||
+              chessBoard[ChessSquare.d8.index].piece != null) {
             legalAndIllegalMoves.removeWhere(
               (square) => (square.file == Files.c && square.rank == 8),
             );
