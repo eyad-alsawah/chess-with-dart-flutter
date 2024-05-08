@@ -14,7 +14,6 @@ class Callbacks {
   late OnDraw onDraw;
   late OnPlayingTurnChanged onPlayingTurnChanged;
   late OnPieceSelected onPieceSelected;
-  late OnCastling onCastling;
   late OnPieceMoved onPieceMoved;
   late OnError onError;
   late OnPawnPromoted onPawnPromoted;

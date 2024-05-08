@@ -207,7 +207,6 @@ class _ChessBoardState extends State<ChessBoard> {
         state.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
-      onCastling: (movedRookIndex) {},
       onPlayingTurnChanged: (playingTurn) {
         widget.onPlayingTurnChanged(playingTurn);
       },
