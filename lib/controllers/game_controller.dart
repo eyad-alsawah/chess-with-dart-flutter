@@ -40,7 +40,6 @@ class ChessController {
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController.fromPosition({
     required this.onCheck,
-    required String initialPosition,
     PlayingTurn? playAs,
     required this.onVictory,
     required this.onDraw,

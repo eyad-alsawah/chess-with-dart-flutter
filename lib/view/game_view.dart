@@ -97,7 +97,6 @@ class _ChessBoardState extends State<ChessBoard> {
       updateView: () {
         widget.onUpdateView();
       },
-      initialPosition: "initialPosition",
       onVictory: (victoryType) {
         widget.onVictory();
       },
