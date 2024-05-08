@@ -15,7 +15,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.sizeOf(context).width* 0.6,
+      width: MediaQuery.sizeOf(context).width * 0.6,
       backgroundColor: const Color.fromARGB(255, 38, 37, 33),
       child: SingleChildScrollView(
         child: Column(

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
-import 'package:chess/view/game_view.dart';
+import 'package:chess/view/chess_board.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +58,6 @@ class _HomeViewState extends State<HomeView> {
           children: [
             const SizedBox(height: 50),
             ChessBoard(
-              playingAs: PlayingAs.white,
               size: 375,
               onTap: (name) {},
               onPlayingTurnChanged: (playingTurn) {

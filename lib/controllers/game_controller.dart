@@ -9,12 +9,10 @@ import 'package:chess/model/square.dart';
 class ChessController {
   final OnCheck onCheck;
   final OnVictory onVictory;
-  final OnDraw onDraw;
   final OnPlayingTurnChanged onPlayingTurnChanged;
   final OnPieceSelected onPieceSelected;
   final OnPieceMoved onPieceMoved;
   final OnError onError;
-  final OnPawnPromoted onPawnPromoted;
   final OnSelectPromotionType onSelectPromotionType;
   final PlaySound playSound;
   final UpdateView updateView;
@@ -25,12 +23,10 @@ class ChessController {
   void registerCallbacksListeners() {
     callbacks.onCheck = onCheck;
     callbacks.onVictory = onVictory;
-    callbacks.onDraw = onDraw;
     callbacks.onPlayingTurnChanged = onPlayingTurnChanged;
     callbacks.onPieceSelected = onPieceSelected;
     callbacks.onPieceMoved = onPieceMoved;
     callbacks.onError = onError;
-    callbacks.onPawnPromoted = onPawnPromoted;
     callbacks.onSelectPromotionType = onSelectPromotionType;
     callbacks.playSound = playSound;
     callbacks.updateView = updateView;
@@ -38,16 +34,14 @@ class ChessController {
   }
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
-  ChessController.fromPosition({
+  ChessController({
     required this.onCheck,
     PlayingTurn? playAs,
     required this.onVictory,
-    required this.onDraw,
     required this.onPieceSelected,
     required this.onPlayingTurnChanged,
     required this.onPieceMoved,
     required this.onError,
-    required this.onPawnPromoted,
     required this.onSelectPromotionType,
     required this.playSound,
     required this.updateView,
@@ -159,8 +153,8 @@ class ChessController {
                               : PlayingTurn.white)
                       .then((selectedPromotionType) {
                       promotedPawn = selectedPromotionType;
-                      callbacks.onPawnPromoted(
-                          tappedSquareIndex, selectedPromotionType);
+                      chessBoard[tappedSquareIndex].piece =
+                          selectedPromotionType;
                     })
                   : null;
 

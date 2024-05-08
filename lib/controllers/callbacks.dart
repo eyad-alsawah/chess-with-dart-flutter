@@ -16,7 +16,6 @@ class Callbacks {
   late OnPieceSelected onPieceSelected;
   late OnPieceMoved onPieceMoved;
   late OnError onError;
-  late OnPawnPromoted onPawnPromoted;
   late OnSelectPromotionType onSelectPromotionType;
   late PlaySound playSound;
   late UpdateView updateView;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ColorManager {
-   static Color lightSquare = lightSquareLichess;
-   static Color darkSquare = darkSquareLichess;
+  static Color lightSquare = lightSquareLichess;
+  static Color darkSquare = darkSquareLichess;
 
   // chess.com
   static Color lightSquareChess = const Color(0xFFECEDD1);

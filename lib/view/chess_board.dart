@@ -15,13 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:chess/model/model.dart';
 import 'package:just_audio/just_audio.dart';
 
-enum PlayingAs { white, black }
-
 List<String> filesNotation = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 List<String> ranksNotation = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
 class ChessBoard extends StatefulWidget {
-  final PlayingAs playingAs;
   final ValueChanged<String> onTap;
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final VoidCallback onUpdateView;
@@ -29,7 +26,6 @@ class ChessBoard extends StatefulWidget {
   final double size;
   const ChessBoard({
     super.key,
-    required this.playingAs,
     required this.size,
     required this.onTap,
     required this.onPlayingTurnChanged,
@@ -51,7 +47,7 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     state = SharedState.instance;
     super.initState();
-    chess = ChessController.fromPosition(
+    chess = ChessController(
       onDebugHighlight: (highlightedIndices, index) {
         debugHighlightIndices.clear();
         debugHighlightIndices = highlightedIndices;
@@ -62,7 +58,6 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
-
         switch (soundType) {
           case SoundType.illegal:
             audioPlayer.setAsset(illegalSound);
@@ -99,10 +94,6 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onVictory: (victoryType) {
         widget.onVictory();
-      },
-      onDraw: (drawType) {},
-      onPawnPromoted: (promotedPieceIndex, promotedTo) async {
-        chessBoard[promotedPieceIndex].piece = promotedTo;
       },
       onSelectPromotionType: (playingTurn) async {
         return await showDialog(
@@ -278,7 +269,6 @@ class _ChessBoardState extends State<ChessBoard> {
                 width: widget.size * 0.08,
                 child: ListView.builder(
                     itemCount: 8,
-                    reverse: widget.playingAs == PlayingAs.white,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context, index) {
@@ -342,9 +332,7 @@ class _ChessBoardState extends State<ChessBoard> {
                       ),
                     ),
                     drawInitialPieces(
-                        playingAs: PlayingAs.white,
-                        boardSize: 375,
-                        tappedIndices: state.tappedIndices),
+                        boardSize: 375, tappedIndices: state.tappedIndices),
                   ],
                 ),
               ),
@@ -353,7 +341,6 @@ class _ChessBoardState extends State<ChessBoard> {
                 width: widget.size * 0.08,
                 child: ListView.builder(
                     itemCount: 8,
-                    reverse: widget.playingAs == PlayingAs.white,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context, index) {
@@ -447,9 +434,7 @@ Color getSquareColor(
 }
 
 Widget drawInitialPieces(
-    {required PlayingAs playingAs,
-    required double boardSize,
-    required List<int> tappedIndices}) {
+    {required double boardSize, required List<int> tappedIndices}) {
   return IgnorePointer(
     child: SizedBox(
       width: boardSize * 0.8,
