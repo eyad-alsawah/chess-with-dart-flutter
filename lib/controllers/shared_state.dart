@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:chess/model/initial_model_state.dart';
-import 'package:chess/model/model.dart';
+import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/capture_widget.dart';
 import 'package:chess/utils/colored_printer.dart';

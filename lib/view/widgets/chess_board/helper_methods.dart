@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/core/theme/color_manager.dart';
-import 'package:chess/model/model.dart';
+import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
-import 'package:chess/view/widgets/chess_board/chess_board.dart';
+import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:flutter/material.dart';
 
 String getSquareNameFromIndex({required int index}) {

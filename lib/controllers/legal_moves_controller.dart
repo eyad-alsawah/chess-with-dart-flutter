@@ -2,7 +2,7 @@ import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/model/model.dart';
+import 'package:chess/model/chess_board_model.dart';
 
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/debug_config.dart';

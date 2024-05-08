@@ -3,6 +3,7 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/global_keys.dart';
 import 'package:chess/utils/sound_assets.dart';
 import 'package:chess/view/widgets/chess_board/files_notation_indicator.dart';
@@ -43,6 +44,8 @@ class _ChessBoardState extends State<ChessBoard> {
     state = SharedState.instance;
     super.initState();
     chess = ChessController(
+      fenString: null,
+      // fenString: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {
@@ -98,6 +101,9 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onError: (error, errorString) {
         // todo: show a toast here
+        ColoredPrinter.printColored(
+            "error: \n$error, $errorString", AnsiColor.red);
+        ColoredPrinter.printColored('', AnsiColor.reset);
       },
     );
   }

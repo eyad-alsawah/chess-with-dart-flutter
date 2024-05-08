@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/model/model.dart';
+import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/fen_parser.dart';
 
 //--------------Main Game Controller-------------------
 class ChessController {
@@ -15,6 +16,7 @@ class ChessController {
   final OnSelectPromotionType onSelectPromotionType;
   final PlaySound playSound;
   final UpdateView updateView;
+  final String? fenString;
 //-------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -40,7 +42,13 @@ class ChessController {
     required this.onSelectPromotionType,
     required this.playSound,
     required this.updateView,
+    required this.fenString,
   }) {
+    if (fenString != null) {
+      chessBoard.clear();
+      List<Square> fromFen = FenParser.generateChessBoard(fenString!);
+      chessBoard.addAll(fromFen);
+    }
     registerCallbacksListeners();
   }
 

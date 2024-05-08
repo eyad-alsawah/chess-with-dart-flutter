@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:chess/view/widgets/chess_board/chess_board.dart';
+import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:flutter/material.dart';
 
 class FilesNotationIndicator extends StatelessWidget {

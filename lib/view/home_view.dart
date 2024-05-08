@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
-import 'package:chess/view/widgets/chess_board/chess_board.dart';
+import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
