@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:chess/view/widgets/chess_board/chess_board.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
@@ -56,9 +57,9 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 50),
+            SizedBox(height: AppSizeH.s50),
             ChessBoard(
-              size: 375,
+              size: AppSizeH.s428,
               onPlayingTurnChanged: (playingTurn) {
                 SharedState.instance.currentPlayingTurn =
                     playingTurn == PlayingTurn.white
@@ -80,7 +81,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: AppSizeH.s30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -96,14 +97,14 @@ class _HomeViewState extends State<HomeView> {
                   child: Container(
                     decoration:
                         BoxDecoration(border: Border.all(color: Colors.white)),
-                    height: 50,
+                    height: AppSizeH.s50,
                     child: ListView.builder(
                       controller: _previewController,
                       scrollDirection: Axis.horizontal,
                       itemCount: stateImages.length,
                       itemBuilder: (context, index) => Container(
-                        height: 50,
-                        width: 50,
+                        height: AppSizeH.s50,
+                        width: AppSizeW.s50,
                         decoration: BoxDecoration(
                           border: Border.all(
                               color: index == stateImages.length - 1

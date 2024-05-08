@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 class FilesNotationIndicator extends StatelessWidget {
   final double size;
   final bool top;
-  const FilesNotationIndicator({super.key, required this.size, required this.top});
+  const FilesNotationIndicator(
+      {super.key, required this.size, required this.top});
 
   @override
   Widget build(BuildContext context) {

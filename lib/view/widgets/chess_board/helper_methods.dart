@@ -5,6 +5,7 @@ import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/model/model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/image_assets.dart';
+import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:chess/view/widgets/chess_board/chess_board.dart';
 import 'package:flutter/material.dart';
 
@@ -65,8 +66,8 @@ Widget drawInitialPieces(
             Visibility(
               visible: tappedIndices.contains(index),
               child: Container(
-                height: 10,
-                width: 10,
+                height: AppSizeH.s10,
+                width: AppSizeW.s10,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.lightGreen,

@@ -1,5 +1,6 @@
 import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/utils/debug_config.dart';
+import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:flutter/material.dart';
 
 class DrawerWidget extends StatefulWidget {
@@ -21,22 +22,20 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(
-              height: 100,
-            ),
+            SizedBox(height: AppSizeH.s100),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: GestureDetector(
                 onTap: () async => widget.onResetGame(),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Reset Game',
                       style: TextStyle(color: Colors.white),
                     ),
-                    SizedBox(width: 4),
-                    Icon(
+                    SizedBox(width: AppSizeW.s4),
+                    const Icon(
                       Icons.restart_alt_rounded,
                       color: Colors.white,
                     ),
@@ -44,9 +43,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ),
               ),
             ),
-            const Divider(
+            Divider(
               color: Colors.white30,
-              thickness: 2,
+              thickness: AppSizeW.s2,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
@@ -61,7 +60,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: AppSizeH.s10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
@@ -83,23 +82,23 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                               : const Color.fromARGB(255, 38, 37, 33),
                         ),
                       ),
-                      width: 32,
-                      height: 32,
+                      width: AppSizeW.s33,
+                      height: AppSizeH.s33,
                       child: Row(
                         children: [
                           Container(
-                              width: 15,
-                              height: 30,
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
                               color: ColorManager.darkSquareChess),
                           Container(
-                              width: 15,
-                              height: 30,
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
                               color: ColorManager.lightSquareChess),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 15),
+                  SizedBox(width: AppSizeW.s15),
                   GestureDetector(
                     onTap: () {
                       ColorManager.darkSquare = ColorManager.darkSquareLichess;
@@ -117,17 +116,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                               : const Color.fromARGB(255, 38, 37, 33),
                         ),
                       ),
-                      width: 32,
-                      height: 32,
+                      width: AppSizeW.s33,
+                      height: AppSizeH.s33,
                       child: Row(
                         children: [
                           Container(
-                              width: 15,
-                              height: 30,
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
                               color: ColorManager.darkSquareLichess),
                           Container(
-                              width: 15,
-                              height: 30,
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
                               color: ColorManager.lightSquareLichess),
                         ],
                       ),
@@ -136,9 +135,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ],
               ),
             ),
-            const Divider(
+            Divider(
               color: Colors.white30,
-              thickness: 2,
+              thickness: AppSizeW.s2,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
@@ -153,7 +152,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: AppSizeH.s10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(

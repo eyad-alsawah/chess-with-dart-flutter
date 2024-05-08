@@ -159,7 +159,8 @@ class _ChessBoardState extends State<ChessBoard> {
                       ),
                     ),
                     drawInitialPieces(
-                        boardSize: 375, tappedIndices: state.legalMovesIndices),
+                        boardSize: widget.size,
+                        tappedIndices: state.legalMovesIndices),
                   ],
                 ),
               ),
