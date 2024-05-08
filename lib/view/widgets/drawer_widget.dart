@@ -1,4 +1,5 @@
 import 'package:chess/core/theme/color_manager.dart';
+import 'package:chess/utils/debug_config.dart';
 import 'package:flutter/material.dart';
 
 class DrawerWidget extends StatefulWidget {
@@ -138,6 +139,40 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             const Divider(
               color: Colors.white30,
               thickness: 2,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Developer Options:',
+                    style: TextStyle(
+                        color: Colors.white60, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Show all moves',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Switch.adaptive(
+                      activeColor: ColorManager.lightSquare,
+                      value: DebugConfig.displayAllLegalAndIllegalMoves,
+                      onChanged: (v) {
+                        DebugConfig.displayAllLegalAndIllegalMoves = v;
+                        setState(() {});
+                      }),
+                ],
+              ),
             ),
           ],
         ),

@@ -1,8 +1,11 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/helper_methods.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/model.dart';
 
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/debug_config.dart';
 import 'package:chess/utils/index_to_square_map.dart';
 
 class LegalMovesController {
@@ -24,6 +27,15 @@ class LegalMovesController {
   }) {
     List<Square> legalAndIllegalMoves =
         getIllegalAndLegalMoves(rank: tappedSquareRank, file: tappedSquareFile);
+
+    if (DebugConfig.displayAllLegalAndIllegalMoves) {
+      SharedState.instance.debugHighlightIndices.clear();
+      SharedState.instance.debugHighlightIndices.addAll(
+          HelperMethods.instance.squaresToIndices(legalAndIllegalMoves));
+    } else {
+      SharedState.instance.debugHighlightIndices.clear();
+    }
+
     List<Square> legalMovesOnly = getLegalMovesOnly(
         file: tappedSquareFile,
         rank: tappedSquareRank,

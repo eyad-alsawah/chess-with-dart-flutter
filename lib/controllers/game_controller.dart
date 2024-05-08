@@ -7,7 +7,6 @@ import 'package:chess/model/square.dart';
 
 //--------------Main Game Controller-------------------
 class ChessController {
-  final OnCheck onCheck;
   final OnVictory onVictory;
   final OnPlayingTurnChanged onPlayingTurnChanged;
   final OnPieceSelected onPieceSelected;
@@ -16,12 +15,10 @@ class ChessController {
   final OnSelectPromotionType onSelectPromotionType;
   final PlaySound playSound;
   final UpdateView updateView;
-  final OnDebugHighlight onDebugHighlight;
 //-------------------------------------------
 
   //----------------------------------------------------------------------------
   void registerCallbacksListeners() {
-    callbacks.onCheck = onCheck;
     callbacks.onVictory = onVictory;
     callbacks.onPlayingTurnChanged = onPlayingTurnChanged;
     callbacks.onPieceSelected = onPieceSelected;
@@ -30,12 +27,10 @@ class ChessController {
     callbacks.onSelectPromotionType = onSelectPromotionType;
     callbacks.playSound = playSound;
     callbacks.updateView = updateView;
-    callbacks.onDebugHighlight = onDebugHighlight;
   }
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController({
-    required this.onCheck,
     PlayingTurn? playAs,
     required this.onVictory,
     required this.onPieceSelected,
@@ -45,7 +40,6 @@ class ChessController {
     required this.onSelectPromotionType,
     required this.playSound,
     required this.updateView,
-    required this.onDebugHighlight,
   }) {
     registerCallbacksListeners();
   }
@@ -193,9 +187,9 @@ class ChessController {
               sharedState.isKingInCheck = gameStatusController
                   .isKingSquareAttacked(playingTurn: sharedState.playingTurn);
               if (sharedState.isKingInCheck) {
-                callbacks.onCheck(chessBoard.indexWhere((piece) =>
+                sharedState.checkedKingIndex = chessBoard.indexWhere((piece) =>
                     piece.pieceType != sharedState.selectedPiece?.pieceType &&
-                    piece.piece == Pieces.king));
+                    piece.piece == Pieces.king);
                 if (gameStatusController.isCheckmate(
                     attackedPlayer: sharedState.playingTurn)) {
                   helperMethods.preventFurtherInteractions(true);

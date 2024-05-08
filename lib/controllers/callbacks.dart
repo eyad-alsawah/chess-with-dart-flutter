@@ -9,7 +9,6 @@ class Callbacks {
 
   // Public static method to access the instance
   static Callbacks get instance => _instance;
-  late OnCheck onCheck;
   late OnVictory onVictory;
   late OnDraw onDraw;
   late OnPlayingTurnChanged onPlayingTurnChanged;
@@ -20,5 +19,4 @@ class Callbacks {
   late PlaySound playSound;
   late UpdateView updateView;
   late OnCapture onCapture;
-  late OnDebugHighlight onDebugHighlight;
 }

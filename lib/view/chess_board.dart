@@ -41,21 +41,12 @@ class _ChessBoardState extends State<ChessBoard> {
   late SharedState state;
   late ChessController chess;
   AudioPlayer audioPlayer = AudioPlayer();
-  List<int> debugHighlightIndices = [];
 
   @override
   void initState() {
     state = SharedState.instance;
     super.initState();
     chess = ChessController(
-      onDebugHighlight: (highlightedIndices, index) {
-        debugHighlightIndices.clear();
-        debugHighlightIndices = highlightedIndices;
-        setState(() {});
-      },
-      onCheck: (enemyKingIndex) {
-        state.checkedKingIndex = enemyKingIndex;
-      },
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {
@@ -190,10 +181,6 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onPieceSelected:
           (highlightedLegalMovesIndices, selectedPieceIndex) async {
-        state.selectedIndex = null;
-        highlightedLegalMovesIndices.isEmpty
-            ? state.tappedIndices.clear()
-            : state.tappedIndices.addAll(highlightedLegalMovesIndices);
         state.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
@@ -202,7 +189,7 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onPieceMoved: (from, to) async {
         state.selectedIndex = null;
-        state.tappedIndices.clear();
+        state.legalMovesIndices.clear();
         // todo: change the place of this to ensure that its value won't be null after we set it to an Int
         state.checkedKingIndex = null;
         await SharedState.instance
@@ -219,7 +206,6 @@ class _ChessBoardState extends State<ChessBoard> {
 
   @override
   Widget build(BuildContext context) {
-    // debugHighlightIndices.clear();
     return SizedBox(
       width: widget.size,
       height: widget.size,
@@ -306,14 +292,12 @@ class _ChessBoardState extends State<ChessBoard> {
                         ),
                         itemBuilder: (context, index) => GestureDetector(
                           onTap: () {
-                            state.tappedIndices.clear();
                             chess.handleSquareTapped(tappedSquareIndex: index);
-
                             widget.onTap(state.squareName);
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: debugHighlightIndices.contains(index)
+                              color: state.debugHighlightIndices.contains(index)
                                   ? Colors.blue
                                   : (state.checkedKingIndex != null &&
                                           index == state.checkedKingIndex)
@@ -325,14 +309,14 @@ class _ChessBoardState extends State<ChessBoard> {
                                               ignoreTappedIndices: true,
                                               index: index,
                                               tappedIndices:
-                                                  state.tappedIndices),
+                                                  state.legalMovesIndices),
                             ),
                           ),
                         ),
                       ),
                     ),
                     drawInitialPieces(
-                        boardSize: 375, tappedIndices: state.tappedIndices),
+                        boardSize: 375, tappedIndices: state.legalMovesIndices),
                   ],
                 ),
               ),

@@ -44,9 +44,9 @@ class SharedState {
 
   //------------------game_view-----------
   String squareName = "";
-  List<int> tappedIndices = [];
   int? selectedIndex;
   int? checkedKingIndex;
+  List<int> debugHighlightIndices = [];
   //---------------home_view--------------
   String currentPlayingTurn = "White's Turn";
 
@@ -68,7 +68,6 @@ class SharedState {
         didDarkKingSideRookMove: false,
         didDarkQueenSideRookMove: false,
         squareName: "",
-        tappedIndices: [],
         currentPlayingTurn: "White's Turn"));
 
     stateIndex = 0;
@@ -90,9 +89,9 @@ class SharedState {
     didDarkQueenSideRookMove = false;
     //------------------game view--------------
     squareName = "";
-    tappedIndices = [];
     selectedIndex = null;
     checkedKingIndex = null;
+    debugHighlightIndices = [];
     //------------------home_view----------------------
     currentPlayingTurn = "White's Turn";
     chessBoard.clear();
@@ -126,7 +125,6 @@ class SharedState {
         didDarkKingSideRookMove: didDarkKingSideRookMove,
         didDarkQueenSideRookMove: didDarkQueenSideRookMove,
         squareName: squareName,
-        tappedIndices: tappedIndices.deepCopy(),
         currentPlayingTurn: currentPlayingTurn));
     ColoredPrinter.printColored(
         "Storing current state, stored states: ${stateList.length}");
@@ -172,8 +170,6 @@ class SharedState {
     didDarkQueenSideRookMove = state.didDarkQueenSideRookMove;
     //------------------game_view-----------------------------
     squareName = state.squareName;
-    tappedIndices.clear();
-    tappedIndices.addAll(state.tappedIndices);
     selectedIndex = state.selectedIndex;
     checkedKingIndex = state.checkedKingIndex;
     //------------------home_view--------
@@ -212,7 +208,6 @@ class GameState {
   bool didDarkKingSideRookMove;
   bool didDarkQueenSideRookMove;
   String squareName;
-  List<int> tappedIndices;
   int? selectedIndex;
   int? checkedKingIndex;
   String currentPlayingTurn;
@@ -235,7 +230,6 @@ class GameState {
       required this.didDarkKingSideRookMove,
       required this.didDarkQueenSideRookMove,
       required this.squareName,
-      required this.tappedIndices,
       this.selectedIndex,
       this.checkedKingIndex,
       required this.currentPlayingTurn});
