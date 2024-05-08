@@ -19,7 +19,6 @@ class Callbacks {
   late OnError onError;
   late OnPawnPromoted onPawnPromoted;
   late OnSelectPromotionType onSelectPromotionType;
-  late OnEnPassant onEnPassant;
   late PlaySound playSound;
   late UpdateView updateView;
   late OnCapture onCapture;

@@ -220,10 +220,6 @@ class _ChessBoardState extends State<ChessBoard> {
             .storeState()
             .then((value) => widget.onUpdateView());
       },
-      onEnPassant: (capturedPawnIndex) {
-        chessBoard[capturedPawnIndex].piece = null;
-        chessBoard[capturedPawnIndex].pieceType = null;
-      },
       onError: (error, errorString) {
         AudioPlayer audioPlayer = AudioPlayer();
         audioPlayer.setAsset(illegalSound);

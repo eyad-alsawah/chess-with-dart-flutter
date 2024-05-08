@@ -13,7 +13,6 @@ typedef OnPawnPromoted = void Function(
     int promotedPieceIndex, Pieces promotedTo);
 typedef OnSelectPromotionType = Future<Pieces> Function(
     PlayingTurn playingTurn);
-typedef OnEnPassant = void Function(int capturedPawnIndex);
 typedef PlaySound = void Function(SoundType soundType);
 typedef UpdateView = void Function();
 typedef OnCheck = void Function(int checkedKingIndex);

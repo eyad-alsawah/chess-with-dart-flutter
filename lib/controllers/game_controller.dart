@@ -17,7 +17,6 @@ class ChessController {
   final OnError onError;
   final OnPawnPromoted onPawnPromoted;
   final OnSelectPromotionType onSelectPromotionType;
-  final OnEnPassant onEnPassant;
   final PlaySound playSound;
   final UpdateView updateView;
   final OnDebugHighlight onDebugHighlight;
@@ -35,7 +34,6 @@ class ChessController {
     callbacks.onError = onError;
     callbacks.onPawnPromoted = onPawnPromoted;
     callbacks.onSelectPromotionType = onSelectPromotionType;
-    callbacks.onEnPassant = onEnPassant;
     callbacks.playSound = playSound;
     callbacks.updateView = updateView;
     callbacks.onDebugHighlight = onDebugHighlight;
@@ -55,7 +53,6 @@ class ChessController {
     required this.onCastling,
     required this.onPawnPromoted,
     required this.onSelectPromotionType,
-    required this.onEnPassant,
     required this.playSound,
     required this.updateView,
     required this.onDebugHighlight,

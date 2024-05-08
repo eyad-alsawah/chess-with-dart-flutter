@@ -88,7 +88,9 @@ class EnPassantController {
     chessBoard[sharedState.selectedPieceIndex! +
             (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
         emptyEnPassantCapturedPawnSquare;
-    callbacks.onEnPassant(sharedState.selectedPieceIndex! +
-        (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1));
+    int capturedPawnIndex = sharedState.selectedPieceIndex! +
+        (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1);
+    chessBoard[capturedPawnIndex].piece = null;
+    chessBoard[capturedPawnIndex].pieceType = null;
   }
 }
