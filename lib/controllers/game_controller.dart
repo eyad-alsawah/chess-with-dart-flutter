@@ -214,6 +214,7 @@ class ChessController {
             sharedState.inMoveSelectionMode = true;
             sharedState.legalMovesIndices.clear();
           }, (error, stack) {
+            callbacks.playSound(SoundType.illegal);
             callbacks.onError(Error, stack.toString());
           });
   }

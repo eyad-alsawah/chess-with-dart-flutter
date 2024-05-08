@@ -11,7 +11,6 @@ Future<void> main() async {
 class ChessApp extends StatelessWidget {
   const ChessApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -19,7 +18,7 @@ class ChessApp extends StatelessWidget {
       minTextAdapt: false,
       splitScreenMode: false,
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Chess',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),

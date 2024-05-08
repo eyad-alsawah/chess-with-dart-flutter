@@ -76,12 +76,8 @@ class _ChessBoardState extends State<ChessBoard> {
           audioPlayer.play();
         }
       },
-      updateView: () {
-        widget.onUpdateView();
-      },
-      onVictory: (victoryType) {
-        widget.onVictory();
-      },
+      updateView: () => widget.onUpdateView(),
+      onVictory: (victoryType) => widget.onVictory(),
       onSelectPromotionType: (playingTurn) async =>
           showPromotionTypeSelectionDialog(playingTurn, context),
       onPieceSelected:
@@ -89,9 +85,8 @@ class _ChessBoardState extends State<ChessBoard> {
         state.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
-      onPlayingTurnChanged: (playingTurn) {
-        widget.onPlayingTurnChanged(playingTurn);
-      },
+      onPlayingTurnChanged: (playingTurn) =>
+          widget.onPlayingTurnChanged(playingTurn),
       onPieceMoved: (from, to) async {
         state.selectedIndex = null;
         state.legalMovesIndices.clear();
@@ -102,9 +97,7 @@ class _ChessBoardState extends State<ChessBoard> {
             .then((value) => widget.onUpdateView());
       },
       onError: (error, errorString) {
-        AudioPlayer audioPlayer = AudioPlayer();
-        audioPlayer.setAsset(illegalSound);
-        audioPlayer.play();
+        // todo: show a toast here
       },
     );
   }
