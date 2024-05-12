@@ -132,6 +132,38 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                       ),
                     ),
                   ),
+                  SizedBox(width: AppSizeW.s15),
+                  GestureDetector(
+                    onTap: () {
+                      ColorManager.darkSquare = Colors.black;
+                      ColorManager.lightSquare = Colors.white;
+                      setState(() {});
+                      widget.updateView();
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: ColorManager.lightSquare == Colors.white
+                              ? Colors.red
+                              : const Color.fromARGB(255, 38, 37, 33),
+                        ),
+                      ),
+                      width: AppSizeW.s33,
+                      height: AppSizeH.s33,
+                      child: Row(
+                        children: [
+                          Container(
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
+                              color: Colors.black),
+                          Container(
+                              width: AppSizeW.s15,
+                              height: AppSizeH.s30,
+                              color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

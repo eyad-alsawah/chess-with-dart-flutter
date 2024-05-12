@@ -55,7 +55,7 @@ class ChessController {
     registerCallbacksListeners();
   }
 
-  handleSquareTapped({required int tappedSquareIndex}) async {
+  Future<void> handleSquareTapped({required int tappedSquareIndex}) async {
     sharedState.lockFurtherInteractions
         ? null
         : runZonedGuarded(() async {
@@ -208,12 +208,12 @@ class ChessController {
                         Pieces.king, selectedPiece.pieceType,
                         matchPiece: true, matchType: false);
 
-                // if (await gameStatusController.isCheckmate(
-                //     attackedPlayer: sharedState.playingTurn)) {
-                //   helperMethods.preventFurtherInteractions(true);
-                //   callbacks.onVictory(VictoryType.checkmate);
-                //   callbacks.playSound(SoundType.victory);
-                // }
+                if (await gameStatusController.isCheckmate(
+                    attackedPlayer: sharedState.playingTurn)) {
+                  helperMethods.preventFurtherInteractions(true);
+                  callbacks.onVictory(VictoryType.checkmate);
+                  callbacks.playSound(SoundType.victory);
+                }
               }
 
               if (await gameStatusController.checkForStaleMate(
@@ -231,7 +231,6 @@ class ChessController {
             sharedState.inMoveSelectionMode = true;
             sharedState.legalMovesIndices.clear();
           }, (error, stack) {
-            throw error;
             callbacks.playSound(SoundType.illegal);
             callbacks.onError(Error, stack.toString());
           });

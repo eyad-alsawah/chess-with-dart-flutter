@@ -129,9 +129,6 @@ class SharedState {
         didDarkQueenSideRookMove: didDarkQueenSideRookMove,
         squareName: squareName,
         currentPlayingTurn: currentPlayingTurn));
-    ColoredPrinter.printColored(
-        "Storing current state, stored states: ${stateList.length}");
-
     return completer.future;
   }
 

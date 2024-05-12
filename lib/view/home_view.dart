@@ -27,7 +27,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     _controllerTopCenter =
-        ConfettiController(duration: const Duration(seconds: 10));
+        ConfettiController(duration: const Duration(seconds: 5));
     super.initState();
   }
 
@@ -52,7 +52,7 @@ class _HomeViewState extends State<HomeView> {
       body: ConfettiWidget(
         confettiController: _controllerTopCenter,
         blastDirectionality: BlastDirectionality.explosive,
-        blastDirection: pi / 2,
+        blastDirection: 0,
         shouldLoop: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
