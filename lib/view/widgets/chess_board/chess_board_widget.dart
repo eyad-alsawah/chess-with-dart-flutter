@@ -44,8 +44,10 @@ class _ChessBoardState extends State<ChessBoard> {
     state = SharedState.instance;
     super.initState();
     chess = ChessController(
+      onDraw: (drawType) {},
       fenString: null,
-      // fenString: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+      //fenString:'4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0',
+      //  fenString: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {

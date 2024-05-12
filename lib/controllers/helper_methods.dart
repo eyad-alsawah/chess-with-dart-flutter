@@ -30,18 +30,23 @@ class HelperMethods {
       required PlayingTurn playingTurn,
       required List<int> legalMovesIndices}) {
     bool inMoveSelectionMode =
-        // pressing on an empty square or on a square occupied by an enemy piece that is not in the legal moves should not change the value to false
-        ((chessBoard[tappedSquareIndex].pieceType == null ||
-                    (chessBoard[tappedSquareIndex].pieceType ==
+        // pressing on an empty square or on a square occupied by an openent piece that is not in the legal moves should not change the value to false
+        ((ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
+                        null ||
+                    (ChessBoardModel.getSquareAtIndex(tappedSquareIndex)
+                                .pieceType ==
                             PieceType.light &&
                         sharedState.playingTurn != PlayingTurn.white) ||
-                    (chessBoard[tappedSquareIndex].pieceType ==
+                    (ChessBoardModel.getSquareAtIndex(tappedSquareIndex)
+                                .pieceType ==
                             PieceType.dark &&
                         sharedState.playingTurn != PlayingTurn.black)) &&
                 !legalMovesIndices.contains(tappedSquareIndex)) ||
-            (chessBoard[tappedSquareIndex].pieceType == PieceType.light &&
+            (ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
+                    PieceType.light &&
                 sharedState.playingTurn == PlayingTurn.white) ||
-            (chessBoard[tappedSquareIndex].pieceType == PieceType.dark &&
+            (ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
+                    PieceType.dark &&
                 sharedState.playingTurn == PlayingTurn.black);
     return inMoveSelectionMode;
   }
@@ -60,7 +65,7 @@ class HelperMethods {
   List<int> squaresToIndices(List<Square> squares) {
     List<int> indices = [];
     for (var move in squares) {
-      int squareIndex = chessBoard.indexOf(move);
+      int squareIndex = ChessBoardModel.getIndexOfSquare(move);
       if (squareIndex >= 0 && squareIndex <= 63) {
         indices.add(squareIndex);
       }

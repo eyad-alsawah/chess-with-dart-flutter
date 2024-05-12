@@ -46,16 +46,16 @@ Game Over
 ### **Testing For Checkmate**:
 * king is checked & player can neither move king to safety nor take the attacking piece:
    * king is checked:
-        * get pawn squares, and for each square, check if an enemy pawn exists
-        * get knight pieces, and for each square, check if an enemy knight exists
-        * get vertical/horizontal pieces, and for each square, check if either an enemy rook/queen exist.
-        * get diagonal pieces, and for each square, check if either an enemy bishop/queen exist.
+        * get pawn squares, and for each square, check if an openent pawn exists
+        * get knight pieces, and for each square, check if an openent knight exists
+        * get vertical/horizontal pieces, and for each square, check if either an openent rook/queen exist.
+        * get diagonal pieces, and for each square, check if either an openent bishop/queen exist.
     * player can neither move king to safety nor take the attacking piece:
         * get king squares, and for each square:
-        * get pawn squares, and for each square, check if an enemy pawn exists
-        * get knight pieces, and for each square, check if an enemy knight exists
-        * get vertical/horizontal pieces, and for each square, check if either an enemy rook/queen exist.
-        * get diagonal pieces, and for each square, check if either an enemy bishop/queen exist. 
+        * get pawn squares, and for each square, check if an openent pawn exists
+        * get knight pieces, and for each square, check if an openent knight exists
+        * get vertical/horizontal pieces, and for each square, check if either an openent rook/queen exist.
+        * get diagonal pieces, and for each square, check if either an openent bishop/queen exist. 
 * one of the players' time runs out:
         * for each player create a timer, and pause the timer if it isn't a player's turn
         * if either player's time runs out, the other player wins
@@ -65,7 +65,7 @@ Game Over
     * no pawns on the board &&:
       * king vs king
       * king + m * bishops (all bishops are on the same color)  vs king
-      * king + m * bishops (all bishops are on the same color)  vs  king + n * bishops (all bishops are on the same color as the enemy's bishops) 
+      * king + m * bishops (all bishops are on the same color)  vs  king + n * bishops (all bishops are on the same color as the openent's bishops) 
       * king + knight vs king
       * blocked position (dead position) 
   * stalemate: player is not in check && has no legal move

@@ -1,6 +1,6 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
+import 'package:chess/model/global_state.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/index_to_square_map.dart';
 
@@ -23,13 +23,13 @@ class CastlingController {
       } else if (sharedState.didLightKingSideRookMove) {
         castlingAvailability = sharedState.didLightQueenSideRookMove
             ? []
-            : [chessBoard[ChessSquare.c1.index]];
+            : [ChessBoardModel.getSquareAtIndex(ChessSquare.c1.index)];
       } else {
         castlingAvailability = sharedState.didLightQueenSideRookMove
-            ? [chessBoard[ChessSquare.g6.index]]
+            ? [ChessBoardModel.getSquareAtIndex(ChessSquare.g6.index)]
             : [
-                chessBoard[ChessSquare.c1.index],
-                chessBoard[ChessSquare.g1.index]
+                ChessBoardModel.getSquareAtIndex(ChessSquare.c1.index),
+                ChessBoardModel.getSquareAtIndex(ChessSquare.g1.index)
               ];
       }
     } else {
@@ -38,13 +38,13 @@ class CastlingController {
       } else if (sharedState.didDarkKingSideRookMove) {
         castlingAvailability = sharedState.didDarkQueenSideRookMove
             ? []
-            : [chessBoard[ChessSquare.c8.index]];
+            : [ChessBoardModel.getSquareAtIndex(ChessSquare.c8.index)];
       } else {
         castlingAvailability = sharedState.didDarkQueenSideRookMove
-            ? [chessBoard[ChessSquare.g8.index]]
+            ? [ChessBoardModel.getSquareAtIndex(ChessSquare.g8.index)]
             : [
-                chessBoard[ChessSquare.c8.index],
-                chessBoard[ChessSquare.g8.index]
+                ChessBoardModel.getSquareAtIndex(ChessSquare.c8.index),
+                ChessBoardModel.getSquareAtIndex(ChessSquare.g8.index)
               ];
       }
     }
@@ -101,32 +101,29 @@ class CastlingController {
         // moving the rook and updating the board
         if (tappedSquareIndex == 62) {
           callbacks.onPieceMoved(63, 61);
-          chessBoard[ChessSquare.h8.index].piece = null;
-          chessBoard[ChessSquare.h8.index].pieceType = null;
-          chessBoard[ChessSquare.f8.index].piece = Pieces.rook;
-          chessBoard[ChessSquare.f8.index].pieceType = PieceType.dark;
+          ChessBoardModel.emptySquareAtIndex(ChessSquare.h8.index);
+
+          ChessBoardModel.updateSquareAtIndex(
+              ChessSquare.f8.index, Pieces.rook, PieceType.dark);
         } else {
           callbacks.onPieceMoved(56, 59);
-          chessBoard[ChessSquare.a8.index].piece = null;
-          chessBoard[ChessSquare.a8.index].pieceType = null;
-          chessBoard[ChessSquare.d8.index].piece = Pieces.rook;
-          chessBoard[ChessSquare.d8.index].pieceType = PieceType.dark;
+          ChessBoardModel.emptySquareAtIndex(ChessSquare.a8.index);
+          ChessBoardModel.updateSquareAtIndex(
+              ChessSquare.d8.index, Pieces.rook, PieceType.dark);
         }
       } else if (sharedState.selectedPiece?.pieceType == PieceType.light &&
           sharedState.selectedPieceIndex! == 4 &&
           (tappedSquareIndex == 2 || tappedSquareIndex == 6)) {
         if (tappedSquareIndex == 6) {
           callbacks.onPieceMoved(7, 5);
-          chessBoard[ChessSquare.h1.index].piece = null;
-          chessBoard[ChessSquare.h1.index].pieceType = null;
-          chessBoard[ChessSquare.f1.index].piece = Pieces.rook;
-          chessBoard[ChessSquare.f1.index].pieceType = PieceType.light;
+          ChessBoardModel.emptySquareAtIndex(ChessSquare.h1.index);
+          ChessBoardModel.updateSquareAtIndex(
+              ChessSquare.f1.index, Pieces.rook, PieceType.light);
         } else {
           callbacks.onPieceMoved(0, 3);
-          chessBoard[ChessSquare.a1.index].piece = null;
-          chessBoard[ChessSquare.a1.index].pieceType = null;
-          chessBoard[ChessSquare.d1.index].piece = Pieces.rook;
-          chessBoard[ChessSquare.d1.index].pieceType = PieceType.light;
+          ChessBoardModel.emptySquareAtIndex(ChessSquare.a1.index);
+          ChessBoardModel.updateSquareAtIndex(
+              ChessSquare.d1.index, Pieces.rook, PieceType.light);
         }
       }
     }

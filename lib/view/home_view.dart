@@ -7,6 +7,7 @@ import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -59,7 +60,7 @@ class _HomeViewState extends State<HomeView> {
           children: [
             SizedBox(height: AppSizeH.s50),
             ChessBoard(
-              size: AppSizeH.s428,
+              size: 0.95.sw,
               onPlayingTurnChanged: (playingTurn) {
                 SharedState.instance.currentPlayingTurn =
                     playingTurn == PlayingTurn.white

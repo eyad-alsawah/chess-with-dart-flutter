@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
@@ -16,6 +17,7 @@ class ChessController {
   final OnSelectPromotionType onSelectPromotionType;
   final PlaySound playSound;
   final UpdateView updateView;
+  final OnDraw onDraw;
   final String? fenString;
 //-------------------------------------------
 
@@ -29,12 +31,14 @@ class ChessController {
     callbacks.onSelectPromotionType = onSelectPromotionType;
     callbacks.playSound = playSound;
     callbacks.updateView = updateView;
+    callbacks.onDraw = onDraw;
   }
 
   /// current PlayingTurn can be known from the initialPosition parameter, but an optional PlayingTurn can be provided using playAs paremeter
   ChessController({
     PlayingTurn? playAs,
     required this.onVictory,
+    required this.onDraw,
     required this.onPieceSelected,
     required this.onPlayingTurnChanged,
     required this.onPieceMoved,
@@ -45,9 +49,9 @@ class ChessController {
     required this.fenString,
   }) {
     if (fenString != null) {
-      chessBoard.clear();
+      ChessBoardModel.clearBoard();
       List<Square> fromFen = FenParser.generateChessBoard(fenString!);
-      chessBoard.addAll(fromFen);
+      ChessBoardModel.addAll(fromFen);
     }
     registerCallbacksListeners();
   }
@@ -70,9 +74,11 @@ class ChessController {
 
             if (sharedState.inMoveSelectionMode) {
               sharedState.selectedPieceIndex = tappedSquareIndex;
-              sharedState.selectedPiece = chessBoard[tappedSquareIndex];
+              sharedState.selectedPiece =
+                  ChessBoardModel.getSquareAtIndex(tappedSquareIndex);
+
               sharedState.legalMovesIndices =
-                  legalMovesController.getLegalMovesIndices(
+                  await legalMovesController.getLegalMovesIndices(
                 tappedSquareFile: tappedSquareFile,
                 tappedSquareRank: tappedSquareRank,
                 isKingChecked: sharedState.isKingInCheck,
@@ -88,6 +94,7 @@ class ChessController {
                   ? sharedState.legalMovesIndices.clear()
                   : null;
 
+              // for the highlight guide
               callbacks.onPieceSelected(
                   sharedState.legalMovesIndices, tappedSquareIndex);
 
@@ -102,14 +109,15 @@ class ChessController {
                     .contains(tappedSquareIndex) &&
                 sharedState.selectedPiece != null &&
                 sharedState.selectedPieceIndex != null) {
+              Square? selectedPiece = sharedState.selectedPiece?.copy();
+              Files selectedPieceFile = selectedPiece!.file;
+              int selectedPieceRank = selectedPiece.rank;
+              //------------------------------
               late SoundType soundToPlay;
               // pawn will be promoted to queen by default
               Pieces promotedPawn = Pieces.queen;
-              Files selectedPieceFile = helperMethods.getFileNameFromIndex(
-                  index: sharedState.selectedPieceIndex!);
-              int selectedPieceRank = helperMethods.getRankNameFromIndex(
-                  index: sharedState.selectedPieceIndex!);
 
+              // changing the playing turn
               sharedState.playingTurn =
                   sharedState.playingTurn == PlayingTurn.white
                       ? PlayingTurn.black
@@ -118,17 +126,23 @@ class ChessController {
 
               bool didCaptureEnPassant =
                   enPassantController.didCaptureEnPassant(
-                movedPieceType: sharedState.selectedPiece?.pieceType,
-                didMovePawn: sharedState.selectedPiece!.piece == Pieces.pawn,
+                movedPieceType: selectedPiece.pieceType,
+                didMovePawn: selectedPiece.piece == Pieces.pawn,
                 didMoveToEmptySquareOnDifferentFile:
                     selectedPieceFile != tappedSquareFile &&
-                        chessBoard[tappedSquareIndex].piece == null,
+                        (ChessBoardModel.getSquareAtIndex(tappedSquareIndex))
+                                .piece ==
+                            null,
               );
+              // playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
+              soundToPlay =
+                  ((ChessBoardModel.getSquareAtIndex(tappedSquareIndex))
+                                  .piece !=
+                              null ||
+                          didCaptureEnPassant)
+                      ? SoundType.capture
+                      : SoundType.pieceMoved;
 
-              soundToPlay = (chessBoard[tappedSquareIndex].piece != null ||
-                      didCaptureEnPassant)
-                  ? SoundType.capture
-                  : SoundType.pieceMoved;
               // moving the rook in case a king castled
               castlingController.moveRookOnCastle(
                   tappedSquareIndex: tappedSquareIndex);
@@ -139,12 +153,12 @@ class ChessController {
               enPassantController.addPawnToEnPassantCapturablePawns(
                   fromRank: selectedPieceRank,
                   toRank: tappedSquareRank,
-                  piece: sharedState.selectedPiece!.piece,
+                  piece: selectedPiece.piece,
                   movedToIndex: tappedSquareIndex,
-                  pawnType: sharedState.selectedPiece!.pieceType);
+                  pawnType: selectedPiece.pieceType);
 
               bool shouldPromotePawn = promotionController.shouldPawnBePromoted(
-                  selectedPiecePiece: sharedState.selectedPiece?.piece,
+                  selectedPiecePiece: selectedPiece.piece,
                   tappedSquareRank: tappedSquareRank);
 
               shouldPromotePawn
@@ -155,25 +169,16 @@ class ChessController {
                               : PlayingTurn.white)
                       .then((selectedPromotionType) {
                       promotedPawn = selectedPromotionType;
-                      chessBoard[tappedSquareIndex].piece =
-                          selectedPromotionType;
+                      ChessBoardModel.updateSquareAtIndex(
+                        tappedSquareIndex,
+                        selectedPromotionType,
+                        sharedState.playingTurn == PlayingTurn.white
+                            ? PieceType.light
+                            : PieceType.dark,
+                      );
                     })
                   : null;
 
-              // empty square that will replace the square on which the piece that we will move is at
-              Square emptySquareAtSelectedPieceIndex = Square(
-                  file: selectedPieceFile,
-                  rank: selectedPieceRank,
-                  piece: null,
-                  pieceType: null);
-              Square newSquareAtTappedIndex = Square(
-                file: tappedSquareFile,
-                rank: tappedSquareRank,
-                piece: shouldPromotePawn
-                    ? promotedPawn
-                    : sharedState.selectedPiece?.piece,
-                pieceType: sharedState.selectedPiece?.pieceType,
-              );
               Square emptyEnPassantCapturedPawnSquare = Square(
                   file: tappedSquareFile,
                   rank: selectedPieceRank,
@@ -188,29 +193,34 @@ class ChessController {
                   movedPiece: sharedState.selectedPiece!.piece!,
                   movedPieceType: sharedState.selectedPiece!.pieceType!,
                   indexPieceMovedFrom: sharedState.selectedPieceIndex!);
-
-              chessBoard[tappedSquareIndex] = newSquareAtTappedIndex;
-              chessBoard[sharedState.selectedPieceIndex!] =
-                  emptySquareAtSelectedPieceIndex;
-              sharedState.isKingInCheck = gameStatusController
+              //------------------------------------
+              ChessBoardModel.updateSquareAtIndex(
+                  tappedSquareIndex,
+                  shouldPromotePawn ? promotedPawn : selectedPiece.piece,
+                  selectedPiece.pieceType);
+              ChessBoardModel.emptySquareAtIndex(
+                  sharedState.selectedPieceIndex!);
+              sharedState.isKingInCheck = await gameStatusController
                   .isKingSquareAttacked(playingTurn: sharedState.playingTurn);
+              //--------------------------------------------------
               if (sharedState.isKingInCheck) {
-                sharedState.checkedKingIndex = chessBoard.indexWhere((piece) =>
-                    piece.pieceType != sharedState.selectedPiece?.pieceType &&
-                    piece.piece == Pieces.king);
-                if (gameStatusController.isCheckmate(
-                    attackedPlayer: sharedState.playingTurn)) {
-                  helperMethods.preventFurtherInteractions(true);
-                  callbacks.onVictory(VictoryType.checkmate);
-                  callbacks.playSound(SoundType.victory);
-                }
+                sharedState.checkedKingIndex =
+                    ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+                        Pieces.king, selectedPiece.pieceType,
+                        matchPiece: true, matchType: false);
+
+                // if (await gameStatusController.isCheckmate(
+                //     attackedPlayer: sharedState.playingTurn)) {
+                //   helperMethods.preventFurtherInteractions(true);
+                //   callbacks.onVictory(VictoryType.checkmate);
+                //   callbacks.playSound(SoundType.victory);
+                // }
               }
 
-              if (gameStatusController.checkForStaleMate(
-                  opponentKingType:
-                      sharedState.selectedPiece?.pieceType == PieceType.light
-                          ? PieceType.dark
-                          : PieceType.light)) {
+              if (await gameStatusController.checkForStaleMate(
+                  opponentKingType: selectedPiece.pieceType == PieceType.light
+                      ? PieceType.dark
+                      : PieceType.light)) {
                 soundToPlay = SoundType.draw;
               }
 
@@ -222,6 +232,7 @@ class ChessController {
             sharedState.inMoveSelectionMode = true;
             sharedState.legalMovesIndices.clear();
           }, (error, stack) {
+            throw error;
             callbacks.playSound(SoundType.illegal);
             callbacks.onError(Error, stack.toString());
           });

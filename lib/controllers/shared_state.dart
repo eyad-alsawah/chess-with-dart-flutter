@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:chess/model/initial_model_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/capture_widget.dart';
@@ -54,21 +53,21 @@ class SharedState {
     stateList.clear();
     stateImages.clear();
 
-    stateList.add(GameState(
-        currentChessBoard: initialChessBoard.deepCopy(),
-        legalMovesIndices: [],
-        playingTurn: PlayingTurn.white,
-        isKingInCheck: false,
-        inMoveSelectionMode: true,
-        lockFurtherInteractions: false,
-        didLightKingMove: false,
-        didDarkKingMove: false,
-        didLightKingSideRookMove: false,
-        didLightQueenSideRookMove: false,
-        didDarkKingSideRookMove: false,
-        didDarkQueenSideRookMove: false,
-        squareName: "",
-        currentPlayingTurn: "White's Turn"));
+    // stateList.add(GameState(
+    //     currentChessBoard: initialChessBoard.deepCopy(),
+    //     legalMovesIndices: [],
+    //     playingTurn: PlayingTurn.white,
+    //     isKingInCheck: false,
+    //     inMoveSelectionMode: true,
+    //     lockFurtherInteractions: false,
+    //     didLightKingMove: false,
+    //     didDarkKingMove: false,
+    //     didLightKingSideRookMove: false,
+    //     didLightQueenSideRookMove: false,
+    //     didDarkKingSideRookMove: false,
+    //     didDarkQueenSideRookMove: false,
+    //     squareName: "",
+    //     currentPlayingTurn: "White's Turn"));
 
     stateIndex = 0;
     movesCount = 0;
@@ -94,8 +93,8 @@ class SharedState {
     debugHighlightIndices = [];
     //------------------home_view----------------------
     currentPlayingTurn = "White's Turn";
-    chessBoard.clear();
-    chessBoard.addAll(initialChessBoard);
+    await ChessBoardModel.clearBoard();
+    // await ChessBoardModel.addAll(initialChessBoard);
   }
 
   Future<void> storeState() async {
@@ -112,7 +111,7 @@ class SharedState {
     movesCount++;
     stateIndex++;
     stateList.add(GameState(
-        currentChessBoard: chessBoard.deepCopy(),
+        currentChessBoard: ChessBoardModel.chessBoard.deepCopy(),
         legalMovesIndices: legalMovesIndices.deepCopy(),
         playingTurn: playingTurn,
         isKingInCheck: isKingInCheck,
@@ -132,7 +131,7 @@ class SharedState {
     return completer.future;
   }
 
-  void replay(ReplayType replayType) {
+  void replay(ReplayType replayType) async {
     late GameState state;
     if (stateList.isEmpty) {
       ColoredPrinter.printColored("no state exists");
@@ -174,8 +173,8 @@ class SharedState {
     checkedKingIndex = state.checkedKingIndex;
     //------------------home_view--------
     currentPlayingTurn = state.currentPlayingTurn;
-    chessBoard.clear();
-    chessBoard.addAll(state.currentChessBoard);
+    await ChessBoardModel.clearBoard();
+    await ChessBoardModel.addAll(state.currentChessBoard);
   }
 }
 

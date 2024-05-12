@@ -14,9 +14,9 @@ class BasicMovesController {
   static BasicMovesController get instance => _instance;
   //----------------------------------------------------------------------------
   List<Square> getPawnPieces({required int rank, required Files file}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int currentIndex = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int currentIndex = ChessBoardModel.getIndexOfSquare(currentPiece);
 
     List<Square> pawnPieces = [];
 
@@ -24,7 +24,8 @@ class BasicMovesController {
       //top-right
       (file != Files.h &&
               rank != 8 &&
-              (chessBoard[currentIndex + 9].pieceType != null ||
+              ((ChessBoardModel.getSquareAtIndex(currentIndex + 9)).pieceType !=
+                      null ||
                   enPassantController.canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
@@ -32,12 +33,13 @@ class BasicMovesController {
                     selectedPawnType: PieceType.light,
                     relativeDirection: RelativeDirection.diagonalTopRight,
                   )))
-          ? pawnPieces.add(chessBoard[currentIndex + 9])
+          ? pawnPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 9))
           : null;
       //top-left
       (file != Files.a &&
               rank != 8 &&
-              (chessBoard[currentIndex + 7].pieceType != null ||
+              ((ChessBoardModel.getSquareAtIndex(currentIndex + 7)).pieceType !=
+                      null ||
                   enPassantController.canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
@@ -45,20 +47,29 @@ class BasicMovesController {
                     selectedPawnType: PieceType.light,
                     relativeDirection: RelativeDirection.diagonalTopLeft,
                   )))
-          ? pawnPieces.add(chessBoard[currentIndex + 7])
+          ? pawnPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 7))
           : null;
       //top
-      (rank != 8 && chessBoard[currentIndex + 8].pieceType == null)
-          ? (rank == 2 && chessBoard[currentIndex + 16].pieceType == null)
-              ? pawnPieces.addAll(
-                  [chessBoard[currentIndex + 8], chessBoard[currentIndex + 16]])
-              : pawnPieces.add(chessBoard[currentIndex + 8])
+      (rank != 8 &&
+              (ChessBoardModel.getSquareAtIndex(currentIndex + 8)).pieceType ==
+                  null)
+          ? (rank == 2 &&
+                  (ChessBoardModel.getSquareAtIndex(currentIndex + 16))
+                          .pieceType ==
+                      null)
+              ? pawnPieces.addAll([
+                  ChessBoardModel.getSquareAtIndex(currentIndex + 8),
+                  ChessBoardModel.getSquareAtIndex(currentIndex + 16)
+                ])
+              : pawnPieces
+                  .add(ChessBoardModel.getSquareAtIndex(currentIndex + 8))
           : null;
     } else if (currentPiece.pieceType == PieceType.dark) {
       //bottom-right
       (file != Files.h &&
               rank != 1 &&
-              (chessBoard[currentIndex - 7].pieceType != null ||
+              ((ChessBoardModel.getSquareAtIndex(currentIndex - 7)).pieceType !=
+                      null ||
                   enPassantController.canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
@@ -66,12 +77,13 @@ class BasicMovesController {
                     selectedPawnType: PieceType.dark,
                     relativeDirection: RelativeDirection.diagonalBottomRight,
                   )))
-          ? pawnPieces.add(chessBoard[currentIndex - 7])
+          ? pawnPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 7))
           : null;
       //bottom-left
       (file != Files.a &&
               rank != 1 &&
-              (chessBoard[currentIndex - 9].pieceType != null ||
+              ((ChessBoardModel.getSquareAtIndex(currentIndex - 9)).pieceType !=
+                      null ||
                   enPassantController.canCaptureEnPassant(
                     fromRank: rank,
                     fromIndex: currentIndex,
@@ -79,14 +91,22 @@ class BasicMovesController {
                     selectedPawnType: PieceType.dark,
                     relativeDirection: RelativeDirection.diagonalBottomLeft,
                   )))
-          ? pawnPieces.add(chessBoard[currentIndex - 9])
+          ? pawnPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 9))
           : null;
       //bottom
-      (rank != 1 && chessBoard[currentIndex - 8].pieceType == null)
-          ? (rank == 7 && chessBoard[currentIndex - 16].pieceType == null)
-              ? pawnPieces.addAll(
-                  [chessBoard[currentIndex - 8], chessBoard[currentIndex - 16]])
-              : pawnPieces.add(chessBoard[currentIndex - 8])
+      (rank != 1 &&
+              (ChessBoardModel.getSquareAtIndex(currentIndex - 8)).pieceType ==
+                  null)
+          ? (rank == 7 &&
+                  (ChessBoardModel.getSquareAtIndex(currentIndex - 16))
+                          .pieceType ==
+                      null)
+              ? pawnPieces.addAll([
+                  ChessBoardModel.getSquareAtIndex(currentIndex - 8),
+                  ChessBoardModel.getSquareAtIndex(currentIndex - 16)
+                ])
+              : pawnPieces
+                  .add(ChessBoardModel.getSquareAtIndex(currentIndex - 8))
           : null;
     }
     return pawnPieces;
@@ -94,9 +114,9 @@ class BasicMovesController {
 
   List<Square> getKingPieces(
       {required int rank, required Files file, bool getCastlingPieces = true}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int index = ChessBoardModel.getIndexOfSquare(currentPiece);
     int currentIndex = index;
 
     List<Square> kingPieces = [];
@@ -108,113 +128,125 @@ class BasicMovesController {
         : null;
 
     //right
-    (file != Files.h) ? kingPieces.add(chessBoard[currentIndex + 1]) : null;
+    (file != Files.h)
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 1))
+        : null;
     //left
-    (file != Files.a) ? kingPieces.add(chessBoard[currentIndex - 1]) : null;
+    (file != Files.a)
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 1))
+        : null;
     //top-right
     (file != Files.h && rank != 8)
-        ? kingPieces.add(chessBoard[currentIndex + 9])
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 9))
         : null;
     //top-left
     (file != Files.a && rank != 8)
-        ? kingPieces.add(chessBoard[currentIndex + 7])
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 7))
         : null;
     //top
-    rank != 8 ? kingPieces.add(chessBoard[currentIndex + 8]) : null;
+    rank != 8
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 8))
+        : null;
 
     //bottom-right
     (file != Files.h && rank != 1)
-        ? kingPieces.add(chessBoard[currentIndex - 7])
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 7))
         : null;
     //bottom-left
     (file != Files.a && rank != 1)
-        ? kingPieces.add(chessBoard[currentIndex - 9])
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 9))
         : null;
     //bottom
-    rank != 1 ? kingPieces.add(chessBoard[currentIndex - 8]) : null;
+    rank != 1
+        ? kingPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 8))
+        : null;
 
     return kingPieces;
   }
 
   List<Square> getKnightPieces({required int rank, required Files file}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int index = ChessBoardModel.getIndexOfSquare(currentPiece);
     int currentIndex = index;
 
     List<Square> knightPieces = [];
 
     //top-right
     (file != Files.h && rank <= 6)
-        ? knightPieces.add(chessBoard[currentIndex + 17])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 17))
         : null;
     //top-left
     (file != Files.a && rank <= 6)
-        ? knightPieces.add(chessBoard[currentIndex + 15])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 15))
         : null;
     //----------
     //bottom-right
     (file != Files.h && rank >= 3)
-        ? knightPieces.add(chessBoard[currentIndex - 15])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 15))
         : null;
     //bottom-left
     (file != Files.a && rank >= 3)
-        ? knightPieces.add(chessBoard[currentIndex - 17])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 17))
         : null;
     //---------
     //right-top
     (file != Files.g && file != Files.h && rank != 8)
-        ? knightPieces.add(chessBoard[currentIndex + 10])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 10))
         : null;
     //right-bottom
     (file != Files.g && file != Files.h && rank != 1)
-        ? knightPieces.add(chessBoard[currentIndex - 6])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 6))
         : null;
     //---------
     //left-top
     (file != Files.b && file != Files.a && rank != 8)
-        ? knightPieces.add(chessBoard[currentIndex + 6])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex + 6))
         : null;
     //left-bottom
     (file != Files.b && file != Files.a && rank != 1)
-        ? knightPieces.add(chessBoard[currentIndex - 10])
+        ? knightPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex - 10))
         : null;
 
     return knightPieces;
   }
 
   List<Square> getDiagonalPieces({required int rank, required Files file}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int index = ChessBoardModel.getIndexOfSquare(currentPiece);
     int currentIndex = index;
     List<Square> diagonalPieces = [];
     //-----------------------------
     //{RelativeDirection.diagonalTopRight}
     while (currentIndex < 64 &&
-        !(chessBoard[currentIndex].file == Files.a && file != Files.a)) {
-      diagonalPieces.add(chessBoard[currentIndex]);
+        !((ChessBoardModel.getSquareAtIndex(currentIndex)).file == Files.a &&
+            file != Files.a)) {
+      diagonalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex = currentIndex + 9;
     }
     currentIndex = index;
     //{RelativeDirection.diagonalBottomLeft}
     while (currentIndex >= 0 &&
-        !(chessBoard[currentIndex].file == Files.h && file != Files.h)) {
-      diagonalPieces.add(chessBoard[currentIndex]);
+        !((ChessBoardModel.getSquareAtIndex(currentIndex)).file == Files.h &&
+            file != Files.h)) {
+      diagonalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex = currentIndex - 9;
     }
     currentIndex = index;
     //{RelativeDirection.diagonalTopLeft}
     while (currentIndex < 63 &&
-        !(chessBoard[currentIndex].file == Files.h && file != Files.h)) {
-      diagonalPieces.add(chessBoard[currentIndex]);
+        !((ChessBoardModel.getSquareAtIndex(currentIndex)).file == Files.h &&
+            file != Files.h)) {
+      diagonalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex = currentIndex + 7;
     }
     currentIndex = index;
     //{RelativeDirection.diagonalBottomRight}
     while (currentIndex > 0 &&
-        !(chessBoard[currentIndex].file == Files.a && file != Files.a)) {
-      diagonalPieces.add(chessBoard[currentIndex]);
+        !((ChessBoardModel.getSquareAtIndex(currentIndex)).file == Files.a &&
+            file != Files.a)) {
+      diagonalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex = currentIndex - 7;
     }
     // remove current piece from the list
@@ -224,18 +256,18 @@ class BasicMovesController {
   }
 
   List<Square> getHorizontalPieces({required int rank, required Files file}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int index = ChessBoardModel.getIndexOfSquare(currentPiece);
     int currentIndex = index;
     List<Square> horizontalPieces = [];
     while (currentIndex < rank * 8) {
-      horizontalPieces.add(chessBoard[currentIndex]);
+      horizontalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex++;
     }
     currentIndex = index;
     while (currentIndex >= (rank - 1) * 8) {
-      horizontalPieces.add(chessBoard[currentIndex]);
+      horizontalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex--;
     }
     // remove current piece from the list
@@ -247,19 +279,19 @@ class BasicMovesController {
   }
 
   List<Square> getVerticalPieces({required int rank, required Files file}) {
-    Square currentPiece = chessBoard
-        .firstWhere((element) => element.rank == rank && element.file == file);
-    int index = chessBoard.indexOf(currentPiece);
+    Square currentPiece =
+        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
+    int index = ChessBoardModel.getIndexOfSquare(currentPiece);
     int currentIndex = index;
     List<Square> verticalPieces = [];
 
     while (currentIndex < 64) {
-      verticalPieces.add(chessBoard[currentIndex]);
+      verticalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex += 8;
     }
     currentIndex = index;
     while (currentIndex >= 0) {
-      verticalPieces.add(chessBoard[currentIndex]);
+      verticalPieces.add(ChessBoardModel.getSquareAtIndex(currentIndex));
       currentIndex -= 8;
     }
     // remove current piece from the list

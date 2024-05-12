@@ -72,11 +72,11 @@ class EnPassantController {
           relativeDirection == RelativeDirection.diagonalBottomLeft) {
         canCaptureEnPassant = indexToCheck != null &&
             fromIndex > indexToCheck &&
-            chessBoard[toIndex].piece == null;
+            ChessBoardModel.getSquareAtIndex(toIndex).piece == null;
       } else {
         canCaptureEnPassant = indexToCheck != null &&
             fromIndex < indexToCheck &&
-            chessBoard[toIndex].piece == null;
+            ChessBoardModel.getSquareAtIndex(toIndex).piece == null;
       }
     }
 
@@ -85,12 +85,14 @@ class EnPassantController {
 
   void updateBoardAfterEnPassant(Files tappedSquareFile,
       Files selectedPieceFile, Square emptyEnPassantCapturedPawnSquare) {
-    chessBoard[sharedState.selectedPieceIndex! +
-            (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1)] =
-        emptyEnPassantCapturedPawnSquare;
+    ChessBoardModel.updateSquareAtIndex(
+        sharedState.selectedPieceIndex! +
+            (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1),
+        emptyEnPassantCapturedPawnSquare.piece,
+        emptyEnPassantCapturedPawnSquare.pieceType);
+
     int capturedPawnIndex = sharedState.selectedPieceIndex! +
         (tappedSquareFile.index > selectedPieceFile.index ? 1 : -1);
-    chessBoard[capturedPawnIndex].piece = null;
-    chessBoard[capturedPawnIndex].pieceType = null;
+    ChessBoardModel.emptySquareAtIndex(capturedPawnIndex);
   }
 }

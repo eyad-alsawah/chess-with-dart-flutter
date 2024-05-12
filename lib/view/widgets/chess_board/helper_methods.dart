@@ -55,7 +55,10 @@ Widget drawInitialPieces(
             Visibility(
               visible: getImageFromBoard(index: index).isNotEmpty,
               child: Transform.rotate(
-                angle: chessBoard[index].pieceType == PieceType.light ? 0 : pi,
+                angle: ChessBoardModel.getSquareAtIndex(index).pieceType ==
+                        PieceType.light
+                    ? 0
+                    : pi,
                 child: Image.asset(
                   height: boardSize * 0.08,
                   width: boardSize * 0.08,
@@ -82,7 +85,7 @@ Widget drawInitialPieces(
 }
 
 String getImageFromBoard({required int index}) {
-  Square square = chessBoard[index];
+  Square square = ChessBoardModel.getSquareAtIndex(index);
   String imageAssetString = '';
   switch (square.piece) {
     case Pieces.pawn:

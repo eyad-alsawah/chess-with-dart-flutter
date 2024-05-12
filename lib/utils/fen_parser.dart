@@ -84,10 +84,9 @@ class Position {
   int? fullmoveNumber;
   String fen = '';
 
-  Position(String fen) {
+  Position(this.fen) {
     RegExp castleValidator = RegExp(r'^[KQkq-]+$');
     RegExp enPassantValidator = RegExp(r'^[a-h1-8-]+$');
-    this.fen = fen;
     List<String> fenParts = fen.split(' ');
     if (fenParts.length != 6) {
       throw ArgumentError(

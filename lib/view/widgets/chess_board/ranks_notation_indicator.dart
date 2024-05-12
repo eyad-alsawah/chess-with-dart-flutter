@@ -18,6 +18,7 @@ class RanksNotationIndicator extends StatelessWidget {
           itemCount: 8,
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
+          reverse: true,
           itemBuilder: (context, index) {
             return SizedBox(
               height: size * 0.1,
