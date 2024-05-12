@@ -1,5 +1,4 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/model/global_state.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
@@ -139,13 +138,19 @@ class ChessBoardModel {
         file: Files.h, rank: 8, piece: Pieces.rook, pieceType: PieceType.dark),
   ];
 
+  static List<Square> currentChessBoard() {
+    List<Square> currentBoard = [];
+    for (var square in chessBoard) {
+      currentBoard.add(square.copy());
+    }
+    return currentBoard;
+  }
+
   static Future<void> clearBoard() async {
     chessBoard.clear();
   }
 
   static Future<void> addAll(List<Square> squares) async {
-    callbacks.updateView();
-    await Future.delayed(const Duration(milliseconds: 500));
     chessBoard.addAll(squares);
   }
 

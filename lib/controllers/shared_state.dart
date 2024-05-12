@@ -6,6 +6,7 @@ import 'package:chess/model/square.dart';
 import 'package:chess/utils/capture_widget.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
+import 'package:chess/utils/fen_parser.dart';
 import 'package:chess/utils/global_keys.dart';
 import 'package:flutter/material.dart';
 
@@ -50,26 +51,26 @@ class SharedState {
   String currentPlayingTurn = "White's Turn";
 
   Future<void> reset() async {
+    stateIndex = 0;
     stateList.clear();
     stateImages.clear();
 
-    // stateList.add(GameState(
-    //     currentChessBoard: initialChessBoard.deepCopy(),
-    //     legalMovesIndices: [],
-    //     playingTurn: PlayingTurn.white,
-    //     isKingInCheck: false,
-    //     inMoveSelectionMode: true,
-    //     lockFurtherInteractions: false,
-    //     didLightKingMove: false,
-    //     didDarkKingMove: false,
-    //     didLightKingSideRookMove: false,
-    //     didLightQueenSideRookMove: false,
-    //     didDarkKingSideRookMove: false,
-    //     didDarkQueenSideRookMove: false,
-    //     squareName: "",
-    //     currentPlayingTurn: "White's Turn"));
+    stateList.add(GameState(
+        currentChessBoard: ChessBoardModel.currentChessBoard(),
+        legalMovesIndices: [],
+        playingTurn: PlayingTurn.white,
+        isKingInCheck: false,
+        inMoveSelectionMode: true,
+        lockFurtherInteractions: false,
+        didLightKingMove: false,
+        didDarkKingMove: false,
+        didLightKingSideRookMove: false,
+        didLightQueenSideRookMove: false,
+        didDarkKingSideRookMove: false,
+        didDarkQueenSideRookMove: false,
+        squareName: "",
+        currentPlayingTurn: "White's Turn"));
 
-    stateIndex = 0;
     movesCount = 0;
     legalMovesIndices.clear();
     selectedPieceIndex = null;
@@ -94,7 +95,9 @@ class SharedState {
     //------------------home_view----------------------
     currentPlayingTurn = "White's Turn";
     await ChessBoardModel.clearBoard();
-    // await ChessBoardModel.addAll(initialChessBoard);
+
+    ChessBoardModel.addAll(FenParser.generateChessBoard(
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'));
   }
 
   Future<void> storeState() async {
@@ -110,8 +113,9 @@ class SharedState {
 
     movesCount++;
     stateIndex++;
+
     stateList.add(GameState(
-        currentChessBoard: ChessBoardModel.chessBoard.deepCopy(),
+        currentChessBoard: ChessBoardModel.currentChessBoard(),
         legalMovesIndices: legalMovesIndices.deepCopy(),
         playingTurn: playingTurn,
         isKingInCheck: isKingInCheck,

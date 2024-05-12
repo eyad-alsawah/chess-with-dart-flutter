@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';

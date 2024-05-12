@@ -18,7 +18,7 @@ class GameStatusController {
 
   bool doesOnlyOneKingExists() {
     int kingsCount = 0;
-    for (var element in ChessBoardModel.chessBoard) {
+    for (var element in ChessBoardModel.currentChessBoard()) {
       if (element.piece == Pieces.king) {
         kingsCount++;
       }
@@ -128,7 +128,7 @@ class GameStatusController {
     PieceType attackedPlayerType =
         attackedPlayer == PlayingTurn.white ? PieceType.light : PieceType.dark;
     List<Square> attackedPlayerPieces = [];
-    for (var square in ChessBoardModel.chessBoard) {
+    for (var square in ChessBoardModel.currentChessBoard()) {
       if (square.pieceType == attackedPlayerType) {
         if (square.piece == Pieces.king) {
           kingSquare = square.copy();
@@ -217,7 +217,7 @@ class GameStatusController {
         matchPiece: true, matchType: true);
     // checking for stalemate
     List<int> allLegalMovesIndices = [];
-    for (var square in ChessBoardModel.chessBoard) {
+    for (var square in ChessBoardModel.currentChessBoard()) {
       if (square.pieceType ==
           ChessBoardModel.getSquareAtIndex(opponentKingIndex).pieceType) {
         allLegalMovesIndices
