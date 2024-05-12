@@ -224,7 +224,6 @@ class LegalMovesController {
         }
       }
     }
-    print("--------------------");
 
     // filtering legal moves to prevent moving to a place that would not remove the check
     if (kingChecked) {
