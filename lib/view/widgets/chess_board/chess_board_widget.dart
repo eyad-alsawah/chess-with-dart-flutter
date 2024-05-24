@@ -138,6 +138,13 @@ class _ChessBoardState extends State<ChessBoard> {
                           crossAxisCount: 8,
                         ),
                         itemBuilder: (context, index) => GestureDetector(
+                          // onTap: () async {
+                          //   for (int i = 0; i <= 63; i++) {
+                          //     chess.handleSquareTapped(i);
+                          //     await Future.delayed(
+                          //         const Duration(milliseconds: 10));
+                          //   }
+                          // },
                           onTap: () => chess.handleSquareTapped(index),
                           child: Container(
                             decoration: BoxDecoration(

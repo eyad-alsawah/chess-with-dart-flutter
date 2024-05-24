@@ -2,7 +2,6 @@ import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/model/square.dart';
 import 'package:chess/utils/index_to_square_map.dart';
 
 class CastlingController {
@@ -34,36 +33,29 @@ class CastlingController {
 
   //----------------------------------------------------------------------------
   // todo: handle cases where there aren't rooks on the start of the game
-  List<Square> getCastlingAvailability({required PieceType pieceType}) {
-    List<Square> castlingAvailability;
+  List<int> getCastlingAvailability({required PieceType pieceType}) {
+    List<int> castlingAvailability;
     if (pieceType == PieceType.light) {
       if (didLightKingMove) {
         castlingAvailability = [];
       } else if (didLightKingSideRookMove) {
-        castlingAvailability = didLightQueenSideRookMove
-            ? []
-            : [(ChessSquare.c1.index).toSquare()];
+        castlingAvailability =
+            didLightQueenSideRookMove ? [] : [ChessSquare.c1.index];
       } else {
         castlingAvailability = didLightQueenSideRookMove
-            ? [(ChessSquare.g6.index).toSquare()]
-            : [
-                (ChessSquare.c1.index).toSquare(),
-                (ChessSquare.g1.index).toSquare()
-              ];
+            ? [ChessSquare.g6.index]
+            : [ChessSquare.c1.index, ChessSquare.g1.index];
       }
     } else {
       if (didDarkKingMove) {
         castlingAvailability = [];
       } else if (didDarkKingSideRookMove) {
         castlingAvailability =
-            didDarkQueenSideRookMove ? [] : [(ChessSquare.c8.index).toSquare()];
+            didDarkQueenSideRookMove ? [] : [ChessSquare.c8.index];
       } else {
         castlingAvailability = didDarkQueenSideRookMove
-            ? [(ChessSquare.g8.index).toSquare()]
-            : [
-                (ChessSquare.c8.index).toSquare(),
-                (ChessSquare.g8.index).toSquare()
-              ];
+            ? [ChessSquare.g8.index]
+            : [ChessSquare.c8.index, ChessSquare.g8.index];
       }
     }
     return castlingAvailability;
@@ -148,22 +140,22 @@ class CastlingController {
     }
   }
 
-  static List<Square> preventCastlingIfPieceStandsBetweenRookAndKing(
-      {required int from, required List<Square> legalAndIllegalMoves}) {
+  static List<int> preventCastlingIfPieceStandsBetweenRookAndKing(
+      {required int from, required List<int> legalAndIllegalMoves}) {
     if (from.toPiece() == Pieces.king) {
       if (from.toPieceType() == PieceType.light) {
         if (!CastlingController.didLightKingMove) {
           if ((ChessSquare.f1.index).toPiece() != null ||
               (ChessSquare.g1.index).toPiece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 1),
+              (square) => (square.toFile() == Files.g && square.toRank() == 1),
             );
           }
           if ((ChessSquare.b1.index).toPiece() != null ||
               (ChessSquare.c1.index).toPiece() != null ||
               (ChessSquare.d1.index).toPiece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 1),
+              (square) => (square.toFile() == Files.c && square.toRank() == 1),
             );
           }
         }
@@ -172,14 +164,14 @@ class CastlingController {
           if ((ChessSquare.f8.index).toPiece() != null ||
               (ChessSquare.g8.index).toPiece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 8),
+              (square) => (square.toFile() == Files.g && square.toRank() == 8),
             );
           }
           if ((ChessSquare.b8.index).toPiece() != null ||
               (ChessSquare.c8.index).toPiece() != null ||
               (ChessSquare.d8.index).toPiece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 8),
+              (square) => (square.toFile() == Files.c && square.toRank() == 8),
             );
           }
         }

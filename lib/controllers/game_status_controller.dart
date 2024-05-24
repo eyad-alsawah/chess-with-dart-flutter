@@ -3,7 +3,6 @@ import 'package:chess/controllers/helper_methods.dart';
 
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
-import 'package:chess/model/square.dart';
 import 'package:chess/utils/extensions.dart';
 
 class GameStatusController {
@@ -70,70 +69,73 @@ class GameStatusController {
     int oppenentKingRank = opponentKingIndex.toRank();
 
     /// -------------------------------------getting surrounding openent pawns--------------------------
-    List<Square> surroundingopenentPawns =
+    List<int> surroundingopenentPawns =
         basicMovesController.getPawnPieces(opponentKingIndex);
     // pawns can't check a king of the same type
     surroundingopenentPawns
-        .removeWhere((pawn) => pawn.pieceType == oppenentKingType);
+        .removeWhere((pawn) => pawn.toPieceType() == oppenentKingType);
     // pawns that are on the same file as the king aren't checking the king
     surroundingopenentPawns
-        .removeWhere((pawn) => pawn.file == oppenentKingFile);
+        .removeWhere((pawn) => pawn.toFile() == oppenentKingFile);
     surroundingopenentPawns.removeWhere((pawn) {
       // a black king can't be put in check by white pawns higher in rank
-      if (oppenentKingType == PieceType.dark && pawn.rank > oppenentKingRank) {
+      if (oppenentKingType == PieceType.dark &&
+          pawn.toRank() > oppenentKingRank) {
         return true;
       }
       // a white king can't be put in check by white pawns lower in rank
-      if (oppenentKingType == PieceType.light && pawn.rank < oppenentKingRank) {
+      if (oppenentKingType == PieceType.light &&
+          pawn.toRank() < oppenentKingRank) {
         return true;
       }
       return false;
     });
 
     /// -------------------------------------getting surrounding openent knights---------------
-    List<Square> surroundingKnights =
+    List<int> surroundingKnights =
         basicMovesController.getKnightPieces(opponentKingIndex);
     // knights of the same type as the openent king can't check the king
     surroundingKnights
-        .removeWhere((knight) => knight.pieceType == oppenentKingType);
+        .removeWhere((knight) => knight.toPieceType() == oppenentKingType);
     // empty squares don't count, same for pieces that are not knights
-    surroundingKnights.removeWhere(
-        (square) => square.piece == null || square.piece != Pieces.knight);
+    surroundingKnights.removeWhere((square) =>
+        square.toPiece() == null || square.toPiece() != Pieces.knight);
 
     /// ------------------------------------getting surrounding openent rooks and queens  (queens vertical/horizontal to the openent king)---------
-    List<Square> surroundingRooksAndQueens = [
+    List<int> surroundingRooksAndQueens = [
       ...basicMovesController.getHorizontalPieces(opponentKingIndex),
       ...basicMovesController.getVerticalPieces(opponentKingIndex),
     ];
 
-    List<Square> surroundingRooksAndQueensInLineOfSight =
+    List<int> surroundingRooksAndQueensInLineOfSight =
         await legalMovesController.getLegalMovesOnly(
             legalAndIllegalMoves: surroundingRooksAndQueens,
             from: opponentKingIndex);
 
     // rooks or queens of the same type as the king can't check the king
     surroundingRooksAndQueensInLineOfSight.removeWhere(
-        (rookOrQueen) => rookOrQueen.pieceType == oppenentKingType);
+        (rookOrQueen) => rookOrQueen.toPieceType() == oppenentKingType);
 
     // empty squares don't count, same for pieces that are neither rooks nor queens
     surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
-        square.piece == null ||
-        (square.piece != Pieces.rook && square.piece != Pieces.queen));
+        square.toPiece() == null ||
+        (square.toPiece() != Pieces.rook && square.toPiece() != Pieces.queen));
 
     /// ----------------------------------------getting surrounding openent bishops and queens (queens diagonal to the openent king)----------------
-    List<Square> surroundingBishopsAndQueens =
+    List<int> surroundingBishopsAndQueens =
         basicMovesController.getDiagonalPieces(opponentKingIndex);
-    List<Square> surroundingBishopsAndQueensInLineOfSight =
+    List<int> surroundingBishopsAndQueensInLineOfSight =
         await legalMovesController.getLegalMovesOnly(
             legalAndIllegalMoves: surroundingBishopsAndQueens,
             from: opponentKingIndex);
 
     surroundingBishopsAndQueensInLineOfSight.removeWhere(
-        (bishopOrQueen) => bishopOrQueen.pieceType == oppenentKingType);
+        (bishopOrQueen) => bishopOrQueen.toPieceType() == oppenentKingType);
     // empty squares don't count, same for pieces that are neither bishops nor queens
     surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
-        square.piece == null ||
-        (square.piece != Pieces.bishop && square.piece != Pieces.queen));
+        square.toPiece() == null ||
+        (square.toPiece() != Pieces.bishop &&
+            square.toPiece() != Pieces.queen));
 
     ///------------------------------------------------------------------------------------
 

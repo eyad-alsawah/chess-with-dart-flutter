@@ -31,34 +31,33 @@ class LegalMovesController {
       return [];
     }
     // getting all the moves a piece can move to if there was nothing standing in its way
-    List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(from);
+    List<int> legalAndIllegalMoves = getIllegalAndLegalMoves(from);
 
     if (DebugConfig.displayAllLegalAndIllegalMoves) {
       SharedState.instance.debugHighlightIndices.clear();
-      SharedState.instance.debugHighlightIndices.addAll(
-          HelperMethods.instance.squaresToIndices(legalAndIllegalMoves));
+      SharedState.instance.debugHighlightIndices.addAll(legalAndIllegalMoves);
     } else {
       SharedState.instance.debugHighlightIndices.clear();
     }
 
     // filtering out illegal moves
-    List<Square> legalMovesOnly = await getLegalMovesOnly(
+    List<int> legalMovesOnly = await getLegalMovesOnly(
         from: from,
         legalAndIllegalMoves: legalAndIllegalMoves.deepCopy(),
         fromHandleSquareTapped: !ignorePlayingTurn,
         kingChecked: isKingChecked);
 
-    return HelperMethods.instance.squaresToIndices(legalMovesOnly);
+    return legalMovesOnly;
   }
 
   //----------------------------------------------------------------------------------
 
-  Future<List<Square>> getLegalMovesOnly(
-      {required List<Square> legalAndIllegalMoves,
+  Future<List<int>> getLegalMovesOnly(
+      {required List<int> legalAndIllegalMoves,
       required int from,
       bool fromHandleSquareTapped = false,
       bool kingChecked = false}) async {
-    List<Square> legalMoves = [];
+    List<int> legalMoves = [];
 
     bool didCaptureOnRankLeft = false;
     bool didCaptureOnRankRight = false;
@@ -75,17 +74,17 @@ class LegalMovesController {
             from: from, legalAndIllegalMoves: legalAndIllegalMoves.deepCopy());
 
     for (var move in legalAndIllegalMoves) {
-      RelativeDirection relativeDirection = helperMethods.getRelativeDirection(
-          from: from, to: ChessBoardModel.getIndexOfSquare(move));
+      RelativeDirection relativeDirection =
+          helperMethods.getRelativeDirection(from: from, to: move);
 
       if (from.toPieceType() == null) {
         legalMoves.clear();
       } else if (from.toPiece() == Pieces.knight) {
         // treated differently than other pieces due to the way the knight moves
-        (move.piece == null || move.pieceType != from.toPieceType())
+        (move.toPiece() == null || move.toPieceType() != from.toPieceType())
             ? legalMoves.add(move)
             : null;
-      } else if (move.piece == null) {
+      } else if (move.toPiece() == null) {
         switch (relativeDirection) {
           case RelativeDirection.rankLeft:
             if (!didCaptureOnRankLeft) {
@@ -131,7 +130,7 @@ class LegalMovesController {
             break;
         }
       } else {
-        if (move.pieceType == from.toPieceType()) {
+        if (move.toPieceType() == from.toPieceType()) {
           switch (relativeDirection) {
             case RelativeDirection.rankLeft:
               didCaptureOnRankLeft = true;
@@ -237,26 +236,25 @@ class LegalMovesController {
     return legalMoves.deepCopy();
   }
 
-  Future<List<Square>> filterMoveThatExposeKingToCheck(
-      List<Square> legalMoves, int from, bool fromHandleSquareTapped) async {
+  Future<List<int>> filterMoveThatExposeKingToCheck(
+      List<int> legalMoves, int from, bool fromHandleSquareTapped) async {
     if (fromHandleSquareTapped) {
       PieceType? fromType = from.toPieceType();
       Pieces? fromPiece = from.toPiece();
 
       // deep copying the list to prevent Concurrent modification of legalMoves
       for (var move in legalMoves.deepCopy()) {
-        int moveIndex = ChessBoardModel.getIndexOfSquare(move);
-        PieceType? moveType = move.copy().pieceType;
-        Pieces? movePiece = move.copy().piece;
+        PieceType? moveType = move.toPieceType();
+        Pieces? movePiece = move.toPiece();
 
         //--------------------
 
         // emptying the square we are at currently
         await ChessBoardModel.emptySquareAtIndex(from);
 
-        // updating the square at moveIndex
+        // updating the square at move
         await ChessBoardModel.updateSquareAtIndex(
-          moveIndex,
+          move,
           fromPiece,
           fromType,
         );
@@ -264,12 +262,11 @@ class LegalMovesController {
         // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
         bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
             attackedKingType: fromType,
-            escapeTo: fromPiece == Pieces.king ? moveIndex : null);
+            escapeTo: fromPiece == Pieces.king ? move : null);
 
         // resetting the hypothetically moved pieces
         await ChessBoardModel.updateSquareAtIndex(from, fromPiece, fromType);
-        await ChessBoardModel.updateSquareAtIndex(
-            moveIndex, movePiece, moveType);
+        await ChessBoardModel.updateSquareAtIndex(move, movePiece, moveType);
         isKingAttacked ? legalMoves.remove(move) : null;
       }
     }
@@ -283,15 +280,10 @@ class LegalMovesController {
     callbacks.updateView();
   }
 
-  Future<List<Square>> preventMovingIfCheckRemains(
-      {required List<Square> legalMoves, required int to}) async {
+  Future<List<int>> preventMovingIfCheckRemains(
+      {required List<int> legalMoves, required int to}) async {
     // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
-    List<int> legalMovesIndices = [];
-
-    legalMovesIndices
-        .addAll(HelperMethods.instance.squaresToIndices(legalMoves.deepCopy()));
-
-    for (var index in legalMovesIndices) {
+    for (var index in legalMoves.deepCopy()) {
       Square currentSquareAtIndex = index.toSquare().copy();
       ChessBoardModel.updateSquareAtIndex(
           index, to.toPiece(), to.toPieceType());
@@ -303,8 +295,7 @@ class LegalMovesController {
 
       if (isKingAttacked) {
         legalMoves.removeWhere((move) =>
-            move.file == (index).toSquare().file &&
-            move.rank == (index).toSquare().rank);
+            move.toFile() == index.toFile() && move.toRank() == index.toRank());
       }
       // resetting the hypothetically moved piece
       ChessBoardModel.updateSquareAtIndex(
@@ -315,10 +306,10 @@ class LegalMovesController {
   }
   //----------------------------------------------------------------------------
 
-  List<Square> getIllegalAndLegalMoves(int from) {
-    List<Square> moves = [];
+  List<int> getIllegalAndLegalMoves(int from) {
+    List<int> moves = [];
     // Define a map to associate each piece type with its move calculation function
-    final Map<Pieces, List<Square> Function()> moveFunctions = {
+    final Map<Pieces, List<int> Function()> moveFunctions = {
       Pieces.rook: () =>
           basicMovesController.getHorizontalPieces(from) +
           basicMovesController.getVerticalPieces(from),

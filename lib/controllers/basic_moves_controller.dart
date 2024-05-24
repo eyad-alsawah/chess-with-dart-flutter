@@ -1,7 +1,6 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/model/square.dart';
 
 class BasicMovesController {
   // Private constructor
@@ -13,12 +12,12 @@ class BasicMovesController {
   // Public static method to access the instance
   static BasicMovesController get instance => _instance;
   //----------------------------------------------------------------------------
-  List<Square> getPawnPieces(int from) {
+  List<int> getPawnPieces(int from) {
     Files file = from.toFile();
     int rank = from.toRank();
     PieceType? pieceType = from.toPieceType();
 
-    List<Square> pawnPieces = [];
+    List<int> pawnPieces = [];
 
     if (pieceType == PieceType.light) {
       //top-right
@@ -30,7 +29,7 @@ class BasicMovesController {
                     to: from + 9,
                     relativeDirection: RelativeDirection.diagonalTopRight,
                   )))
-          ? pawnPieces.add((from + 9).toSquare())
+          ? pawnPieces.add(from + 9)
           : null;
       //top-left
       (file != Files.a &&
@@ -41,14 +40,13 @@ class BasicMovesController {
                     to: from + 7,
                     relativeDirection: RelativeDirection.diagonalTopLeft,
                   )))
-          ? pawnPieces.add((from + 7).toSquare())
+          ? pawnPieces.add(from + 7)
           : null;
       //top
       (rank != 8 && (from + 8).toPieceType() == null)
           ? (rank == 2 && (from + 16).toPieceType() == null)
-              ? pawnPieces
-                  .addAll([(from + 8).toSquare(), (from + 16).toSquare()])
-              : pawnPieces.add((from + 8).toSquare())
+              ? pawnPieces.addAll([from + 8, from + 16])
+              : pawnPieces.add(from + 8)
           : null;
     } else if (pieceType == PieceType.dark) {
       //bottom-right
@@ -60,7 +58,7 @@ class BasicMovesController {
                     to: from - 7,
                     relativeDirection: RelativeDirection.diagonalBottomRight,
                   )))
-          ? pawnPieces.add((from - 7).toSquare())
+          ? pawnPieces.add(from - 7)
           : null;
       //bottom-left
       (file != Files.a &&
@@ -71,24 +69,23 @@ class BasicMovesController {
                     to: from - 9,
                     relativeDirection: RelativeDirection.diagonalBottomLeft,
                   )))
-          ? pawnPieces.add((from - 9).toSquare())
+          ? pawnPieces.add(from - 9)
           : null;
       //bottom
       (rank != 1 && (from - 8).toPieceType() == null)
           ? (rank == 7 && (from - 16).toPieceType() == null)
-              ? pawnPieces
-                  .addAll([(from - 8).toSquare(), (from - 16).toSquare()])
-              : pawnPieces.add((from - 8).toSquare())
+              ? pawnPieces.addAll([from - 8, from - 16])
+              : pawnPieces.add(from - 8)
           : null;
     }
     return pawnPieces;
   }
 
-  List<Square> getKingPieces(int from, {bool getCastlingPieces = true}) {
+  List<int> getKingPieces(int from, {bool getCastlingPieces = true}) {
     Files file = from.toFile();
     int rank = from.toRank();
 
-    List<Square> kingPieces = [];
+    List<int> kingPieces = [];
 
     // castling:
     getCastlingPieces
@@ -97,156 +94,141 @@ class BasicMovesController {
         : null;
 
     //right
-    (file != Files.h) ? kingPieces.add((from + 1).toSquare()) : null;
+    (file != Files.h) ? kingPieces.add(from + 1) : null;
     //left
-    (file != Files.a) ? kingPieces.add((from - 1).toSquare()) : null;
+    (file != Files.a) ? kingPieces.add(from - 1) : null;
     //top-right
-    (file != Files.h && rank != 8)
-        ? kingPieces.add((from + 9).toSquare())
-        : null;
+    (file != Files.h && rank != 8) ? kingPieces.add(from + 9) : null;
     //top-left
-    (file != Files.a && rank != 8)
-        ? kingPieces.add((from + 7).toSquare())
-        : null;
+    (file != Files.a && rank != 8) ? kingPieces.add(from + 7) : null;
     //top
-    rank != 8 ? kingPieces.add((from + 8).toSquare()) : null;
+    rank != 8 ? kingPieces.add(from + 8) : null;
 
     //bottom-right
-    (file != Files.h && rank != 1)
-        ? kingPieces.add((from - 7).toSquare())
-        : null;
+    (file != Files.h && rank != 1) ? kingPieces.add(from - 7) : null;
     //bottom-left
-    (file != Files.a && rank != 1)
-        ? kingPieces.add((from - 9).toSquare())
-        : null;
+    (file != Files.a && rank != 1) ? kingPieces.add(from - 9) : null;
     //bottom
-    rank != 1 ? kingPieces.add((from - 8).toSquare()) : null;
+    rank != 1 ? kingPieces.add(from - 8) : null;
 
     return kingPieces;
   }
 
-  List<Square> getKnightPieces(int from) {
+  List<int> getKnightPieces(int from) {
     Files file = from.toFile();
     int rank = from.toRank();
 
-    List<Square> knightPieces = [];
+    List<int> knightPieces = [];
 
     //top-right
-    (file != Files.h && rank <= 6)
-        ? knightPieces.add((from + 17).toSquare())
-        : null;
+    (file != Files.h && rank <= 6) ? knightPieces.add(from + 17) : null;
     //top-left
-    (file != Files.a && rank <= 6)
-        ? knightPieces.add((from + 15).toSquare())
-        : null;
+    (file != Files.a && rank <= 6) ? knightPieces.add(from + 15) : null;
     //----------
     //bottom-right
-    (file != Files.h && rank >= 3)
-        ? knightPieces.add((from - 15).toSquare())
-        : null;
+    (file != Files.h && rank >= 3) ? knightPieces.add(from - 15) : null;
     //bottom-left
-    (file != Files.a && rank >= 3)
-        ? knightPieces.add((from - 17).toSquare())
-        : null;
+    (file != Files.a && rank >= 3) ? knightPieces.add(from - 17) : null;
     //---------
     //right-top
     (file != Files.g && file != Files.h && rank != 8)
-        ? knightPieces.add((from + 10).toSquare())
+        ? knightPieces.add(from + 10)
         : null;
     //right-bottom
     (file != Files.g && file != Files.h && rank != 1)
-        ? knightPieces.add((from - 6).toSquare())
+        ? knightPieces.add(from - 6)
         : null;
     //---------
     //left-top
     (file != Files.b && file != Files.a && rank != 8)
-        ? knightPieces.add((from + 6).toSquare())
+        ? knightPieces.add(from + 6)
         : null;
     //left-bottom
     (file != Files.b && file != Files.a && rank != 1)
-        ? knightPieces.add((from - 10).toSquare())
+        ? knightPieces.add(from - 10)
         : null;
 
     return knightPieces;
   }
 
-  List<Square> getDiagonalPieces(int from) {
+  List<int> getDiagonalPieces(int from) {
     Files file = from.toFile();
     int rank = from.toRank();
     int currentIndex = from;
-    List<Square> diagonalPieces = [];
+    List<int> diagonalPieces = [];
     //-----------------------------
     //{RelativeDirection.diagonalTopRight}
     while (currentIndex < 64 &&
         !(currentIndex.toFile() == Files.a && file != Files.a)) {
-      diagonalPieces.add(currentIndex.toSquare());
+      diagonalPieces.add(currentIndex);
       currentIndex = currentIndex + 9;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalBottomLeft}
     while (currentIndex >= 0 &&
         !(currentIndex.toFile() == Files.h && file != Files.h)) {
-      diagonalPieces.add(currentIndex.toSquare());
+      diagonalPieces.add(currentIndex);
       currentIndex = currentIndex - 9;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalTopLeft}
     while (currentIndex < 63 &&
         !(currentIndex.toFile() == Files.h && file != Files.h)) {
-      diagonalPieces.add(currentIndex.toSquare());
+      diagonalPieces.add(currentIndex);
       currentIndex = currentIndex + 7;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalBottomRight}
     while (currentIndex > 0 &&
         !(currentIndex.toFile() == Files.a && file != Files.a)) {
-      diagonalPieces.add(currentIndex.toSquare());
+      diagonalPieces.add(currentIndex);
       currentIndex = currentIndex - 7;
     }
     // remove current piece from the list
-    diagonalPieces
-        .removeWhere((element) => element.rank == rank && element.file == file);
+    diagonalPieces.removeWhere(
+        (element) => element.toRank() == rank && element.toFile() == file);
     return diagonalPieces;
   }
 
-  List<Square> getHorizontalPieces(int from) {
+  List<int> getHorizontalPieces(int from) {
     int rank = from.toRank();
+    Files file = from.toFile();
 
     int currentIndex = from;
-    List<Square> horizontalPieces = [];
+    List<int> horizontalPieces = [];
     while (currentIndex < rank * 8) {
-      horizontalPieces.add((currentIndex).toSquare());
+      horizontalPieces.add(currentIndex);
       currentIndex++;
     }
     currentIndex = from;
     while (currentIndex >= (rank - 1) * 8) {
-      horizontalPieces.add((currentIndex).toSquare());
+      horizontalPieces.add(currentIndex);
       currentIndex--;
     }
     // remove current piece from the list
     horizontalPieces.removeWhere(
-        (element) => element.rank == rank && element.file == from.toFile());
+        (element) => element.toRank() == rank && element.toFile() == file);
     //--------------------------------
 
     return horizontalPieces;
   }
 
-  List<Square> getVerticalPieces(int from) {
+  List<int> getVerticalPieces(int from) {
     int currentIndex = from;
-    List<Square> verticalPieces = [];
+    List<int> verticalPieces = [];
 
     while (currentIndex < 64) {
-      verticalPieces.add((currentIndex).toSquare());
+      verticalPieces.add(currentIndex);
       currentIndex += 8;
     }
     currentIndex = from;
     while (currentIndex >= 0) {
-      verticalPieces.add((currentIndex).toSquare());
+      verticalPieces.add(currentIndex);
       currentIndex -= 8;
     }
     // remove current piece from the list
     verticalPieces.removeWhere((element) =>
-        element.rank == from.toRank() && element.file == from.toFile());
+        element.toRank() == from.toRank() && element.toFile() == from.toFile());
     return verticalPieces;
   }
 }
