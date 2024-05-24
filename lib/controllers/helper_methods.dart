@@ -5,7 +5,7 @@ import 'package:chess/model/square.dart';
 
 extension ToSquare on int {
   Square toSquare() {
-    return ChessBoardModel.chessBoard.elementAt(this).copy();
+    return ChessBoardModel.chessBoard[this]!.copy();
   }
 }
 
