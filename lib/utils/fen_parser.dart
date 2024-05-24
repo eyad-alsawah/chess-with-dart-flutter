@@ -39,8 +39,9 @@ class FenParser {
             ? (piece == piece.toUpperCase() ? PieceType.light : PieceType.dark)
             : null;
         chessBoard.add(Square(
-          file: Files.values[file - 1],
-          rank: rank,
+          // todo: uncomment this:
+          // file: Files.values[file - 1],
+          // rank: rank,
           piece: getPiece(piece),
           pieceType: getPiece(piece) != null
               ? pieceType

@@ -16,7 +16,7 @@ class ChessController {
   final OnVictory onVictory;
   final OnPlayingTurnChanged onPlayingTurnChanged;
   final OnPieceSelected onPieceSelected;
-  final OnPieceMoved onPieceMoved;
+
   final OnError onError;
   final OnSelectPromotionType onSelectPromotionType;
   final PlaySound playSound;
@@ -31,7 +31,6 @@ class ChessController {
     callbacks.onVictory = onVictory;
     callbacks.onPlayingTurnChanged = onPlayingTurnChanged;
     callbacks.onPieceSelected = onPieceSelected;
-    callbacks.onPieceMoved = onPieceMoved;
     callbacks.onError = onError;
     callbacks.onSelectPromotionType = onSelectPromotionType;
     callbacks.playSound = playSound;
@@ -46,7 +45,6 @@ class ChessController {
     required this.onDraw,
     required this.onPieceSelected,
     required this.onPlayingTurnChanged,
-    required this.onPieceMoved,
     required this.onError,
     required this.onSelectPromotionType,
     required this.playSound,

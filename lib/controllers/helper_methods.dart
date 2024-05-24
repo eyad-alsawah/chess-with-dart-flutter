@@ -2,10 +2,51 @@ import 'package:chess/controllers/enums.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/index_to_square_map.dart';
 
 extension ToSquare on int {
   Square toSquare() {
-    return ChessBoardModel.chessBoard[this]!.copy();
+    return ChessBoardModel.chessBoard[ChessSquare.values[this]]!.copy();
+  }
+}
+
+extension ChessSquareToRank on ChessSquare {
+  int toRank() {
+    return int.parse(name[1]);
+  }
+}
+
+extension ChessSquareToFile on ChessSquare {
+  Files toFile() {
+    String fileStr = name[0];
+    late Files fileEnum;
+    switch (fileStr) {
+      case 'a':
+        fileEnum = Files.a;
+        break;
+      case 'b':
+        fileEnum = Files.b;
+        break;
+      case 'c':
+        fileEnum = Files.c;
+        break;
+      case 'd':
+        fileEnum = Files.d;
+        break;
+      case 'e':
+        fileEnum = Files.e;
+        break;
+      case 'f':
+        fileEnum = Files.f;
+        break;
+      case 'g':
+        fileEnum = Files.g;
+        break;
+      case 'h':
+        fileEnum = Files.h;
+        break;
+    }
+    return fileEnum;
   }
 }
 

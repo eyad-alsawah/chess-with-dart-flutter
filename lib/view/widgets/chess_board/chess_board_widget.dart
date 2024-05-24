@@ -93,15 +93,6 @@ class _ChessBoardState extends State<ChessBoard> {
       },
       onPlayingTurnChanged: (playingTurn) =>
           widget.onPlayingTurnChanged(playingTurn),
-      onPieceMoved: (from, to) async {
-        state.selectedIndex = null;
-        ChessController.legalMovesIndices.clear();
-        // todo: change the place of this to ensure that its value won't be null after we set it to an Int
-        GameStatusController.checkedKingIndex = null;
-        await SharedState.instance
-            .storeState()
-            .then((value) => widget.onUpdateView());
-      },
       onError: (error, errorString) {
         // todo: show a toast here
         ColoredPrinter.printColored(

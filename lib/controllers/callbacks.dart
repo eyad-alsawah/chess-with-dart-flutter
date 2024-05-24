@@ -13,7 +13,6 @@ class Callbacks {
   late OnDraw onDraw;
   late OnPlayingTurnChanged onPlayingTurnChanged;
   late OnPieceSelected onPieceSelected;
-  late OnPieceMoved onPieceMoved;
   late OnError onError;
   late OnSelectPromotionType onSelectPromotionType;
   late PlaySound playSound;
