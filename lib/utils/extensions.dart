@@ -1,3 +1,7 @@
+import 'package:chess/controllers/enums.dart';
+import 'package:chess/model/chess_board_model.dart';
+import 'package:chess/model/square.dart';
+
 extension ListDeepCopy<T> on List<T> {
   List<T> deepCopy() {
     return map((element) {
@@ -13,5 +17,93 @@ extension ListDeepCopy<T> on List<T> {
         return element; // Return other types as is
       }
     }).toList();
+  }
+}
+
+extension PlayingTurnExtension on PlayingTurn {
+  PieceType toPieceType() {
+    return this == PlayingTurn.light ? PieceType.light : PieceType.dark;
+  }
+}
+
+extension ToSquare on int {
+  Square toSquare() {
+    return ChessBoardModel.chessBoard[ChessSquare.values[this]]!.copy();
+  }
+}
+
+extension ChessSquareToRank on ChessSquare {
+  int toRank() {
+    return int.parse(name[1]);
+  }
+}
+
+extension ChessSquareToFile on ChessSquare {
+  Files toFile() {
+    String fileStr = name[0];
+    late Files fileEnum;
+    switch (fileStr) {
+      case 'a':
+        fileEnum = Files.a;
+        break;
+      case 'b':
+        fileEnum = Files.b;
+        break;
+      case 'c':
+        fileEnum = Files.c;
+        break;
+      case 'd':
+        fileEnum = Files.d;
+        break;
+      case 'e':
+        fileEnum = Files.e;
+        break;
+      case 'f':
+        fileEnum = Files.f;
+        break;
+      case 'g':
+        fileEnum = Files.g;
+        break;
+      case 'h':
+        fileEnum = Files.h;
+        break;
+    }
+    return fileEnum;
+  }
+}
+
+extension ToPiece on int {
+  Pieces? toPiece() {
+    return toSquare().piece;
+  }
+}
+
+extension ToPieceType on int {
+  PieceType? toPieceType() {
+    return toSquare().pieceType;
+  }
+}
+
+extension ToOppositeType on PieceType {
+  PieceType? toOppositeType() {
+    return this == PieceType.light ? PieceType.dark : PieceType.light;
+  }
+}
+
+extension ToFile on int {
+  Files toFile() {
+    return Files.values[this % 8];
+  }
+}
+
+extension ToPlayingTurn on PieceType {
+  PlayingTurn toPlayingTurn() {
+    return this == PieceType.light ? PlayingTurn.light : PlayingTurn.dark;
+  }
+}
+
+extension ToRank on int {
+  int toRank() {
+    return (this ~/ 8) + 1;
   }
 }

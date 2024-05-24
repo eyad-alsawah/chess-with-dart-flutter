@@ -1,8 +1,7 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/utils/index_to_square_map.dart';
+import 'package:chess/utils/extensions.dart';
 
 class CastlingController {
   // Private constructor

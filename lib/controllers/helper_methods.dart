@@ -1,90 +1,7 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/model/global_state.dart';
-import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
-import 'package:chess/utils/index_to_square_map.dart';
-
-extension ToSquare on int {
-  Square toSquare() {
-    return ChessBoardModel.chessBoard[ChessSquare.values[this]]!.copy();
-  }
-}
-
-extension ChessSquareToRank on ChessSquare {
-  int toRank() {
-    return int.parse(name[1]);
-  }
-}
-
-extension ChessSquareToFile on ChessSquare {
-  Files toFile() {
-    String fileStr = name[0];
-    late Files fileEnum;
-    switch (fileStr) {
-      case 'a':
-        fileEnum = Files.a;
-        break;
-      case 'b':
-        fileEnum = Files.b;
-        break;
-      case 'c':
-        fileEnum = Files.c;
-        break;
-      case 'd':
-        fileEnum = Files.d;
-        break;
-      case 'e':
-        fileEnum = Files.e;
-        break;
-      case 'f':
-        fileEnum = Files.f;
-        break;
-      case 'g':
-        fileEnum = Files.g;
-        break;
-      case 'h':
-        fileEnum = Files.h;
-        break;
-    }
-    return fileEnum;
-  }
-}
-
-extension ToPiece on int {
-  Pieces? toPiece() {
-    return toSquare().piece;
-  }
-}
-
-extension ToPieceType on int {
-  PieceType? toPieceType() {
-    return toSquare().pieceType;
-  }
-}
-
-extension ToOppositeType on PieceType {
-  PieceType? toOppositeType() {
-    return this == PieceType.light ? PieceType.dark : PieceType.light;
-  }
-}
-
-extension ToFile on int {
-  Files toFile() {
-    return Files.values[this % 8];
-  }
-}
-
-extension ToPlayingTurn on PieceType {
-  PlayingTurn toPlayingTurn() {
-    return this == PieceType.light ? PlayingTurn.light : PlayingTurn.dark;
-  }
-}
-
-extension ToRank on int {
-  int toRank() {
-    return (this ~/ 8) + 1;
-  }
-}
+import 'package:chess/utils/extensions.dart';
 
 class HelperMethods {
   // Private constructor
@@ -119,17 +36,6 @@ class HelperMethods {
             (selectedPiece.pieceType == PieceType.dark &&
                 sharedState.playingTurn != PlayingTurn.dark));
     return shouldClearLegalMovesIndices;
-  }
-
-  List<int> squaresToIndices(List<Square> squares) {
-    List<int> indices = [];
-    for (var move in squares) {
-      int squareIndex = ChessBoardModel.getIndexOfSquare(move);
-      if (squareIndex >= 0 && squareIndex <= 63) {
-        indices.add(squareIndex);
-      }
-    }
-    return indices;
   }
 
   //----------------------------------------------------------------------------

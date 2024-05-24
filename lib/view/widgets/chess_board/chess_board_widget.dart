@@ -1,5 +1,3 @@
-// import 'package:audioplayers/audioplayers.dart';
-
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
 import 'package:chess/controllers/game_status_controller.dart';
@@ -14,9 +12,6 @@ import 'package:chess/view/widgets/chess_board/ranks_notation_indicator.dart';
 import 'package:flutter/material.dart';
 
 import 'package:just_audio/just_audio.dart';
-
-List<String> filesNotation = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-List<String> ranksNotation = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
 class ChessBoard extends StatefulWidget {
   final ValueChanged<PlayingTurn> onPlayingTurnChanged;

@@ -2,18 +2,17 @@ import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
-import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/extensions.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
-import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:flutter/material.dart';
 
 String getSquareNameFromIndex({required int index}) {
   index++;
   int rank = (index / 8).ceil();
-  String file = filesNotation[index - 8 * (rank - 1) - 1];
+  String file = Files.values[index - 8 * (rank - 1) - 1].name;
   return "$file$rank";
 }
 

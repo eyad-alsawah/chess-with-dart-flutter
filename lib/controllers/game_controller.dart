@@ -3,12 +3,12 @@ import 'package:chess/controllers/castling_controller.dart';
 import 'package:chess/controllers/en_passent_controller.dart';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_status_controller.dart';
-import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/controllers/promotion_controller.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/extensions.dart';
 import 'package:chess/utils/fen_parser.dart';
 
 //--------------Main Game Controller-------------------

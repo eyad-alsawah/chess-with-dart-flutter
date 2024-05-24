@@ -1,7 +1,6 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/square.dart';
-import 'package:chess/utils/index_to_square_map.dart';
+import 'package:chess/utils/extensions.dart';
 
 class ChessBoardModel {
   static Map<ChessSquare, Square> chessBoard = {

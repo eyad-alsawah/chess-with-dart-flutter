@@ -1,6 +1,6 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/global_state.dart';
+import 'package:chess/utils/extensions.dart';
 
 class BasicMovesController {
   // Private constructor

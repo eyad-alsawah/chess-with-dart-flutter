@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
+import 'package:chess/controllers/enums.dart';
 import 'package:flutter/material.dart';
 
 class RanksNotationIndicator extends StatelessWidget {
@@ -28,7 +28,7 @@ class RanksNotationIndicator extends StatelessWidget {
                   angle: right ? pi : 0,
                   child: FittedBox(
                     child: Text(
-                      ranksNotation[index],
+                      (Ranks.values[index].index + 1).toString(),
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
