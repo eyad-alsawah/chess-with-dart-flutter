@@ -17,7 +17,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(AppSizeR.s12))),
           content: Transform.rotate(
-            angle: playingTurn == PlayingTurn.white ? 0 : pi,
+            angle: playingTurn == PlayingTurn.light ? 0 : pi,
             child: Container(
               padding: EdgeInsets.all(AppSizeW.s10),
               decoration: BoxDecoration(
@@ -35,7 +35,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
                             .pop(Pieces.rook);
                       },
                       child: Image.asset(
-                        playingTurn == PlayingTurn.white
+                        playingTurn == PlayingTurn.light
                             ? whiteCastle
                             : blackCastle,
                       ),
@@ -52,7 +52,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
                             .pop(Pieces.knight);
                       },
                       child: Image.asset(
-                        playingTurn == PlayingTurn.white
+                        playingTurn == PlayingTurn.light
                             ? whiteKnight
                             : blackKnight,
                       ),
@@ -69,7 +69,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
                             .pop(Pieces.bishop);
                       },
                       child: Image.asset(
-                        playingTurn == PlayingTurn.white
+                        playingTurn == PlayingTurn.light
                             ? whiteBishop
                             : blackBishop,
                       ),
@@ -86,7 +86,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
                             .pop(Pieces.queen);
                       },
                       child: Image.asset(
-                        playingTurn == PlayingTurn.white
+                        playingTurn == PlayingTurn.light
                             ? whiteQueen
                             : blackQueen,
                       ),

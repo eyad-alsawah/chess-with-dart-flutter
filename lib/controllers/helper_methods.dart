@@ -3,6 +3,48 @@ import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 
+extension ToSquare on int {
+  Square toSquare() {
+    return ChessBoardModel.chessBoard.elementAt(this).copy();
+  }
+}
+
+extension ToPiece on int {
+  Pieces? toPiece() {
+    return toSquare().piece;
+  }
+}
+
+extension ToPieceType on int {
+  PieceType? toPieceType() {
+    return toSquare().pieceType;
+  }
+}
+
+extension ToOppositeType on PieceType {
+  PieceType? toOppositeType() {
+    return this == PieceType.light ? PieceType.dark : PieceType.light;
+  }
+}
+
+extension ToFile on int {
+  Files toFile() {
+    return Files.values[this % 8];
+  }
+}
+
+extension ToPlayingTurn on PieceType {
+  PlayingTurn toPlayingTurn() {
+    return this == PieceType.light ? PlayingTurn.light : PlayingTurn.dark;
+  }
+}
+
+extension ToRank on int {
+  int toRank() {
+    return (this ~/ 8) + 1;
+  }
+}
+
 class HelperMethods {
   // Private constructor
   HelperMethods._private();
@@ -14,51 +56,27 @@ class HelperMethods {
   static HelperMethods get instance => _instance;
   //----------------------------------------------------------------------------
 
-  Files getFileNameFromIndex({required int index}) {
-    return Files.values[index % 8];
-  }
-
-  int getRankNameFromIndex({required int index}) {
-    return (index ~/ 8) + 1;
-  }
-
-  //----------------------------------------------------------------------------
-
   //----------------------------------------------------------------------------
   bool isInMoveSelectionMode(
-      {required int tappedSquareIndex,
+      {required int index,
       required PlayingTurn playingTurn,
       required List<int> legalMovesIndices}) {
-    bool inMoveSelectionMode =
-        // pressing on an empty square or on a square occupied by an openent piece that is not in the legal moves should not change the value to false
-        ((ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
-                        null ||
-                    (ChessBoardModel.getSquareAtIndex(tappedSquareIndex)
-                                .pieceType ==
-                            PieceType.light &&
-                        sharedState.playingTurn != PlayingTurn.white) ||
-                    (ChessBoardModel.getSquareAtIndex(tappedSquareIndex)
-                                .pieceType ==
-                            PieceType.dark &&
-                        sharedState.playingTurn != PlayingTurn.black)) &&
-                !legalMovesIndices.contains(tappedSquareIndex)) ||
-            (ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
-                    PieceType.light &&
-                sharedState.playingTurn == PlayingTurn.white) ||
-            (ChessBoardModel.getSquareAtIndex(tappedSquareIndex).pieceType ==
-                    PieceType.dark &&
-                sharedState.playingTurn == PlayingTurn.black);
-    return inMoveSelectionMode;
+    PieceType? tappedSquareType = (index).toPieceType();
+    bool tappedOnAnEmptySquare = tappedSquareType == null;
+    bool tappedOnSquareOfSameType =
+        tappedSquareType == playingTurn.toPieceType();
+    bool tappedOnSquareCanMoveTo = legalMovesIndices.contains(index);
+    return ((tappedOnAnEmptySquare || tappedOnSquareOfSameType) &&
+        !tappedOnSquareCanMoveTo);
   }
 
-  bool shouldClearLegalMovesIndices(
-      {required PieceType? selectedPieceType,
-      required PlayingTurn playingTurn}) {
-    bool shouldClearLegalMovesIndices =
-        ((sharedState.selectedPiece?.pieceType == PieceType.light &&
-                sharedState.playingTurn != PlayingTurn.white) ||
-            (sharedState.selectedPiece?.pieceType == PieceType.dark &&
-                sharedState.playingTurn != PlayingTurn.black));
+  bool selectedPieceDoesNotMatchCurrentPlayingTurn(
+      {required Square? selectedPiece}) {
+    bool shouldClearLegalMovesIndices = selectedPiece != null &&
+        ((selectedPiece.pieceType == PieceType.light &&
+                sharedState.playingTurn != PlayingTurn.light) ||
+            (selectedPiece.pieceType == PieceType.dark &&
+                sharedState.playingTurn != PlayingTurn.dark));
     return shouldClearLegalMovesIndices;
   }
 
@@ -74,12 +92,11 @@ class HelperMethods {
   }
 
   //----------------------------------------------------------------------------
-  RelativeDirection getRelativeDirection(
-      {required Square targetSquare, required Square currentSquare}) {
-    int currentSquareRank = currentSquare.rank;
-    int targetSquareRank = targetSquare.rank;
-    Files currentSquareFile = currentSquare.file;
-    Files targetSquareFile = targetSquare.file;
+  RelativeDirection getRelativeDirection({required int to, required int from}) {
+    int currentSquareRank = from.toRank();
+    int targetSquareRank = to.toRank();
+    Files currentSquareFile = from.toFile();
+    Files targetSquareFile = to.toFile();
     RelativeDirection relativeDirection;
     if (targetSquareRank == currentSquareRank) {
       relativeDirection = targetSquareFile.index > currentSquareFile.index

@@ -2,6 +2,7 @@
 
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
+import 'package:chess/controllers/game_status_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/global_keys.dart';
@@ -94,9 +95,9 @@ class _ChessBoardState extends State<ChessBoard> {
           widget.onPlayingTurnChanged(playingTurn),
       onPieceMoved: (from, to) async {
         state.selectedIndex = null;
-        state.legalMovesIndices.clear();
+        ChessController.legalMovesIndices.clear();
         // todo: change the place of this to ensure that its value won't be null after we set it to an Int
-        state.checkedKingIndex = null;
+        GameStatusController.checkedKingIndex = null;
         await SharedState.instance
             .storeState()
             .then((value) => widget.onUpdateView());
@@ -137,14 +138,16 @@ class _ChessBoardState extends State<ChessBoard> {
                           crossAxisCount: 8,
                         ),
                         itemBuilder: (context, index) => GestureDetector(
-                          onTap: () => chess.handleSquareTapped(
-                              tappedSquareIndex: index),
+                          onTap: () => chess.handleSquareTapped(index),
                           child: Container(
                             decoration: BoxDecoration(
                               color: state.debugHighlightIndices.contains(index)
                                   ? Colors.blue
-                                  : (state.checkedKingIndex != null &&
-                                          index == state.checkedKingIndex)
+                                  : (GameStatusController.checkedKingIndex !=
+                                              null &&
+                                          index ==
+                                              GameStatusController
+                                                  .checkedKingIndex)
                                       ? Colors.red
                                       : (index == state.selectedIndex &&
                                               state.selectedIndex != null)
@@ -152,16 +155,15 @@ class _ChessBoardState extends State<ChessBoard> {
                                           : getSquareColor(
                                               ignoreTappedIndices: true,
                                               index: index,
-                                              tappedIndices:
-                                                  state.legalMovesIndices),
+                                            ),
                             ),
                           ),
                         ),
                       ),
                     ),
                     drawInitialPieces(
-                        boardSize: widget.size,
-                        tappedIndices: state.legalMovesIndices),
+                      boardSize: widget.size,
+                    ),
                   ],
                 ),
               ),

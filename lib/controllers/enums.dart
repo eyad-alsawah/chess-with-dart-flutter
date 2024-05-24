@@ -31,7 +31,13 @@ enum DrawType {
 
 enum CastlingType { kingSide, queenSide }
 
-enum PlayingTurn { white, black }
+enum PlayingTurn { light, dark }
+
+extension PlayingTurnExtension on PlayingTurn {
+  PieceType toPieceType() {
+    return this == PlayingTurn.light ? PieceType.light : PieceType.dark;
+  }
+}
 
 enum PieceType { light, dark }
 

@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/game_controller.dart';
+import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/core/theme/color_manager.dart';
-import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
@@ -16,15 +17,13 @@ String getSquareNameFromIndex({required int index}) {
   return "$file$rank";
 }
 
-Color getSquareColor(
-    {required int index,
-    required List<int> tappedIndices,
-    required bool ignoreTappedIndices}) {
+Color getSquareColor({required int index, required bool ignoreTappedIndices}) {
   index++;
   int currentRow = (index / 8).ceil();
   Color squareColor;
 
-  if (tappedIndices.contains(index - 1) && !ignoreTappedIndices) {
+  if (ChessController.legalMovesIndices.contains(index - 1) &&
+      !ignoreTappedIndices) {
     squareColor = Colors.red;
   } else if (currentRow % 2 == 0) {
     squareColor =
@@ -36,8 +35,7 @@ Color getSquareColor(
   return squareColor;
 }
 
-Widget drawInitialPieces(
-    {required double boardSize, required List<int> tappedIndices}) {
+Widget drawInitialPieces({required double boardSize}) {
   return IgnorePointer(
     child: SizedBox(
       width: boardSize * 0.8,
@@ -55,10 +53,7 @@ Widget drawInitialPieces(
             Visibility(
               visible: getImageFromBoard(index: index).isNotEmpty,
               child: Transform.rotate(
-                angle: ChessBoardModel.getSquareAtIndex(index).pieceType ==
-                        PieceType.light
-                    ? 0
-                    : pi,
+                angle: (index).toPieceType() == PieceType.light ? 0 : pi,
                 child: Image.asset(
                   height: boardSize * 0.08,
                   width: boardSize * 0.08,
@@ -67,7 +62,7 @@ Widget drawInitialPieces(
               ),
             ),
             Visibility(
-              visible: tappedIndices.contains(index),
+              visible: ChessController.legalMovesIndices.contains(index),
               child: Container(
                 height: AppSizeH.s10,
                 width: AppSizeW.s10,
@@ -85,7 +80,7 @@ Widget drawInitialPieces(
 }
 
 String getImageFromBoard({required int index}) {
-  Square square = ChessBoardModel.getSquareAtIndex(index);
+  Square square = index.toSquare();
   String imageAssetString = '';
   switch (square.piece) {
     case Pieces.pawn:

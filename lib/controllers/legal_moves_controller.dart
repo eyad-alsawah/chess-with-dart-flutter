@@ -1,3 +1,4 @@
+import 'package:chess/controllers/castling_controller.dart';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/controllers/shared_state.dart';
@@ -7,7 +8,6 @@ import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/debug_config.dart';
 import 'package:chess/utils/extensions.dart';
-import 'package:chess/utils/index_to_square_map.dart';
 
 class LegalMovesController {
   // Private constructor
@@ -21,14 +21,17 @@ class LegalMovesController {
   //----------------------------------------------------------------------------
 
   Future<List<int>> getLegalMovesIndices({
-    required Files tappedSquareFile,
-    required int tappedSquareRank,
+    required int from,
     bool isKingChecked = false,
-    bool fromHandleSquareTapped = false,
+    bool ignorePlayingTurn = true,
   }) async {
+    if (!ignorePlayingTurn &&
+        helperMethods.selectedPieceDoesNotMatchCurrentPlayingTurn(
+            selectedPiece: from.toSquare())) {
+      return [];
+    }
     // getting all the moves a piece can move to if there was nothing standing in its way
-    List<Square> legalAndIllegalMoves =
-        getIllegalAndLegalMoves(rank: tappedSquareRank, file: tappedSquareFile);
+    List<Square> legalAndIllegalMoves = getIllegalAndLegalMoves(from);
 
     if (DebugConfig.displayAllLegalAndIllegalMoves) {
       SharedState.instance.debugHighlightIndices.clear();
@@ -40,10 +43,9 @@ class LegalMovesController {
 
     // filtering out illegal moves
     List<Square> legalMovesOnly = await getLegalMovesOnly(
-        file: tappedSquareFile,
-        rank: tappedSquareRank,
+        from: from,
         legalAndIllegalMoves: legalAndIllegalMoves.deepCopy(),
-        fromHandleSquareTapped: fromHandleSquareTapped,
+        fromHandleSquareTapped: !ignorePlayingTurn,
         kingChecked: isKingChecked);
 
     return HelperMethods.instance.squaresToIndices(legalMovesOnly);
@@ -53,13 +55,10 @@ class LegalMovesController {
 
   Future<List<Square>> getLegalMovesOnly(
       {required List<Square> legalAndIllegalMoves,
-      required Files file,
-      required int rank,
+      required int from,
       bool fromHandleSquareTapped = false,
       bool kingChecked = false}) async {
     List<Square> legalMoves = [];
-    Square tappedPiece =
-        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
 
     bool didCaptureOnRankLeft = false;
     bool didCaptureOnRankRight = false;
@@ -71,19 +70,19 @@ class LegalMovesController {
     bool didCaptureOnDiagonalBottomRight = false;
 
     // for castling: to prevent the king from castling if any piece stands between the king and the rook
-    legalAndIllegalMoves = preventCastlingIfPieceStandsBetweenRookAndKing(
-        tappedPiece: tappedPiece.copy(),
-        legalAndIllegalMoves: legalAndIllegalMoves.deepCopy());
+    legalAndIllegalMoves =
+        CastlingController.preventCastlingIfPieceStandsBetweenRookAndKing(
+            from: from, legalAndIllegalMoves: legalAndIllegalMoves.deepCopy());
 
     for (var move in legalAndIllegalMoves) {
       RelativeDirection relativeDirection = helperMethods.getRelativeDirection(
-          currentSquare: tappedPiece, targetSquare: move);
+          from: from, to: ChessBoardModel.getIndexOfSquare(move));
 
-      if (tappedPiece.pieceType == null) {
+      if (from.toPieceType() == null) {
         legalMoves.clear();
-      } else if (tappedPiece.piece == Pieces.knight) {
+      } else if (from.toPiece() == Pieces.knight) {
         // treated differently than other pieces due to the way the knight moves
-        (move.piece == null || move.pieceType != tappedPiece.pieceType)
+        (move.piece == null || move.pieceType != from.toPieceType())
             ? legalMoves.add(move)
             : null;
       } else if (move.piece == null) {
@@ -132,7 +131,7 @@ class LegalMovesController {
             break;
         }
       } else {
-        if (move.pieceType == tappedPiece.pieceType) {
+        if (move.pieceType == from.toPieceType()) {
           switch (relativeDirection) {
             case RelativeDirection.rankLeft:
               didCaptureOnRankLeft = true;
@@ -229,48 +228,46 @@ class LegalMovesController {
     if (kingChecked) {
       // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
       legalMoves = await preventMovingIfCheckRemains(
-          legalMoves: legalMoves.deepCopy(), tappedPiece: tappedPiece.copy());
+          legalMoves: legalMoves.deepCopy(), to: from);
     }
     // todo: causing problems needs fixing
     legalMoves = await filterMoveThatExposeKingToCheck(
-        legalMoves.deepCopy(), tappedPiece.copy(), fromHandleSquareTapped);
+        legalMoves.deepCopy(), from, fromHandleSquareTapped);
 
     return legalMoves.deepCopy();
   }
 
-  Future<List<Square>> filterMoveThatExposeKingToCheck(List<Square> legalMoves,
-      Square selectedPiece, bool fromHandleSquareTapped) async {
+  Future<List<Square>> filterMoveThatExposeKingToCheck(
+      List<Square> legalMoves, int from, bool fromHandleSquareTapped) async {
     if (fromHandleSquareTapped) {
+      PieceType? fromType = from.toPieceType();
+      Pieces? fromPiece = from.toPiece();
+
       // deep copying the list to prevent Concurrent modification of legalMoves
       for (var move in legalMoves.deepCopy()) {
         int moveIndex = ChessBoardModel.getIndexOfSquare(move);
         PieceType? moveType = move.copy().pieceType;
         Pieces? movePiece = move.copy().piece;
 
-        int selectedPieceIndex = ChessBoardModel.getIndexOfSquareAtFileAndRank(
-            file: selectedPiece.file, rank: selectedPiece.rank);
         //--------------------
 
         // emptying the square we are at currently
-        await ChessBoardModel.emptySquareAtIndex(selectedPieceIndex);
+        await ChessBoardModel.emptySquareAtIndex(from);
 
         // updating the square at moveIndex
         await ChessBoardModel.updateSquareAtIndex(
           moveIndex,
-          selectedPiece.piece,
-          selectedPiece.pieceType,
+          fromPiece,
+          fromType,
         );
 
         // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
         bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
-            playingTurn: selectedPiece.pieceType == PieceType.light
-                ? PlayingTurn.white
-                : PlayingTurn.black,
-            escapeSquare: selectedPiece.piece == Pieces.king ? move : null);
+            attackedKingType: fromType,
+            escapeTo: fromPiece == Pieces.king ? moveIndex : null);
 
         // resetting the hypothetically moved pieces
-        await ChessBoardModel.updateSquareAtIndex(
-            selectedPieceIndex, selectedPiece.piece, selectedPiece.pieceType);
+        await ChessBoardModel.updateSquareAtIndex(from, fromPiece, fromType);
         await ChessBoardModel.updateSquareAtIndex(
             moveIndex, movePiece, moveType);
         isKingAttacked ? legalMoves.remove(move) : null;
@@ -287,7 +284,7 @@ class LegalMovesController {
   }
 
   Future<List<Square>> preventMovingIfCheckRemains(
-      {required List<Square> legalMoves, required Square tappedPiece}) async {
+      {required List<Square> legalMoves, required int to}) async {
     // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
     List<int> legalMovesIndices = [];
 
@@ -295,24 +292,19 @@ class LegalMovesController {
         .addAll(HelperMethods.instance.squaresToIndices(legalMoves.deepCopy()));
 
     for (var index in legalMovesIndices) {
-      Square currentSquareAtIndex =
-          ChessBoardModel.getSquareAtIndex(index).copy();
-
+      Square currentSquareAtIndex = index.toSquare().copy();
       ChessBoardModel.updateSquareAtIndex(
-          index, tappedPiece.piece, tappedPiece.pieceType);
+          index, to.toPiece(), to.toPieceType());
 
       // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
       bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
-          playingTurn: tappedPiece.pieceType == PieceType.light
-              ? PlayingTurn.white
-              : PlayingTurn.black,
-          escapeSquare: tappedPiece.piece == Pieces.king
-              ? ChessBoardModel.getSquareAtIndex(index).copy()
-              : null);
+          escapeTo: to.toPiece() == Pieces.king ? index : null,
+          attackedKingType: to.toPieceType());
+
       if (isKingAttacked) {
         legalMoves.removeWhere((move) =>
-            move.file == ChessBoardModel.getSquareAtIndex(index).copy().file &&
-            move.rank == ChessBoardModel.getSquareAtIndex(index).copy().rank);
+            move.file == (index).toSquare().file &&
+            move.rank == (index).toSquare().rank);
       }
       // resetting the hypothetically moved piece
       ChessBoardModel.updateSquareAtIndex(
@@ -321,92 +313,27 @@ class LegalMovesController {
 
     return legalMoves;
   }
-
-  List<Square> preventCastlingIfPieceStandsBetweenRookAndKing(
-      {required Square tappedPiece,
-      required List<Square> legalAndIllegalMoves}) {
-    if (tappedPiece.piece == Pieces.king) {
-      if (tappedPiece.pieceType == PieceType.light) {
-        if (!sharedState.didLightKingMove) {
-          if (ChessBoardModel.getSquareAtIndex(ChessSquare.f1.index).piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.g1.index).piece !=
-                  null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 1),
-            );
-          }
-          if (ChessBoardModel.getSquareAtIndex(
-                          ChessSquare.b1.index)
-                      .piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.c1.index).piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.d1.index).piece !=
-                  null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 1),
-            );
-          }
-        }
-      } else {
-        if (!sharedState.didDarkKingMove) {
-          if (ChessBoardModel.getSquareAtIndex(ChessSquare.f8.index).piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.g8.index).piece !=
-                  null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.g && square.rank == 8),
-            );
-          }
-          if (ChessBoardModel.getSquareAtIndex(
-                          ChessSquare.b8.index)
-                      .piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.c8.index).piece !=
-                  null ||
-              ChessBoardModel.getSquareAtIndex(ChessSquare.d8.index).piece !=
-                  null) {
-            legalAndIllegalMoves.removeWhere(
-              (square) => (square.file == Files.c && square.rank == 8),
-            );
-          }
-        }
-      }
-    }
-    return legalAndIllegalMoves;
-  }
-
   //----------------------------------------------------------------------------
 
-  List<Square> getIllegalAndLegalMoves(
-      {required int rank, required Files file}) {
-    Square tappedPiece =
-        ChessBoardModel.getSquareAtFileAndRank(file: file, rank: rank);
-
+  List<Square> getIllegalAndLegalMoves(int from) {
     List<Square> moves = [];
-
     // Define a map to associate each piece type with its move calculation function
     final Map<Pieces, List<Square> Function()> moveFunctions = {
       Pieces.rook: () =>
-          basicMovesController.getHorizontalPieces(rank: rank, file: file) +
-          basicMovesController.getVerticalPieces(rank: rank, file: file),
-      Pieces.knight: () =>
-          basicMovesController.getKnightPieces(rank: rank, file: file),
-      Pieces.bishop: () =>
-          basicMovesController.getDiagonalPieces(rank: rank, file: file),
+          basicMovesController.getHorizontalPieces(from) +
+          basicMovesController.getVerticalPieces(from),
+      Pieces.knight: () => basicMovesController.getKnightPieces(from),
+      Pieces.bishop: () => basicMovesController.getDiagonalPieces(from),
       Pieces.queen: () =>
-          basicMovesController.getHorizontalPieces(rank: rank, file: file) +
-          basicMovesController.getVerticalPieces(rank: rank, file: file) +
-          basicMovesController.getDiagonalPieces(rank: rank, file: file),
-      Pieces.king: () =>
-          basicMovesController.getKingPieces(rank: rank, file: file),
-      Pieces.pawn: () =>
-          basicMovesController.getPawnPieces(rank: rank, file: file),
+          basicMovesController.getHorizontalPieces(from) +
+          basicMovesController.getVerticalPieces(from) +
+          basicMovesController.getDiagonalPieces(from),
+      Pieces.king: () => basicMovesController.getKingPieces(from),
+      Pieces.pawn: () => basicMovesController.getPawnPieces(from),
     };
 
     // Use the map to get the corresponding moves for the tapped piece
-    moves = moveFunctions[tappedPiece.piece]?.call() ?? [];
+    moves = moveFunctions[from.toPiece()]?.call() ?? [];
 
     return moves;
   }

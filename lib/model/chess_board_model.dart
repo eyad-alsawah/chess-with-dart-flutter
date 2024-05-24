@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/helper_methods.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
@@ -47,7 +48,11 @@ class ChessBoardModel {
     Square(
         file: Files.d, rank: 2, piece: Pieces.pawn, pieceType: PieceType.light),
     Square(
-        file: Files.e, rank: 2, piece: Pieces.pawn, pieceType: PieceType.light),
+        // todo: revert this change
+        file: Files.e,
+        rank: 2,
+        piece: Pieces.pawn,
+        pieceType: PieceType.light),
     Square(
         file: Files.f, rank: 2, piece: Pieces.pawn, pieceType: PieceType.light),
     Square(
@@ -154,10 +159,6 @@ class ChessBoardModel {
     chessBoard.addAll(squares);
   }
 
-  static Square getSquareAtIndex(int index) {
-    return chessBoard.deepCopy().elementAt(index);
-  }
-
   static Square getSquareAtFileAndRank(
       {required Files file, required int rank}) {
     return chessBoard
@@ -205,5 +206,14 @@ class ChessBoardModel {
   static Future<void> emptySquareAtIndex(int index) async {
     chessBoard[index].piece = null;
     chessBoard[index].pieceType = null;
+  }
+
+  //-----------------------------
+  static Future<void> move(
+      {required int from, required int to, Pieces? pawnPromotedTo}) async {
+    PieceType? type = from.toPieceType();
+    Pieces? piece = from.toPiece();
+    emptySquareAtIndex(from);
+    updateSquareAtIndex(to, pawnPromotedTo ?? piece, type);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/helper_methods.dart';
 
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
@@ -15,6 +16,36 @@ class GameStatusController {
   // Public static method to access the instance
   static GameStatusController get instance => _instance;
   //----------------------------------------------------------------------------
+  static int? checkedKingIndex;
+  static bool isKingChecked = false;
+
+  static Future<GameStatusDTO> checkStatus(int to) async {
+    PieceType? opponentKingType = to.toPieceType()?.toOppositeType();
+    // resetting checkedKingIndex on each new move so that the red check square is removed
+    checkedKingIndex = null;
+    isKingChecked = await gameStatusController.isKingSquareAttacked(
+        attackedKingType: opponentKingType);
+    if (isKingChecked) {
+      checkedKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+          Pieces.king, opponentKingType,
+          matchPiece: true, matchType: true);
+
+      if (await gameStatusController.isCheckmate(
+          playingTurn: opponentKingType!.toPlayingTurn())) {
+        helperMethods.preventFurtherInteractions(true);
+        callbacks.onVictory(VictoryType.checkmate);
+        callbacks.playSound(SoundType.victory);
+      }
+    }
+
+    if (await gameStatusController.checkForStaleMate(
+        opponentPlayerType: opponentKingType!, isKingChecked: isKingChecked)) {
+      // todo: uncomment this
+      // soundToPlay = SoundType.draw;
+    }
+
+    return GameStatusDTO(checkedKingIndex: checkedKingIndex);
+  }
 
   bool doesOnlyOneKingExists() {
     int kingsCount = 0;
@@ -27,66 +58,62 @@ class GameStatusController {
   }
 
   Future<bool> isKingSquareAttacked({
-    required PlayingTurn playingTurn,
-    Square? escapeSquare,
+    required PieceType? attackedKingType,
+    int? escapeTo,
   }) async {
-    PieceType openentKingType =
-        playingTurn == PlayingTurn.white ? PieceType.light : PieceType.dark;
-    Square oppenentKing = escapeSquare ??
-        ChessBoardModel.getSquareAtPieceAndType(
-                piece: Pieces.king, type: openentKingType)
-            .copy();
+    int opponentKingIndex = escapeTo ??
+        ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+            Pieces.king, attackedKingType,
+            matchPiece: true, matchType: true);
+    PieceType? oppenentKingType = attackedKingType;
+    Files oppenentKingFile = opponentKingIndex.toFile();
+    int oppenentKingRank = opponentKingIndex.toRank();
 
     /// -------------------------------------getting surrounding openent pawns--------------------------
-    List<Square> surroundingopenentPawns = basicMovesController.getPawnPieces(
-        rank: oppenentKing.rank, file: oppenentKing.file);
+    List<Square> surroundingopenentPawns =
+        basicMovesController.getPawnPieces(opponentKingIndex);
     // pawns can't check a king of the same type
     surroundingopenentPawns
-        .removeWhere((pawn) => pawn.pieceType == oppenentKing.pieceType);
+        .removeWhere((pawn) => pawn.pieceType == oppenentKingType);
     // pawns that are on the same file as the king aren't checking the king
     surroundingopenentPawns
-        .removeWhere((pawn) => pawn.file == oppenentKing.file);
+        .removeWhere((pawn) => pawn.file == oppenentKingFile);
     surroundingopenentPawns.removeWhere((pawn) {
       // a black king can't be put in check by white pawns higher in rank
-      if (oppenentKing.pieceType == PieceType.dark &&
-          pawn.rank > oppenentKing.rank) {
+      if (oppenentKingType == PieceType.dark && pawn.rank > oppenentKingRank) {
         return true;
       }
       // a white king can't be put in check by white pawns lower in rank
-      if (oppenentKing.pieceType == PieceType.light &&
-          pawn.rank < oppenentKing.rank) {
+      if (oppenentKingType == PieceType.light && pawn.rank < oppenentKingRank) {
         return true;
       }
       return false;
     });
 
     /// -------------------------------------getting surrounding openent knights---------------
-    List<Square> surroundingKnights = basicMovesController.getKnightPieces(
-        rank: oppenentKing.rank, file: oppenentKing.file);
+    List<Square> surroundingKnights =
+        basicMovesController.getKnightPieces(opponentKingIndex);
     // knights of the same type as the openent king can't check the king
     surroundingKnights
-        .removeWhere((knight) => knight.pieceType == openentKingType);
+        .removeWhere((knight) => knight.pieceType == oppenentKingType);
     // empty squares don't count, same for pieces that are not knights
     surroundingKnights.removeWhere(
         (square) => square.piece == null || square.piece != Pieces.knight);
 
     /// ------------------------------------getting surrounding openent rooks and queens  (queens vertical/horizontal to the openent king)---------
     List<Square> surroundingRooksAndQueens = [
-      ...basicMovesController.getHorizontalPieces(
-          rank: oppenentKing.rank, file: oppenentKing.file),
-      ...basicMovesController.getVerticalPieces(
-          rank: oppenentKing.rank, file: oppenentKing.file),
+      ...basicMovesController.getHorizontalPieces(opponentKingIndex),
+      ...basicMovesController.getVerticalPieces(opponentKingIndex),
     ];
 
     List<Square> surroundingRooksAndQueensInLineOfSight =
         await legalMovesController.getLegalMovesOnly(
             legalAndIllegalMoves: surroundingRooksAndQueens,
-            file: oppenentKing.file,
-            rank: oppenentKing.rank);
+            from: opponentKingIndex);
 
     // rooks or queens of the same type as the king can't check the king
     surroundingRooksAndQueensInLineOfSight.removeWhere(
-        (rookOrQueen) => rookOrQueen.pieceType == oppenentKing.pieceType);
+        (rookOrQueen) => rookOrQueen.pieceType == oppenentKingType);
 
     // empty squares don't count, same for pieces that are neither rooks nor queens
     surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
@@ -94,16 +121,15 @@ class GameStatusController {
         (square.piece != Pieces.rook && square.piece != Pieces.queen));
 
     /// ----------------------------------------getting surrounding openent bishops and queens (queens diagonal to the openent king)----------------
-    List<Square> surroundingBishopsAndQueens = basicMovesController
-        .getDiagonalPieces(rank: oppenentKing.rank, file: oppenentKing.file);
+    List<Square> surroundingBishopsAndQueens =
+        basicMovesController.getDiagonalPieces(opponentKingIndex);
     List<Square> surroundingBishopsAndQueensInLineOfSight =
         await legalMovesController.getLegalMovesOnly(
             legalAndIllegalMoves: surroundingBishopsAndQueens,
-            file: oppenentKing.file,
-            rank: oppenentKing.rank);
+            from: opponentKingIndex);
 
     surroundingBishopsAndQueensInLineOfSight.removeWhere(
-        (bishopOrQueen) => bishopOrQueen.pieceType == oppenentKing.pieceType);
+        (bishopOrQueen) => bishopOrQueen.pieceType == oppenentKingType);
     // empty squares don't count, same for pieces that are neither bishops nor queens
     surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
         square.piece == null ||
@@ -117,93 +143,78 @@ class GameStatusController {
         surroundingBishopsAndQueensInLineOfSight.isNotEmpty;
   }
 
-  Future<bool> isCheckmate({required PlayingTurn attackedPlayer}) async {
+  Future<bool> isCheckmate({required PlayingTurn playingTurn}) async {
+    // If at the end of this function this list is empty then it is a checkmate
     List<int> movesThatProtectTheKing = [];
-    // a late initialization error should not occur, unless the logic is wrong
-    late Square kingSquare;
 
     // find all the attacked player pieces expect the king
     // find all the legal moves for those pieces
     // move them and check if king is still attacked
-    PieceType attackedPlayerType =
-        attackedPlayer == PlayingTurn.white ? PieceType.light : PieceType.dark;
-    List<Square> attackedPlayerPieces = [];
-    for (var square in ChessBoardModel.currentChessBoard()) {
-      if (square.pieceType == attackedPlayerType) {
-        if (square.piece == Pieces.king) {
-          kingSquare = square.copy();
+    // a late initialization error should not occur, unless the logic is wrong
+    late int kingIndex;
+
+    for (int index = 0; index <= 63; index++) {
+      if (index.toPieceType() == playingTurn.toPieceType()) {
+        if (index.toPiece() == Pieces.king) {
+          kingIndex = index;
         } else {
-          attackedPlayerPieces.add(square.copy());
+          List<int> legalMovesIndices =
+              await legalMovesController.getLegalMovesIndices(
+            from: index,
+          );
+          movesThatProtectTheKing.addAll(legalMovesIndices);
         }
       }
     }
 
-    List<Square> attackedPlayerLegalMoves = [];
-    List<int> attackedPlayerLegalMovesIndices = [];
-    for (var piece in attackedPlayerPieces) {
-      List<Square> legalAndIllegalMoves = legalMovesController
-          .getIllegalAndLegalMoves(rank: piece.rank, file: piece.file);
-      List<Square> legalMovesOnly =
-          await legalMovesController.getLegalMovesOnly(
-              legalAndIllegalMoves: legalAndIllegalMoves.deepCopy(),
-              file: piece.file,
-              rank: piece.rank);
-      List<int> legalMovesIndices =
-          await legalMovesController.getLegalMovesIndices(
-              tappedSquareFile: piece.file, tappedSquareRank: piece.rank);
+    for (var moveIndex in movesThatProtectTheKing.deepCopy()) {
+      Pieces? originalPiece = moveIndex.toPiece();
+      PieceType? originalPieceType = moveIndex.toPieceType();
 
-      attackedPlayerLegalMoves.addAll(legalMovesOnly.deepCopy());
-      attackedPlayerLegalMovesIndices.addAll(legalMovesIndices.deepCopy());
-    }
-
-    movesThatProtectTheKing.addAll(attackedPlayerLegalMovesIndices.deepCopy());
-
-    for (var index in attackedPlayerLegalMovesIndices) {
-      Square currentSquareAtIndex =
-          ChessBoardModel.getSquareAtIndex(index).copy();
-      // deep copy
+      // placing a pawn at moveIndex
       await ChessBoardModel.updateSquareAtIndex(
-          index, Pieces.pawn, attackedPlayerType);
+          moveIndex, Pieces.pawn, playingTurn.toPieceType());
 
-      if (await isKingSquareAttacked(playingTurn: attackedPlayer)) {
-        movesThatProtectTheKing.removeWhere((moveIndex) => moveIndex == index);
+      // checking if check remains
+      if (await isKingSquareAttacked(
+          attackedKingType: playingTurn.toPieceType())) {
+        movesThatProtectTheKing.removeWhere((index) => index == moveIndex);
       }
 
+      // resetting the square to its original state
       ChessBoardModel.updateSquareAtIndex(
-          index, currentSquareAtIndex.piece, currentSquareAtIndex.pieceType);
+          moveIndex, originalPiece, originalPieceType);
     }
 
     ///-----------------------------checking if king can move to safety
-    List<int> kingLegalMovesIndices =
-        await legalMovesController.getLegalMovesIndices(
-            tappedSquareFile: kingSquare.file,
-            tappedSquareRank: kingSquare.rank);
+    List<int> kingMovesThatWouldProtectHim =
+        await legalMovesController.getLegalMovesIndices(from: kingIndex);
 
-    List<int> kingMovesThatWouldProtectHim = [];
-    kingMovesThatWouldProtectHim.addAll(kingLegalMovesIndices.deepCopy());
-
-    for (var index in kingLegalMovesIndices) {
-      int kingSquareIndex = ChessBoardModel.getIndexOfSquare(kingSquare);
+    for (var moveIndex in kingMovesThatWouldProtectHim.deepCopy()) {
       // the square we will temporarily move the king to for testing if the check remains.
 
-      Square originalSquare = ChessBoardModel.getSquareAtIndex(index).copy();
+      Pieces? originalPiece = moveIndex.toPiece();
+      PieceType? originalPieceType = moveIndex.toPieceType();
       // emptying the square the king is currently on
-      ChessBoardModel.emptySquareAtIndex(kingSquareIndex);
+      ChessBoardModel.emptySquareAtIndex(kingIndex);
 
       // moving the king to the new square
       ChessBoardModel.updateSquareAtIndex(
-          kingSquareIndex, Pieces.king, attackedPlayerType);
+          moveIndex, Pieces.king, playingTurn.toPieceType());
+
+      // await Future.delayed(Duration(seconds: 1));
+      // callbacks.updateView();
       //-----------------------
-      if (await isKingSquareAttacked(playingTurn: attackedPlayer)) {
-        kingMovesThatWouldProtectHim
-            .removeWhere((moveIndex) => moveIndex == index);
+      if (await isKingSquareAttacked(
+          attackedKingType: playingTurn.toPieceType())) {
+        kingMovesThatWouldProtectHim.removeWhere((index) => index == moveIndex);
       }
       // resetting the square to its original state
       ChessBoardModel.updateSquareAtIndex(
-          kingSquareIndex, originalSquare.piece, originalSquare.pieceType);
+          moveIndex, originalPiece, originalPieceType);
       // moving the king back to its original square
       ChessBoardModel.updateSquareAtIndex(
-          kingSquareIndex, Pieces.king, attackedPlayerType);
+          kingIndex, Pieces.king, playingTurn.toPieceType());
       //----------------------------------
     }
 
@@ -211,31 +222,33 @@ class GameStatusController {
         movesThatProtectTheKing.isEmpty;
   }
 
-  Future<bool> checkForStaleMate({required PieceType opponentKingType}) async {
-    int opponentKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-        Pieces.king, opponentKingType,
-        matchPiece: true, matchType: true);
+  Future<bool> checkForStaleMate(
+      {required PieceType opponentPlayerType,
+      required bool isKingChecked}) async {
     // checking for stalemate
     List<int> allLegalMovesIndices = [];
-    for (var square in ChessBoardModel.currentChessBoard()) {
-      if (square.pieceType ==
-          ChessBoardModel.getSquareAtIndex(opponentKingIndex).pieceType) {
-        allLegalMovesIndices
-            .addAll(await legalMovesController.getLegalMovesIndices(
-          tappedSquareFile: square.file,
-          tappedSquareRank: square.rank,
-          isKingChecked: sharedState.isKingInCheck,
-          fromHandleSquareTapped: true,
-        ));
+
+    for (int index = 0; index <= 63; index++) {
+      if (index.toPieceType() == opponentPlayerType) {
+        List<int> moves = await legalMovesController.getLegalMovesIndices(
+            from: index, isKingChecked: isKingChecked, ignorePlayingTurn: true);
+        allLegalMovesIndices.addAll(moves);
       }
     }
     // player has no legal move and an empty square was not tapped
-    if (allLegalMovesIndices.isEmpty &&
-        ChessBoardModel.getSquareAtIndex(opponentKingIndex).pieceType != null) {
+    if (allLegalMovesIndices.isEmpty) {
       helperMethods.preventFurtherInteractions(true);
       callbacks.onDraw(DrawType.stalemate);
       return true;
     }
     return false;
   }
+}
+
+//---------------------------
+
+class GameStatusDTO {
+  final int? checkedKingIndex;
+
+  GameStatusDTO({required this.checkedKingIndex});
 }

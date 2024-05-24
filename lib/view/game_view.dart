@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
@@ -63,7 +61,7 @@ class _HomeViewState extends State<HomeView> {
               size: 0.95.sw,
               onPlayingTurnChanged: (playingTurn) {
                 SharedState.instance.currentPlayingTurn =
-                    playingTurn == PlayingTurn.white
+                    playingTurn == PlayingTurn.light
                         ? "White's Turn"
                         : "Black's Turn";
               },
