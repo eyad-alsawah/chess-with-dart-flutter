@@ -76,148 +76,85 @@ class LegalMovesController {
       RelativeDirection relativeDirection =
           helperMethods.getRelativeDirection(from: from, to: move);
 
-      if (from.toPieceType() == null) {
+      bool fromEmptySquare = from.toPieceType() == null;
+      bool toEmptySquare = move.toPiece() == null;
+      bool toOppositeType = move.toPieceType() != from.toPieceType();
+
+      if (fromEmptySquare) {
         legalMoves.clear();
       } else if (from.toPiece() == Pieces.knight) {
         // treated differently than other pieces due to the way the knight moves
         (move.toPiece() == null || move.toPieceType() != from.toPieceType())
             ? legalMoves.add(move)
             : null;
-      } else if (move.toPiece() == null) {
+      } else {
         switch (relativeDirection) {
           case RelativeDirection.rankLeft:
-            if (!didCaptureOnRankLeft) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnRankLeft ? null : legalMoves.add(move);
+            } else if (!didCaptureOnRankLeft) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnRankLeft = true;
             }
             break;
           case RelativeDirection.rankRight:
-            if (!didCaptureOnRankRight) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnRankRight ? null : legalMoves.add(move);
+            } else if (!didCaptureOnRankRight) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnRankRight = true;
             }
             break;
           case RelativeDirection.fileTop:
-            if (!didCaptureOnFileTop) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnFileTop ? null : legalMoves.add(move);
+            } else if (!didCaptureOnFileTop) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnFileTop = true;
             }
             break;
           case RelativeDirection.fileBottom:
-            if (!didCaptureOnFileBottom) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnFileBottom ? null : legalMoves.add(move);
+            } else if (!didCaptureOnFileBottom) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnFileBottom = true;
             }
             break;
           case RelativeDirection.diagonalTopLeft:
-            if (!didCaptureOnDiagonalTopLeft) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnDiagonalTopLeft ? null : legalMoves.add(move);
+            } else if (!didCaptureOnDiagonalTopLeft) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnDiagonalTopLeft = true;
             }
             break;
           case RelativeDirection.diagonalTopRight:
-            if (!didCaptureOnDiagonalTopRight) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnDiagonalTopRight ? null : legalMoves.add(move);
+            } else if (!didCaptureOnDiagonalTopRight) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnDiagonalTopRight = true;
             }
             break;
           case RelativeDirection.diagonalBottomLeft:
-            if (!didCaptureOnDiagonalBottomLeft) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnDiagonalBottomLeft ? null : legalMoves.add(move);
+            } else if (!didCaptureOnDiagonalBottomLeft) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnDiagonalBottomLeft = true;
             }
             break;
           case RelativeDirection.diagonalBottomRight:
-            if (!didCaptureOnDiagonalBottomRight) {
-              legalMoves.add(move);
+            if (toEmptySquare) {
+              didCaptureOnDiagonalBottomRight ? null : legalMoves.add(move);
+            } else if (!didCaptureOnDiagonalBottomRight) {
+              toOppositeType ? legalMoves.add(move) : null;
+              didCaptureOnDiagonalBottomRight = true;
             }
             break;
           default:
             break;
-        }
-      } else {
-        if (move.toPieceType() == from.toPieceType()) {
-          switch (relativeDirection) {
-            case RelativeDirection.rankLeft:
-              didCaptureOnRankLeft = true;
-              break;
-            case RelativeDirection.rankRight:
-              didCaptureOnRankRight = true;
-
-              break;
-            case RelativeDirection.fileTop:
-              didCaptureOnFileTop = true;
-
-              break;
-            case RelativeDirection.fileBottom:
-              didCaptureOnFileBottom = true;
-
-              break;
-            case RelativeDirection.diagonalTopLeft:
-              didCaptureOnDiagonalTopLeft = true;
-
-              break;
-            case RelativeDirection.diagonalTopRight:
-              didCaptureOnDiagonalTopRight = true;
-
-              break;
-            case RelativeDirection.diagonalBottomLeft:
-              didCaptureOnDiagonalBottomLeft = true;
-
-              break;
-            case RelativeDirection.diagonalBottomRight:
-              didCaptureOnDiagonalBottomRight = true;
-
-              break;
-            default:
-              break;
-          }
-        } else {
-          switch (relativeDirection) {
-            case RelativeDirection.rankLeft:
-              if (!didCaptureOnRankLeft) {
-                legalMoves.add(move);
-                didCaptureOnRankLeft = true;
-              }
-              break;
-            case RelativeDirection.rankRight:
-              if (!didCaptureOnRankRight) {
-                legalMoves.add(move);
-                didCaptureOnRankRight = true;
-              }
-              break;
-            case RelativeDirection.fileTop:
-              if (!didCaptureOnFileTop) {
-                legalMoves.add(move);
-                didCaptureOnFileTop = true;
-              }
-              break;
-            case RelativeDirection.fileBottom:
-              if (!didCaptureOnFileBottom) {
-                legalMoves.add(move);
-                didCaptureOnFileBottom = true;
-              }
-              break;
-            case RelativeDirection.diagonalTopLeft:
-              if (!didCaptureOnDiagonalTopLeft) {
-                legalMoves.add(move);
-                didCaptureOnDiagonalTopLeft = true;
-              }
-              break;
-            case RelativeDirection.diagonalTopRight:
-              if (!didCaptureOnDiagonalTopRight) {
-                legalMoves.add(move);
-                didCaptureOnDiagonalTopRight = true;
-              }
-              break;
-            case RelativeDirection.diagonalBottomLeft:
-              if (!didCaptureOnDiagonalBottomLeft) {
-                legalMoves.add(move);
-                didCaptureOnDiagonalBottomLeft = true;
-              }
-              break;
-            case RelativeDirection.diagonalBottomRight:
-              if (!didCaptureOnDiagonalBottomRight) {
-                legalMoves.add(move);
-                didCaptureOnDiagonalBottomRight = true;
-              }
-              break;
-            default:
-              break;
-          }
         }
       }
     }
