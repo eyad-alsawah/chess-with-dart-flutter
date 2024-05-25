@@ -52,7 +52,7 @@ Widget drawInitialPieces({required double boardSize}) {
             Visibility(
               visible: getImageFromBoard(index: index).isNotEmpty,
               child: Transform.rotate(
-                angle: (index).toPieceType() == PieceType.light ? 0 : pi,
+                angle: (index).type() == PieceType.light ? 0 : pi,
                 child: Image.asset(
                   height: boardSize * 0.08,
                   width: boardSize * 0.08,
@@ -79,7 +79,7 @@ Widget drawInitialPieces({required double boardSize}) {
 }
 
 String getImageFromBoard({required int index}) {
-  Square square = index.toSquare();
+  Square square = index.square();
   String imageAssetString = '';
   switch (square.piece) {
     case Pieces.pawn:

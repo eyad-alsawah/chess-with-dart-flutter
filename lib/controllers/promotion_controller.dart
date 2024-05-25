@@ -35,7 +35,7 @@ class PromotionController {
   }
 
   static bool _shouldPawnBePromoted({required int from, required int to}) {
-    return from.toPiece() == Pieces.pawn &&
-        (to.toRank() == 1 || to.toRank() == 8);
+    return from.piece() == Pieces.pawn &&
+        (to.rank() == 1 || to.rank() == 8);
   }
 }

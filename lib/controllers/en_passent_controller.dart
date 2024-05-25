@@ -37,11 +37,11 @@ class EnPassantController {
     required int from,
     required int to,
   }) {
-    int fromRank = from.toRank();
-    int toRank = to.toRank();
-    if (from.toPiece() == Pieces.pawn &&
+    int fromRank = from.rank();
+    int toRank = to.rank();
+    if (from.piece() == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
-      if (from.toPieceType() == PieceType.light) {
+      if (from.type() == PieceType.light) {
         enPassantCapturableLightPawnIndex = to;
       } else {
         enPassantCapturableDarkPawnIndex = to;
@@ -63,10 +63,10 @@ class EnPassantController {
   }
 
   bool didCaptureEnPassant({required int from, required int to}) {
-    PieceType? movedPieceType = from.toPieceType();
+    PieceType? movedPieceType = from.type();
     bool didMoveToEmptySquareOnDifferentFile =
-        from.toFile() != to.toFile() && to.toPiece() == null;
-    bool didMovePawn = from.toPiece() == Pieces.pawn;
+        from.file() != to.file() && to.piece() == null;
+    bool didMovePawn = from.piece() == Pieces.pawn;
     bool didCaptureEnPassent =
         didMovePawn && didMoveToEmptySquareOnDifferentFile;
     _removePawnFromEnPassantCapturablePawns(movedPieceType: movedPieceType);
@@ -79,21 +79,21 @@ class EnPassantController {
     required RelativeDirection relativeDirection,
   }) {
     bool canCaptureEnPassant = false;
-    int? indexToCheck = from.toPieceType() == PieceType.light
+    int? indexToCheck = from.type() == PieceType.light
         ? enPassantCapturableDarkPawnIndex
         : enPassantCapturableLightPawnIndex;
 
-    if ((from.toPieceType() == PieceType.light && from.toRank() == 5) ||
-        (from.toPieceType() == PieceType.dark && from.toRank() == 4)) {
+    if ((from.type() == PieceType.light && from.rank() == 5) ||
+        (from.type() == PieceType.dark && from.rank() == 4)) {
       if (relativeDirection == RelativeDirection.diagonalTopLeft ||
           relativeDirection == RelativeDirection.diagonalBottomLeft) {
         canCaptureEnPassant = indexToCheck != null &&
             from > indexToCheck &&
-            (to).toPiece() == null;
+            (to).piece() == null;
       } else {
         canCaptureEnPassant = indexToCheck != null &&
             from < indexToCheck &&
-            (to).toPiece() == null;
+            (to).piece() == null;
       }
     }
 
@@ -103,7 +103,7 @@ class EnPassantController {
   void emptySquareAtCapturedEnPassantPawn(
       {required int from, required int to}) {
     int capturedPawnIndex =
-        from + (to.toFile().index > from.toFile().index ? 1 : -1);
+        from + (to.file().index > from.file().index ? 1 : -1);
     ChessBoardModel.emptySquareAtIndex(capturedPawnIndex);
   }
 }

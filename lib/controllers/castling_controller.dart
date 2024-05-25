@@ -61,8 +61,8 @@ class CastlingController {
   }
 
   void changeCastlingAvailability({required int from}) {
-    PieceType fromSquarePieceType = from.toPieceType()!;
-    Pieces fromSquarePiece = from.toPiece()!;
+    PieceType fromSquarePieceType = from.type()!;
+    Pieces fromSquarePiece = from.piece()!;
     // checking if castling is possible in the first place before checking all the other conditions
     bool canWhiteKingCastle = !didLightKingMove &&
         (!didLightKingSideRookMove || !didLightQueenSideRookMove);
@@ -113,8 +113,8 @@ class CastlingController {
   }
 
   void moveRookOnCastle({required int from, required int to}) {
-    if (from.toPiece() == Pieces.king) {
-      if (from.toPieceType() == PieceType.dark &&
+    if (from.piece() == Pieces.king) {
+      if (from.type() == PieceType.dark &&
           from == ChessSquare.e8.index &&
           (to == ChessSquare.g8.index || to == ChessSquare.c8.index)) {
         // moving the rook and updating the board
@@ -125,7 +125,7 @@ class CastlingController {
           ChessBoardModel.move(
               from: ChessSquare.a8.index, to: ChessSquare.d8.index);
         }
-      } else if (from.toPieceType() == PieceType.light &&
+      } else if (from.type() == PieceType.light &&
           from == ChessSquare.e1.index &&
           (to == ChessSquare.c1.index || to == ChessSquare.g1.index)) {
         if (to == ChessSquare.g1.index) {
@@ -141,36 +141,36 @@ class CastlingController {
 
   static List<int> preventCastlingIfPieceStandsBetweenRookAndKing(
       {required int from, required List<int> legalAndIllegalMoves}) {
-    if (from.toPiece() == Pieces.king) {
-      if (from.toPieceType() == PieceType.light) {
+    if (from.piece() == Pieces.king) {
+      if (from.type() == PieceType.light) {
         if (!CastlingController.didLightKingMove) {
-          if ((ChessSquare.f1.index).toPiece() != null ||
-              (ChessSquare.g1.index).toPiece() != null) {
+          if ((ChessSquare.f1.index).piece() != null ||
+              (ChessSquare.g1.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.toFile() == Files.g && square.toRank() == 1),
+              (square) => (square.file() == Files.g && square.rank() == 1),
             );
           }
-          if ((ChessSquare.b1.index).toPiece() != null ||
-              (ChessSquare.c1.index).toPiece() != null ||
-              (ChessSquare.d1.index).toPiece() != null) {
+          if ((ChessSquare.b1.index).piece() != null ||
+              (ChessSquare.c1.index).piece() != null ||
+              (ChessSquare.d1.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.toFile() == Files.c && square.toRank() == 1),
+              (square) => (square.file() == Files.c && square.rank() == 1),
             );
           }
         }
       } else {
         if (!CastlingController.didDarkKingMove) {
-          if ((ChessSquare.f8.index).toPiece() != null ||
-              (ChessSquare.g8.index).toPiece() != null) {
+          if ((ChessSquare.f8.index).piece() != null ||
+              (ChessSquare.g8.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.toFile() == Files.g && square.toRank() == 8),
+              (square) => (square.file() == Files.g && square.rank() == 8),
             );
           }
-          if ((ChessSquare.b8.index).toPiece() != null ||
-              (ChessSquare.c8.index).toPiece() != null ||
-              (ChessSquare.d8.index).toPiece() != null) {
+          if ((ChessSquare.b8.index).piece() != null ||
+              (ChessSquare.c8.index).piece() != null ||
+              (ChessSquare.d8.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.toFile() == Files.c && square.toRank() == 8),
+              (square) => (square.file() == Files.c && square.rank() == 8),
             );
           }
         }

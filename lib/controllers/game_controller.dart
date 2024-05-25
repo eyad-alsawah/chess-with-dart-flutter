@@ -121,7 +121,7 @@ class ChessController {
         sharedState.changePlayingTurn();
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
         SoundType soundToPlay =
-            (index.toPieceType() != null || didCaptureEnPassant)
+            (index.type() != null || didCaptureEnPassant)
                 ? SoundType.capture
                 : SoundType.pieceMoved;
 

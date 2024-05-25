@@ -108,7 +108,7 @@ class ChessBoardModel {
       {required Files file, required int rank}) {
     return chessBoard.entries
         .firstWhere((element) =>
-            element.key.toRank() == rank && element.key.toFile() == file)
+            element.key.rank() == rank && element.key.file() == file)
         .key
         .index;
   }
@@ -145,8 +145,8 @@ class ChessBoardModel {
   //-----------------------------
   static Future<void> move(
       {required int from, required int to, Pieces? pawnPromotedTo}) async {
-    PieceType? type = from.toPieceType();
-    Pieces? piece = from.toPiece();
+    PieceType? type = from.type();
+    Pieces? piece = from.piece();
     emptySquareAtIndex(from);
     updateSquareAtIndex(to, pawnPromotedTo ?? piece, type);
   }

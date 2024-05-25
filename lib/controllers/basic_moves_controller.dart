@@ -13,9 +13,9 @@ class BasicMovesController {
   static BasicMovesController get instance => _instance;
   //----------------------------------------------------------------------------
   List<int> getPawnPieces(int from) {
-    Files file = from.toFile();
-    int rank = from.toRank();
-    PieceType? pieceType = from.toPieceType();
+    Files file = from.file();
+    int rank = from.rank();
+    PieceType? pieceType = from.type();
 
     List<int> pawnPieces = [];
 
@@ -23,7 +23,7 @@ class BasicMovesController {
       //top-right
       (file != Files.h &&
               rank != 8 &&
-              ((from + 9).toPiece() != null ||
+              ((from + 9).piece() != null ||
                   enPassantController.canCaptureEnPassant(
                     from: from,
                     to: from + 9,
@@ -34,7 +34,7 @@ class BasicMovesController {
       //top-left
       (file != Files.a &&
               rank != 8 &&
-              ((from + 7).toPieceType() != null ||
+              ((from + 7).type() != null ||
                   enPassantController.canCaptureEnPassant(
                     from: from,
                     to: from + 7,
@@ -43,8 +43,8 @@ class BasicMovesController {
           ? pawnPieces.add(from + 7)
           : null;
       //top
-      (rank != 8 && (from + 8).toPieceType() == null)
-          ? (rank == 2 && (from + 16).toPieceType() == null)
+      (rank != 8 && (from + 8).type() == null)
+          ? (rank == 2 && (from + 16).type() == null)
               ? pawnPieces.addAll([from + 8, from + 16])
               : pawnPieces.add(from + 8)
           : null;
@@ -52,7 +52,7 @@ class BasicMovesController {
       //bottom-right
       (file != Files.h &&
               rank != 1 &&
-              ((from - 7).toPieceType() != null ||
+              ((from - 7).type() != null ||
                   enPassantController.canCaptureEnPassant(
                     from: from,
                     to: from - 7,
@@ -63,7 +63,7 @@ class BasicMovesController {
       //bottom-left
       (file != Files.a &&
               rank != 1 &&
-              ((from - 9).toPieceType() != null ||
+              ((from - 9).type() != null ||
                   enPassantController.canCaptureEnPassant(
                     from: from,
                     to: from - 9,
@@ -72,8 +72,8 @@ class BasicMovesController {
           ? pawnPieces.add(from - 9)
           : null;
       //bottom
-      (rank != 1 && (from - 8).toPieceType() == null)
-          ? (rank == 7 && (from - 16).toPieceType() == null)
+      (rank != 1 && (from - 8).type() == null)
+          ? (rank == 7 && (from - 16).type() == null)
               ? pawnPieces.addAll([from - 8, from - 16])
               : pawnPieces.add(from - 8)
           : null;
@@ -82,15 +82,15 @@ class BasicMovesController {
   }
 
   List<int> getKingPieces(int from, {bool getCastlingPieces = true}) {
-    Files file = from.toFile();
-    int rank = from.toRank();
+    Files file = from.file();
+    int rank = from.rank();
 
     List<int> kingPieces = [];
 
     // castling:
     getCastlingPieces
         ? kingPieces.addAll(castlingController.getCastlingAvailability(
-            pieceType: from.toPieceType()!))
+            pieceType: from.type()!))
         : null;
 
     //right
@@ -115,8 +115,8 @@ class BasicMovesController {
   }
 
   List<int> getKnightPieces(int from) {
-    Files file = from.toFile();
-    int rank = from.toRank();
+    Files file = from.file();
+    int rank = from.rank();
 
     List<int> knightPieces = [];
 
@@ -152,47 +152,47 @@ class BasicMovesController {
   }
 
   List<int> getDiagonalPieces(int from) {
-    Files file = from.toFile();
-    int rank = from.toRank();
+    Files file = from.file();
+    int rank = from.rank();
     int currentIndex = from;
     List<int> diagonalPieces = [];
     //-----------------------------
     //{RelativeDirection.diagonalTopRight}
     while (currentIndex < 64 &&
-        !(currentIndex.toFile() == Files.a && file != Files.a)) {
+        !(currentIndex.file() == Files.a && file != Files.a)) {
       diagonalPieces.add(currentIndex);
       currentIndex = currentIndex + 9;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalBottomLeft}
     while (currentIndex >= 0 &&
-        !(currentIndex.toFile() == Files.h && file != Files.h)) {
+        !(currentIndex.file() == Files.h && file != Files.h)) {
       diagonalPieces.add(currentIndex);
       currentIndex = currentIndex - 9;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalTopLeft}
     while (currentIndex < 63 &&
-        !(currentIndex.toFile() == Files.h && file != Files.h)) {
+        !(currentIndex.file() == Files.h && file != Files.h)) {
       diagonalPieces.add(currentIndex);
       currentIndex = currentIndex + 7;
     }
     currentIndex = from;
     //{RelativeDirection.diagonalBottomRight}
     while (currentIndex > 0 &&
-        !(currentIndex.toFile() == Files.a && file != Files.a)) {
+        !(currentIndex.file() == Files.a && file != Files.a)) {
       diagonalPieces.add(currentIndex);
       currentIndex = currentIndex - 7;
     }
     // remove current piece from the list
     diagonalPieces.removeWhere(
-        (element) => element.toRank() == rank && element.toFile() == file);
+        (element) => element.rank() == rank && element.file() == file);
     return diagonalPieces;
   }
 
   List<int> getHorizontalPieces(int from) {
-    int rank = from.toRank();
-    Files file = from.toFile();
+    int rank = from.rank();
+    Files file = from.file();
 
     int currentIndex = from;
     List<int> horizontalPieces = [];
@@ -207,7 +207,7 @@ class BasicMovesController {
     }
     // remove current piece from the list
     horizontalPieces.removeWhere(
-        (element) => element.toRank() == rank && element.toFile() == file);
+        (element) => element.rank() == rank && element.file() == file);
     //--------------------------------
 
     return horizontalPieces;
@@ -228,7 +228,7 @@ class BasicMovesController {
     }
     // remove current piece from the list
     verticalPieces.removeWhere((element) =>
-        element.toRank() == from.toRank() && element.toFile() == from.toFile());
+        element.rank() == from.rank() && element.file() == from.file());
     return verticalPieces;
   }
 }

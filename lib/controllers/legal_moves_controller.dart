@@ -26,7 +26,7 @@ class LegalMovesController {
   }) async {
     if (!ignorePlayingTurn &&
         helperMethods.selectedPieceDoesNotMatchCurrentPlayingTurn(
-            selectedPiece: from.toSquare())) {
+            selectedPiece: from.square())) {
       return [];
     }
     // getting all the moves a piece can move to if there was nothing standing in its way
@@ -76,15 +76,15 @@ class LegalMovesController {
       RelativeDirection relativeDirection =
           helperMethods.getRelativeDirection(from: from, to: move);
 
-      bool fromEmptySquare = from.toPieceType() == null;
-      bool toEmptySquare = move.toPiece() == null;
-      bool toOppositeType = move.toPieceType() != from.toPieceType();
+      bool fromEmptySquare = from.type() == null;
+      bool toEmptySquare = move.piece() == null;
+      bool toOppositeType = move.type() != from.type();
 
       if (fromEmptySquare) {
         legalMoves.clear();
-      } else if (from.toPiece() == Pieces.knight) {
+      } else if (from.piece() == Pieces.knight) {
         // treated differently than other pieces due to the way the knight moves
-        (move.toPiece() == null || move.toPieceType() != from.toPieceType())
+        (move.piece() == null || move.type() != from.type())
             ? legalMoves.add(move)
             : null;
       } else {
@@ -175,13 +175,13 @@ class LegalMovesController {
   Future<List<int>> filterMoveThatExposeKingToCheck(
       List<int> legalMoves, int from, bool fromHandleSquareTapped) async {
     if (fromHandleSquareTapped) {
-      PieceType? fromType = from.toPieceType();
-      Pieces? fromPiece = from.toPiece();
+      PieceType? fromType = from.type();
+      Pieces? fromPiece = from.piece();
 
       // deep copying the list to prevent Concurrent modification of legalMoves
       for (var move in legalMoves.deepCopy()) {
-        PieceType? moveType = move.toPieceType();
-        Pieces? movePiece = move.toPiece();
+        PieceType? moveType = move.type();
+        Pieces? movePiece = move.piece();
 
         //--------------------
 
@@ -220,18 +220,18 @@ class LegalMovesController {
       {required List<int> legalMoves, required int to}) async {
     // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
     for (var index in legalMoves.deepCopy()) {
-      Square currentSquareAtIndex = index.toSquare().copy();
+      Square currentSquareAtIndex = index.square().copy();
       ChessBoardModel.updateSquareAtIndex(
-          index, to.toPiece(), to.toPieceType());
+          index, to.piece(), to.type());
 
       // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
       bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
-          escapeTo: to.toPiece() == Pieces.king ? index : null,
-          attackedKingType: to.toPieceType());
+          escapeTo: to.piece() == Pieces.king ? index : null,
+          attackedKingType: to.type());
 
       if (isKingAttacked) {
         legalMoves.removeWhere((move) =>
-            move.toFile() == index.toFile() && move.toRank() == index.toRank());
+            move.file() == index.file() && move.rank() == index.rank());
       }
       // resetting the hypothetically moved piece
       ChessBoardModel.updateSquareAtIndex(
@@ -260,7 +260,7 @@ class LegalMovesController {
     };
 
     // Use the map to get the corresponding moves for the tapped piece
-    moves = moveFunctions[from.toPiece()]?.call() ?? [];
+    moves = moveFunctions[from.piece()]?.call() ?? [];
 
     return moves;
   }

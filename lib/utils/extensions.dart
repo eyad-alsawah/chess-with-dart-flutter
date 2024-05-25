@@ -21,25 +21,25 @@ extension ListDeepCopy<T> on List<T> {
 }
 
 extension PlayingTurnExtension on PlayingTurn {
-  PieceType toPieceType() {
+  PieceType type() {
     return this == PlayingTurn.light ? PieceType.light : PieceType.dark;
   }
 }
 
 extension ToSquare on int {
-  Square toSquare() {
+  Square square() {
     return ChessBoardModel.chessBoard[ChessSquare.values[this]]!.copy();
   }
 }
 
 extension ChessSquareToRank on ChessSquare {
-  int toRank() {
+  int rank() {
     return int.parse(name[1]);
   }
 }
 
 extension ChessSquareToFile on ChessSquare {
-  Files toFile() {
+  Files file() {
     String fileStr = name[0];
     late Files fileEnum;
     switch (fileStr) {
@@ -73,37 +73,37 @@ extension ChessSquareToFile on ChessSquare {
 }
 
 extension ToPiece on int {
-  Pieces? toPiece() {
-    return toSquare().piece;
+  Pieces? piece() {
+    return square().piece;
   }
 }
 
 extension ToPieceType on int {
-  PieceType? toPieceType() {
-    return toSquare().pieceType;
+  PieceType? type() {
+    return square().pieceType;
   }
 }
 
 extension ToOppositeType on PieceType {
-  PieceType? toOppositeType() {
+  PieceType? oppositeType() {
     return this == PieceType.light ? PieceType.dark : PieceType.light;
   }
 }
 
 extension ToFile on int {
-  Files toFile() {
+  Files file() {
     return Files.values[this % 8];
   }
 }
 
 extension ToPlayingTurn on PieceType {
-  PlayingTurn toPlayingTurn() {
+  PlayingTurn playingTurn() {
     return this == PieceType.light ? PlayingTurn.light : PlayingTurn.dark;
   }
 }
 
 extension ToRank on int {
-  int toRank() {
+  int rank() {
     return (this ~/ 8) + 1;
   }
 }

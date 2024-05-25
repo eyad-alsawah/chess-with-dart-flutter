@@ -19,10 +19,10 @@ class HelperMethods {
       {required int index,
       required PlayingTurn playingTurn,
       required List<int> legalMovesIndices}) {
-    PieceType? tappedSquareType = (index).toPieceType();
+    PieceType? tappedSquareType = (index).type();
     bool tappedOnAnEmptySquare = tappedSquareType == null;
     bool tappedOnSquareOfSameType =
-        tappedSquareType == playingTurn.toPieceType();
+        tappedSquareType == playingTurn.type();
     bool tappedOnSquareCanMoveTo = legalMovesIndices.contains(index);
     return ((tappedOnAnEmptySquare || tappedOnSquareOfSameType) &&
         !tappedOnSquareCanMoveTo);
@@ -40,10 +40,10 @@ class HelperMethods {
 
   //----------------------------------------------------------------------------
   RelativeDirection getRelativeDirection({required int to, required int from}) {
-    int currentSquareRank = from.toRank();
-    int targetSquareRank = to.toRank();
-    Files currentSquareFile = from.toFile();
-    Files targetSquareFile = to.toFile();
+    int currentSquareRank = from.rank();
+    int targetSquareRank = to.rank();
+    Files currentSquareFile = from.file();
+    Files targetSquareFile = to.file();
     RelativeDirection relativeDirection;
     if (targetSquareRank == currentSquareRank) {
       relativeDirection = targetSquareFile.index > currentSquareFile.index

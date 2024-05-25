@@ -18,7 +18,7 @@ class GameStatusController {
   static bool isKingChecked = false;
 
   static Future<GameStatusDTO> checkStatus(int to) async {
-    PieceType? opponentKingType = to.toPieceType()?.toOppositeType();
+    PieceType? opponentKingType = to.type()?.oppositeType();
     // resetting checkedKingIndex on each new move so that the red check square is removed
     checkedKingIndex = null;
     isKingChecked = await gameStatusController.isKingSquareAttacked(
@@ -29,7 +29,7 @@ class GameStatusController {
           matchPiece: true, matchType: true);
 
       if (await gameStatusController.isCheckmate(
-          playingTurn: opponentKingType!.toPlayingTurn())) {
+          playingTurn: opponentKingType!.playingTurn())) {
         helperMethods.preventFurtherInteractions(true);
         callbacks.onVictory(VictoryType.checkmate);
         callbacks.playSound(SoundType.victory);
@@ -65,27 +65,27 @@ class GameStatusController {
             matchPiece: true, matchType: true);
 
     PieceType? opponentKingType = attackedKingType;
-    Files opponentKingFile = opponentKingIndex.toFile();
-    int opponentKingRank = opponentKingIndex.toRank();
+    Files opponentKingFile = opponentKingIndex.file();
+    int opponentKingRank = opponentKingIndex.rank();
 
     /// -------------------------------------getting surrounding opponent pawns--------------------------
     List<int> surroundingOpponentPawns =
         basicMovesController.getPawnPieces(opponentKingIndex);
     // pawns can't check a king of the same type
     surroundingOpponentPawns
-        .removeWhere((pawn) => pawn.toPieceType() == opponentKingType);
+        .removeWhere((pawn) => pawn.type() == opponentKingType);
     // pawns that are on the same file as the king aren't checking the king
     surroundingOpponentPawns
-        .removeWhere((pawn) => pawn.toFile() == opponentKingFile);
+        .removeWhere((pawn) => pawn.file() == opponentKingFile);
     surroundingOpponentPawns.removeWhere((pawn) {
       // a black king can't be put in check by white pawns higher in rank
       if (opponentKingType == PieceType.dark &&
-          pawn.toRank() > opponentKingRank) {
+          pawn.rank() > opponentKingRank) {
         return true;
       }
       // a white king can't be put in check by white pawns lower in rank
       if (opponentKingType == PieceType.light &&
-          pawn.toRank() < opponentKingRank) {
+          pawn.rank() < opponentKingRank) {
         return true;
       }
       return false;
@@ -96,10 +96,10 @@ class GameStatusController {
         basicMovesController.getKnightPieces(opponentKingIndex);
     // knights of the same type as the opponent king can't check the king
     surroundingKnights
-        .removeWhere((knight) => knight.toPieceType() == opponentKingType);
+        .removeWhere((knight) => knight.type() == opponentKingType);
     // empty squares don't count, same for pieces that are not knights
     surroundingKnights.removeWhere((square) =>
-        square.toPiece() == null || square.toPiece() != Pieces.knight);
+        square.piece() == null || square.piece() != Pieces.knight);
 
     /// ------------------------------------getting surrounding opponent rooks and queens  (queens vertical/horizontal to the opponent king)---------
     List<int> surroundingRooksAndQueens = [
@@ -114,12 +114,12 @@ class GameStatusController {
 
     // rooks or queens of the same type as the king can't check the king
     surroundingRooksAndQueensInLineOfSight.removeWhere(
-        (rookOrQueen) => rookOrQueen.toPieceType() == opponentKingType);
+        (rookOrQueen) => rookOrQueen.type() == opponentKingType);
 
     // empty squares don't count, same for pieces that are neither rooks nor queens
     surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
-        square.toPiece() == null ||
-        (square.toPiece() != Pieces.rook && square.toPiece() != Pieces.queen));
+        square.piece() == null ||
+        (square.piece() != Pieces.rook && square.piece() != Pieces.queen));
 
     /// ----------------------------------------getting surrounding opponent bishops and queens (queens diagonal to the opponent king)----------------
     List<int> surroundingBishopsAndQueens =
@@ -131,12 +131,12 @@ class GameStatusController {
             from: opponentKingIndex);
 
     surroundingBishopsAndQueensInLineOfSight.removeWhere(
-        (bishopOrQueen) => bishopOrQueen.toPieceType() == opponentKingType);
+        (bishopOrQueen) => bishopOrQueen.type() == opponentKingType);
     // empty squares don't count, same for pieces that are neither bishops nor queens
     surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
-        square.toPiece() == null ||
-        (square.toPiece() != Pieces.bishop &&
-            square.toPiece() != Pieces.queen));
+        square.piece() == null ||
+        (square.piece() != Pieces.bishop &&
+            square.piece() != Pieces.queen));
 
     ///------------------------------------------------------------------------------------
 
@@ -157,8 +157,8 @@ class GameStatusController {
     late int kingIndex;
 
     for (int index = 0; index <= 63; index++) {
-      if (index.toPieceType() == playingTurn.toPieceType()) {
-        if (index.toPiece() == Pieces.king) {
+      if (index.type() == playingTurn.type()) {
+        if (index.piece() == Pieces.king) {
           kingIndex = index;
         } else {
           List<int> legalMovesIndices =
@@ -171,16 +171,16 @@ class GameStatusController {
     }
 
     for (var moveIndex in movesThatProtectTheKing.deepCopy()) {
-      Pieces? originalPiece = moveIndex.toPiece();
-      PieceType? originalPieceType = moveIndex.toPieceType();
+      Pieces? originalPiece = moveIndex.piece();
+      PieceType? originalPieceType = moveIndex.type();
 
       // placing a pawn at moveIndex
       await ChessBoardModel.updateSquareAtIndex(
-          moveIndex, Pieces.pawn, playingTurn.toPieceType());
+          moveIndex, Pieces.pawn, playingTurn.type());
 
       // checking if check remains
       if (await isKingSquareAttacked(
-          attackedKingType: playingTurn.toPieceType())) {
+          attackedKingType: playingTurn.type())) {
         movesThatProtectTheKing.removeWhere((index) => index == moveIndex);
       }
 
@@ -196,20 +196,20 @@ class GameStatusController {
     for (var moveIndex in kingMovesThatWouldProtectHim.deepCopy()) {
       // the square we will temporarily move the king to for testing if the check remains.
 
-      Pieces? originalPiece = moveIndex.toPiece();
-      PieceType? originalPieceType = moveIndex.toPieceType();
+      Pieces? originalPiece = moveIndex.piece();
+      PieceType? originalPieceType = moveIndex.type();
       // emptying the square the king is currently on
       ChessBoardModel.emptySquareAtIndex(kingIndex);
 
       // moving the king to the new square
       ChessBoardModel.updateSquareAtIndex(
-          moveIndex, Pieces.king, playingTurn.toPieceType());
+          moveIndex, Pieces.king, playingTurn.type());
 
       // await Future.delayed(Duration(seconds: 1));
       // callbacks.updateView();
       //-----------------------
       if (await isKingSquareAttacked(
-          attackedKingType: playingTurn.toPieceType())) {
+          attackedKingType: playingTurn.type())) {
         kingMovesThatWouldProtectHim.removeWhere((index) => index == moveIndex);
       }
       // resetting the square to its original state
@@ -217,7 +217,7 @@ class GameStatusController {
           moveIndex, originalPiece, originalPieceType);
       // moving the king back to its original square
       ChessBoardModel.updateSquareAtIndex(
-          kingIndex, Pieces.king, playingTurn.toPieceType());
+          kingIndex, Pieces.king, playingTurn.type());
       //----------------------------------
     }
 
@@ -232,7 +232,7 @@ class GameStatusController {
     List<int> allLegalMovesIndices = [];
 
     for (int index = 0; index <= 63; index++) {
-      if (index.toPieceType() == opponentPlayerType) {
+      if (index.type() == opponentPlayerType) {
         List<int> moves = await legalMovesController.getLegalMovesIndices(
             from: index, isKingChecked: isKingChecked, ignorePlayingTurn: true);
         allLegalMovesIndices.addAll(moves);
