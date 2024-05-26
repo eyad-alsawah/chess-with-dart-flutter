@@ -4,6 +4,7 @@ import 'package:chess/controllers/en_passent_controller.dart';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_status_controller.dart';
 import 'package:chess/controllers/promotion_controller.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
@@ -14,7 +15,6 @@ import 'package:chess/utils/fen_parser.dart';
 //--------------Main Game Controller-------------------
 class ChessController {
   final OnVictory onVictory;
-  final OnPlayingTurnChanged onPlayingTurnChanged;
   final OnPieceSelected onPieceSelected;
 
   final OnError onError;
@@ -30,7 +30,6 @@ class ChessController {
   //----------------------------------------------------------------------------
   void registerCallbacksListeners() {
     callbacks.onVictory = onVictory;
-    callbacks.onPlayingTurnChanged = onPlayingTurnChanged;
     callbacks.onPieceSelected = onPieceSelected;
     callbacks.onError = onError;
     callbacks.onSelectPromotionType = onSelectPromotionType;
@@ -45,7 +44,6 @@ class ChessController {
     required this.onVictory,
     required this.onDraw,
     required this.onPieceSelected,
-    required this.onPlayingTurnChanged,
     required this.onError,
     required this.onSelectPromotionType,
     required this.playSound,
@@ -61,7 +59,7 @@ class ChessController {
   }
 
   Future<void> handleSquareTapped(int index) async {
-    if (sharedState.lockFurtherInteractions) {
+    if (SharedState.instance.lockFurtherInteractions) {
       return;
     }
 
@@ -69,27 +67,28 @@ class ChessController {
       /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
       inMoveSelectionMode = helperMethods.isInMoveSelectionMode(
           index: index,
-          playingTurn: sharedState.playingTurn,
-          legalMovesIndices: sharedState.legalMovesIndices);
+          playingTurn: SharedState.instance.playingTurn,
+          legalMovesIndices: SharedState.instance.legalMovesIndices);
 
       bool tappedOnASquareWeCanMoveTo =
-          sharedState.legalMovesIndices.contains(index);
+          SharedState.instance.legalMovesIndices.contains(index);
 
       if (inMoveSelectionMode) {
         from = index;
 
-        sharedState.legalMovesIndices =
+        SharedState.instance.legalMovesIndices =
             await legalMovesController.getLegalMovesIndices(
           from: from!,
           ignorePlayingTurn: false,
-          isKingChecked: sharedState.isKingChecked,
+          isKingChecked: SharedState.instance.isKingChecked,
         );
 
         // for the highlight guide
-        callbacks.onPieceSelected(sharedState.legalMovesIndices, index);
+        callbacks.onPieceSelected(
+            SharedState.instance.legalMovesIndices, index);
 
         // used to clear the highlighted squares when pressing an opponent piece
-        inMoveSelectionMode = sharedState.legalMovesIndices.isEmpty;
+        inMoveSelectionMode = SharedState.instance.legalMovesIndices.isEmpty;
 
         callbacks.updateView();
         return;
@@ -121,7 +120,7 @@ class ChessController {
         // -------------------------------------------------
         await GameStatusController.checkStatus(index);
 
-        sharedState.changePlayingTurn();
+        SharedState.instance.changeActiveColor();
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
         SoundType soundToPlay = (index.type() != null || didCaptureEnPassant)
             ? SoundType.capture
@@ -133,7 +132,7 @@ class ChessController {
       }
       callbacks.onPieceSelected([], index);
       inMoveSelectionMode = true;
-      sharedState.legalMovesIndices.clear();
+      SharedState.instance.legalMovesIndices.clear();
       callbacks.updateView();
     }, (error, stack) {
       callbacks.playSound(SoundType.illegal);

@@ -39,35 +39,18 @@ class EnPassantController {
     int toRank = to.rank();
     if (from.piece() == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
-      if (from.type() == PieceType.light) {
-        SharedState.instance.enPassantCapturableLightPawnIndex = to;
-      } else {
-        SharedState.instance.enPassantCapturableDarkPawnIndex = to;
-      }
-    }
-  }
-
-  static void _removePawnFromEnPassantCapturablePawns({
-    required PieceType? movedPieceType,
-  }) {
-    if (movedPieceType == PieceType.light) {
-      sharedState.enPassantCapturableDarkPawnIndex = null;
-    } else if (movedPieceType == PieceType.dark) {
-      sharedState.enPassantCapturableLightPawnIndex = null;
+      SharedState.instance.enPassantTargetSquare = to.toCoordinates();
     } else {
-      print(
-          "this condition will only be reached if player tapped on empty square in selection mode which shouldn't happen because in handleTap we are checking if we pressed on a highlighted index in selection mode");
+      SharedState.instance.enPassantTargetSquare = '-';
     }
   }
 
   bool didCaptureEnPassant({required int from, required int to}) {
-    PieceType? movedPieceType = from.type();
     bool didMoveToEmptySquareOnDifferentFile =
         from.file() != to.file() && to.piece() == null;
     bool didMovePawn = from.piece() == Pieces.pawn;
     bool didCaptureEnPassent =
         didMovePawn && didMoveToEmptySquareOnDifferentFile;
-    _removePawnFromEnPassantCapturablePawns(movedPieceType: movedPieceType);
     return didCaptureEnPassent;
   }
 
@@ -77,9 +60,9 @@ class EnPassantController {
     required RelativeDirection relativeDirection,
   }) {
     bool canCaptureEnPassant = false;
-    int? indexToCheck = from.type() == PieceType.light
-        ? sharedState.enPassantCapturableDarkPawnIndex
-        : sharedState.enPassantCapturableLightPawnIndex;
+    int? indexToCheck = SharedState.instance.enPassantTargetSquare != '-'
+        ? SharedState.instance.enPassantTargetSquare.fromCoordinates()
+        : null;
 
     if ((from.type() == PieceType.light && from.rank() == 5) ||
         (from.type() == PieceType.dark && from.rank() == 4)) {

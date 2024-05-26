@@ -20,9 +20,15 @@ extension ListDeepCopy<T> on List<T> {
   }
 }
 
-extension PlayingTurnExtension on PlayingTurn {
+extension PlayingTurnToPieceType on PlayingTurn {
   PieceType type() {
     return this == PlayingTurn.light ? PieceType.light : PieceType.dark;
+  }
+}
+
+extension PlayingTurnToActiveColor on PlayingTurn {
+  String activeColor() {
+    return this == PlayingTurn.light ? 'w' : 'b';
   }
 }
 
@@ -105,5 +111,17 @@ extension ToPlayingTurn on PieceType {
 extension ToRank on int {
   int rank() {
     return (this ~/ 8) + 1;
+  }
+}
+
+extension ToCoordinates on int {
+  String toCoordinates() {
+    return ChessSquare.values[this].name;
+  }
+}
+
+extension FromCoordinates on String {
+  int fromCoordinates() {
+    return ChessSquare.values.firstWhere((e) => e.name == this).index;
   }
 }

@@ -13,14 +13,12 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 class ChessBoard extends StatefulWidget {
-  final ValueChanged<PlayingTurn> onPlayingTurnChanged;
   final VoidCallback onUpdateView;
   final VoidCallback onVictory;
   final double size;
   const ChessBoard({
     super.key,
     required this.size,
-    required this.onPlayingTurnChanged,
     required this.onUpdateView,
     required this.onVictory,
   });
@@ -84,8 +82,6 @@ class _ChessBoardState extends State<ChessBoard> {
         state.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
-      onPlayingTurnChanged: (playingTurn) =>
-          widget.onPlayingTurnChanged(playingTurn),
       onError: (error, errorString) {
         // todo: show a toast here
         ColoredPrinter.printColored(

@@ -1,5 +1,5 @@
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/model/global_state.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/extensions.dart';
 
@@ -29,9 +29,9 @@ class HelperMethods {
       {required Square? selectedPiece}) {
     bool shouldClearLegalMovesIndices = selectedPiece != null &&
         ((selectedPiece.pieceType == PieceType.light &&
-                sharedState.playingTurn != PlayingTurn.light) ||
+                SharedState.instance.playingTurn != PlayingTurn.light) ||
             (selectedPiece.pieceType == PieceType.dark &&
-                sharedState.playingTurn != PlayingTurn.dark));
+                SharedState.instance.playingTurn != PlayingTurn.dark));
     return shouldClearLegalMovesIndices;
   }
 
@@ -65,6 +65,6 @@ class HelperMethods {
   }
 
   preventFurtherInteractions(bool status) {
-    sharedState.lockFurtherInteractions = status;
+    SharedState.instance.lockFurtherInteractions = status;
   }
 }

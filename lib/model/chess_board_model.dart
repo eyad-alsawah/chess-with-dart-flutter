@@ -1,8 +1,11 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/square.dart';
+import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
 
 class ChessBoardModel {
+  static Square emptySquare = Square(piece: null, pieceType: null);
   static Map<ChessSquare, Square> chessBoard = {
     // -------------------------------First Rank------------------
     ChessSquare.a1: Square(piece: Pieces.rook, pieceType: PieceType.light),
@@ -23,41 +26,41 @@ class ChessBoardModel {
     ChessSquare.g2: Square(piece: Pieces.pawn, pieceType: PieceType.light),
     ChessSquare.h2: Square(piece: Pieces.pawn, pieceType: PieceType.light),
     // -------------------------------Third Rank------------------
-    ChessSquare.a3: Square(piece: null, pieceType: null),
-    ChessSquare.b3: Square(piece: null, pieceType: null),
-    ChessSquare.c3: Square(piece: null, pieceType: null),
-    ChessSquare.d3: Square(piece: null, pieceType: null),
-    ChessSquare.e3: Square(piece: null, pieceType: null),
-    ChessSquare.f3: Square(piece: null, pieceType: null),
-    ChessSquare.g3: Square(piece: null, pieceType: null),
-    ChessSquare.h3: Square(piece: null, pieceType: null),
+    ChessSquare.a3: emptySquare,
+    ChessSquare.b3: emptySquare,
+    ChessSquare.c3: emptySquare,
+    ChessSquare.d3: emptySquare,
+    ChessSquare.e3: emptySquare,
+    ChessSquare.f3: emptySquare,
+    ChessSquare.g3: emptySquare,
+    ChessSquare.h3: emptySquare,
     // -------------------------------Fourth Rank------------------
-    ChessSquare.a4: Square(piece: null, pieceType: null),
-    ChessSquare.b4: Square(piece: null, pieceType: null),
-    ChessSquare.c4: Square(piece: null, pieceType: null),
-    ChessSquare.d4: Square(piece: null, pieceType: null),
-    ChessSquare.e4: Square(piece: null, pieceType: null),
-    ChessSquare.f4: Square(piece: null, pieceType: null),
-    ChessSquare.g4: Square(piece: null, pieceType: null),
-    ChessSquare.h4: Square(piece: null, pieceType: null),
+    ChessSquare.a4: emptySquare,
+    ChessSquare.b4: emptySquare,
+    ChessSquare.c4: emptySquare,
+    ChessSquare.d4: emptySquare,
+    ChessSquare.e4: emptySquare,
+    ChessSquare.f4: emptySquare,
+    ChessSquare.g4: emptySquare,
+    ChessSquare.h4: emptySquare,
     // -------------------------------Fifth Rank------------------
-    ChessSquare.a5: Square(piece: null, pieceType: null),
-    ChessSquare.b5: Square(piece: null, pieceType: null),
-    ChessSquare.c5: Square(piece: null, pieceType: null),
-    ChessSquare.d5: Square(piece: null, pieceType: null),
-    ChessSquare.e5: Square(piece: null, pieceType: null),
-    ChessSquare.f5: Square(piece: null, pieceType: null),
-    ChessSquare.g5: Square(piece: null, pieceType: null),
-    ChessSquare.h5: Square(piece: null, pieceType: null),
+    ChessSquare.a5: emptySquare,
+    ChessSquare.b5: emptySquare,
+    ChessSquare.c5: emptySquare,
+    ChessSquare.d5: emptySquare,
+    ChessSquare.e5: emptySquare,
+    ChessSquare.f5: emptySquare,
+    ChessSquare.g5: emptySquare,
+    ChessSquare.h5: emptySquare,
     // -------------------------------Sixth Rank------------------
-    ChessSquare.a6: Square(piece: null, pieceType: null),
-    ChessSquare.b6: Square(piece: null, pieceType: null),
-    ChessSquare.c6: Square(piece: null, pieceType: null),
-    ChessSquare.d6: Square(piece: null, pieceType: null),
-    ChessSquare.e6: Square(piece: null, pieceType: null),
-    ChessSquare.f6: Square(piece: null, pieceType: null),
-    ChessSquare.g6: Square(piece: null, pieceType: null),
-    ChessSquare.h6: Square(piece: null, pieceType: null),
+    ChessSquare.a6: emptySquare,
+    ChessSquare.b6: emptySquare,
+    ChessSquare.c6: emptySquare,
+    ChessSquare.d6: emptySquare,
+    ChessSquare.e6: emptySquare,
+    ChessSquare.f6: emptySquare,
+    ChessSquare.g6: emptySquare,
+    ChessSquare.h6: emptySquare,
     // -------------------------------Seventh Rank------------------
     ChessSquare.a7: Square(piece: Pieces.pawn, pieceType: PieceType.dark),
     ChessSquare.b7: Square(piece: Pieces.pawn, pieceType: PieceType.dark),
@@ -147,7 +150,84 @@ class ChessBoardModel {
       {required int from, required int to, Pieces? pawnPromotedTo}) async {
     PieceType? type = from.type();
     Pieces? piece = from.piece();
+    // increase halfMoveClock if no pawn was moved, or no capture happened
+    if (piece == Pieces.pawn || to.type() != null) {
+      SharedState.instance.halfMoveClock = 0;
+      ColoredPrinter.printColored("resetting halfmove clock");
+    } else {
+      SharedState.instance.halfMoveClock++;
+      ColoredPrinter.printColored("increasing halfmove clock");
+    }
+
     emptySquareAtIndex(from);
     updateSquareAtIndex(to, pawnPromotedTo ?? piece, type);
+  }
+
+  static String toFen(
+      {required String activeColor,
+      required String enPassantTargetSquare,
+      required String castlingRights,
+      required int halfMoveClock,
+      required int fullMoveNumber}) {
+    String fen = '';
+    List<String> piecesPlacementOnRanks = [];
+    //----------------------------------------------------------------------
+    int emptySquares = 0;
+
+    for (int i = 0; i <= 63; i++) {
+      Square? square = ChessSquare.values[i].index.square();
+      Pieces? piece = square.piece;
+      PieceType? type = square.pieceType;
+      bool isLight = type == PieceType.light;
+
+      if (piece != null && emptySquares != 0) {
+        fen += emptySquares.toString();
+        emptySquares = 0;
+      }
+
+      switch (piece) {
+        case Pieces.rook:
+          fen += isLight ? 'R' : 'r';
+          break;
+        case Pieces.knight:
+          fen += isLight ? 'N' : 'n';
+          break;
+        case Pieces.bishop:
+          fen += isLight ? 'B' : 'b';
+          break;
+        case Pieces.queen:
+          fen += isLight ? 'Q' : 'q';
+          break;
+        case Pieces.king:
+          fen += isLight ? 'K' : 'k';
+          break;
+        case Pieces.pawn:
+          fen += isLight ? 'P' : 'p';
+          break;
+        default:
+          emptySquares++;
+          break;
+      }
+
+      if ([
+        ChessSquare.h1,
+        ChessSquare.h2,
+        ChessSquare.h3,
+        ChessSquare.h4,
+        ChessSquare.h5,
+        ChessSquare.h6,
+        ChessSquare.h7,
+        ChessSquare.h8,
+      ].any((e) => e.index == i)) {
+        if (emptySquares != 0) {
+          fen += emptySquares.toString();
+        }
+        emptySquares = 0;
+        piecesPlacementOnRanks.add(fen);
+        fen = '';
+      }
+    }
+
+    return '${piecesPlacementOnRanks.reversed.join('/')} $activeColor $castlingRights $enPassantTargetSquare $halfMoveClock $fullMoveNumber';
   }
 }

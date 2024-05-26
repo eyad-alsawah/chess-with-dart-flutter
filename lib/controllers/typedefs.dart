@@ -2,7 +2,6 @@ import 'package:chess/controllers/enums.dart';
 
 typedef OnVictory = void Function(VictoryType victoryType);
 typedef OnDraw = void Function(DrawType drawType);
-typedef OnPlayingTurnChanged = void Function(PlayingTurn playingTurn);
 typedef OnPieceSelected = void Function(
     List<int> highlightedLegalMovesIndices, int selectedPieceIndex);
 typedef OnCastling = void Function(int movedRookIndex);

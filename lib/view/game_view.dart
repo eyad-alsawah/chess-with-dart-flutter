@@ -40,7 +40,7 @@ class _HomeViewState extends State<HomeView> {
       drawer: DrawerWidget(
         updateView: () => setState(() {}),
         onResetGame: () async {
-          await SharedState.instance.reset();
+          // await SharedState.instance.reset();
           setState(() {});
           // ignore: use_build_context_synchronously
           Navigator.of(context).pop();
@@ -59,12 +59,6 @@ class _HomeViewState extends State<HomeView> {
             SizedBox(height: AppSizeH.s50),
             ChessBoard(
               size: 0.95.sw,
-              onPlayingTurnChanged: (playingTurn) {
-                SharedState.instance.currentPlayingTurn =
-                    playingTurn == PlayingTurn.light
-                        ? "White's Turn"
-                        : "Black's Turn";
-              },
               onVictory: () => _controllerTopCenter.play(),
               onUpdateView: () {
                 setState(() {});
@@ -72,7 +66,9 @@ class _HomeViewState extends State<HomeView> {
             ),
             Center(
               child: Text(
-                SharedState.instance.currentPlayingTurn,
+                SharedState.instance.playingTurn == PlayingTurn.light
+                    ? 'White to move'
+                    : 'Black To Move',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -81,6 +77,8 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             SizedBox(height: AppSizeH.s30),
+            Text(SharedState.instance.fen,
+                style: const TextStyle(fontSize: 10, color: Colors.white)),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -100,17 +98,20 @@ class _HomeViewState extends State<HomeView> {
                     child: ListView.builder(
                       controller: _previewController,
                       scrollDirection: Axis.horizontal,
-                      itemCount: stateImages.length,
+                      itemCount: SharedState.instance.stateImages.length,
                       itemBuilder: (context, index) => Container(
                         height: AppSizeH.s50,
                         width: AppSizeW.s50,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: index == stateImages.length - 1
+                              color: index ==
+                                      SharedState.instance.stateImages.length -
+                                          1
                                   ? Colors.red
                                   : Colors.black),
                           image: DecorationImage(
-                            image: MemoryImage(stateImages[index]),
+                            image: MemoryImage(
+                                SharedState.instance.stateImages[index]),
                           ),
                         ),
                       ),

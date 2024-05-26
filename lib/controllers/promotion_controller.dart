@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/utils/extensions.dart';
@@ -17,14 +18,15 @@ class PromotionController {
       {required int from, required int to}) async {
     if (_shouldPawnBePromoted(from: from, to: to)) {
       return await callbacks
-          .onSelectPromotionType(sharedState.playingTurn == PlayingTurn.light
-              ? PlayingTurn.dark
-              : PlayingTurn.light)
+          .onSelectPromotionType(
+              SharedState.instance.playingTurn == PlayingTurn.light
+                  ? PlayingTurn.dark
+                  : PlayingTurn.light)
           .then((selectedPromotionType) {
         ChessBoardModel.updateSquareAtIndex(
           to,
           selectedPromotionType,
-          sharedState.playingTurn == PlayingTurn.light
+          SharedState.instance.playingTurn == PlayingTurn.light
               ? PieceType.light
               : PieceType.dark,
         );

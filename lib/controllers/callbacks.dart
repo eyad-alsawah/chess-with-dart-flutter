@@ -11,7 +11,6 @@ class Callbacks {
   static Callbacks get instance => _instance;
   late OnVictory onVictory;
   late OnDraw onDraw;
-  late OnPlayingTurnChanged onPlayingTurnChanged;
   late OnPieceSelected onPieceSelected;
   late OnError onError;
   late OnSelectPromotionType onSelectPromotionType;
