@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:chess/controllers/callbacks.dart';
-import 'package:chess/controllers/castling_controller.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/capture_widget.dart';
@@ -26,22 +25,34 @@ class SharedState {
 
   int? selectedPieceIndex;
 
-  PlayingTurn playingTurn = PlayingTurn.light;
-
   void changePlayingTurn() {
     playingTurn =
         playingTurn == PlayingTurn.light ? PlayingTurn.dark : PlayingTurn.light;
     Callbacks.instance.onPlayingTurnChanged(playingTurn);
   }
 
-  bool inMoveSelectionMode = true;
   bool lockFurtherInteractions = false;
-
   //------------------game_view-----------
   String squareName = "";
   int? selectedIndex;
-
+//------------------------------------
   List<int> debugHighlightIndices = [];
+  List<int> legalMovesIndices = [];
+  //---------------------------------
+  PlayingTurn playingTurn = PlayingTurn.light;
+  //-------------------------------------
+  bool didLightKingSideRookMove = false;
+  bool didLightQueenSideRookMove = false;
+  bool didDarkKingSideRookMove = false;
+  bool didDarkQueenSideRookMove = false;
+  bool didLightKingMove = false;
+  bool didDarkKingMove = false;
+//----------------------------------------------------------------------------
+  int? enPassantCapturableLightPawnIndex;
+  int? enPassantCapturableDarkPawnIndex;
+  //--------------------------------------------
+  int? checkedKingIndex;
+  bool isKingChecked = false;
   //---------------home_view--------------
   String currentPlayingTurn = "White's Turn";
 
@@ -53,7 +64,6 @@ class SharedState {
     stateList.add(GameState(
         currentChessBoard: ChessBoardModel.currentChessBoard(),
         playingTurn: PlayingTurn.light,
-        inMoveSelectionMode: true,
         lockFurtherInteractions: false,
         didLightKingMove: false,
         didDarkKingMove: false,
@@ -67,9 +77,8 @@ class SharedState {
     movesCount = 0;
 
     playingTurn = PlayingTurn.light;
-    inMoveSelectionMode = true;
+
     lockFurtherInteractions = false;
-    CastlingController.resetState();
     //------------------game view--------------
     squareName = "";
 
@@ -99,14 +108,14 @@ class SharedState {
     stateList.add(GameState(
         currentChessBoard: ChessBoardModel.currentChessBoard(),
         playingTurn: playingTurn,
-        inMoveSelectionMode: inMoveSelectionMode,
         lockFurtherInteractions: lockFurtherInteractions,
-        didLightKingMove: CastlingController.didLightKingMove,
-        didDarkKingMove: CastlingController.didDarkKingMove,
-        didLightKingSideRookMove: CastlingController.didLightKingSideRookMove,
-        didLightQueenSideRookMove: CastlingController.didLightQueenSideRookMove,
-        didDarkKingSideRookMove: CastlingController.didDarkKingSideRookMove,
-        didDarkQueenSideRookMove: CastlingController.didDarkQueenSideRookMove,
+        didLightKingMove: SharedState.instance.didLightKingMove,
+        didDarkKingMove: SharedState.instance.didDarkKingMove,
+        didLightKingSideRookMove: SharedState.instance.didLightKingSideRookMove,
+        didLightQueenSideRookMove:
+            SharedState.instance.didLightQueenSideRookMove,
+        didDarkKingSideRookMove: SharedState.instance.didDarkKingSideRookMove,
+        didDarkQueenSideRookMove: SharedState.instance.didDarkQueenSideRookMove,
         squareName: squareName,
         currentPlayingTurn: currentPlayingTurn));
     return completer.future;
@@ -136,16 +145,13 @@ class SharedState {
     selectedPieceIndex = state.selectedPieceIndex;
 
     playingTurn = state.playingTurn;
-    inMoveSelectionMode = state.inMoveSelectionMode;
     lockFurtherInteractions = state.lockFurtherInteractions;
-    CastlingController.didLightKingMove = state.didLightKingMove;
-    CastlingController.didDarkKingMove = state.didDarkKingMove;
-    CastlingController.didLightKingSideRookMove = state.didDarkKingSideRookMove;
-    CastlingController.didLightQueenSideRookMove =
-        state.didLightQueenSideRookMove;
-    CastlingController.didDarkKingSideRookMove = state.didDarkKingSideRookMove;
-    CastlingController.didDarkQueenSideRookMove =
-        state.didDarkQueenSideRookMove;
+    didLightKingMove = state.didLightKingMove;
+    didDarkKingMove = state.didDarkKingMove;
+    didLightKingSideRookMove = state.didDarkKingSideRookMove;
+    didLightQueenSideRookMove = state.didLightQueenSideRookMove;
+    didDarkKingSideRookMove = state.didDarkKingSideRookMove;
+    didDarkQueenSideRookMove = state.didDarkQueenSideRookMove;
     //------------------game_view-----------------------------
     squareName = state.squareName;
     selectedIndex = state.selectedIndex;
@@ -176,7 +182,7 @@ class GameState {
 
   int? enPassantCapturableLightPawnIndex;
   int? enPassantCapturableDarkPawnIndex;
-  bool inMoveSelectionMode;
+
   bool lockFurtherInteractions;
   //-----------Castling----------------
   bool didLightKingMove;
@@ -198,7 +204,6 @@ class GameState {
       required this.playingTurn,
       this.enPassantCapturableLightPawnIndex,
       this.enPassantCapturableDarkPawnIndex,
-      required this.inMoveSelectionMode,
       required this.lockFurtherInteractions,
       required this.didLightKingMove,
       required this.didDarkKingMove,

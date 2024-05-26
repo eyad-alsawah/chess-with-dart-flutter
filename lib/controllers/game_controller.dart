@@ -24,8 +24,9 @@ class ChessController {
   final OnDraw onDraw;
   final String? fenString;
 //-------------------------------------------
-  static List<int> legalMovesIndices = [];
+
   int? from;
+  bool inMoveSelectionMode = true;
   //----------------------------------------------------------------------------
   void registerCallbacksListeners() {
     callbacks.onVictory = onVictory;
@@ -66,27 +67,29 @@ class ChessController {
 
     runZonedGuarded(() async {
       /// this ensures that inMoveSelectionMode is set to true when tapping on another piece of the same type as the current playing turn
-      sharedState.inMoveSelectionMode = helperMethods.isInMoveSelectionMode(
+      inMoveSelectionMode = helperMethods.isInMoveSelectionMode(
           index: index,
           playingTurn: sharedState.playingTurn,
-          legalMovesIndices: legalMovesIndices);
+          legalMovesIndices: sharedState.legalMovesIndices);
 
-      bool tappedOnASquareWeCanMoveTo = legalMovesIndices.contains(index);
+      bool tappedOnASquareWeCanMoveTo =
+          sharedState.legalMovesIndices.contains(index);
 
-      if (sharedState.inMoveSelectionMode) {
+      if (inMoveSelectionMode) {
         from = index;
 
-        legalMovesIndices = await legalMovesController.getLegalMovesIndices(
+        sharedState.legalMovesIndices =
+            await legalMovesController.getLegalMovesIndices(
           from: from!,
           ignorePlayingTurn: false,
-          isKingChecked: GameStatusController.isKingChecked,
+          isKingChecked: sharedState.isKingChecked,
         );
 
         // for the highlight guide
-        callbacks.onPieceSelected(legalMovesIndices, index);
+        callbacks.onPieceSelected(sharedState.legalMovesIndices, index);
 
         // used to clear the highlighted squares when pressing an opponent piece
-        sharedState.inMoveSelectionMode = legalMovesIndices.isEmpty;
+        inMoveSelectionMode = sharedState.legalMovesIndices.isEmpty;
 
         callbacks.updateView();
         return;
@@ -120,18 +123,17 @@ class ChessController {
 
         sharedState.changePlayingTurn();
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
-        SoundType soundToPlay =
-            (index.type() != null || didCaptureEnPassant)
-                ? SoundType.capture
-                : SoundType.pieceMoved;
+        SoundType soundToPlay = (index.type() != null || didCaptureEnPassant)
+            ? SoundType.capture
+            : SoundType.pieceMoved;
 
         callbacks.playSound(soundToPlay);
 
         callbacks.updateView();
       }
       callbacks.onPieceSelected([], index);
-      sharedState.inMoveSelectionMode = true;
-      legalMovesIndices.clear();
+      inMoveSelectionMode = true;
+      sharedState.legalMovesIndices.clear();
       callbacks.updateView();
     }, (error, stack) {
       callbacks.playSound(SoundType.illegal);

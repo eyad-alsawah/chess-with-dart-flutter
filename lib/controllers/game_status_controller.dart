@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
@@ -14,19 +15,18 @@ class GameStatusController {
   // Public static method to access the instance
   static GameStatusController get instance => _instance;
   //----------------------------------------------------------------------------
-  static int? checkedKingIndex;
-  static bool isKingChecked = false;
 
   static Future<GameStatusDTO> checkStatus(int to) async {
     PieceType? opponentKingType = to.type()?.oppositeType();
     // resetting checkedKingIndex on each new move so that the red check square is removed
-    checkedKingIndex = null;
-    isKingChecked = await gameStatusController.isKingSquareAttacked(
-        attackedKingType: opponentKingType);
-    if (isKingChecked) {
-      checkedKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-          Pieces.king, opponentKingType,
-          matchPiece: true, matchType: true);
+    SharedState.instance.checkedKingIndex = null;
+    SharedState.instance.isKingChecked = await gameStatusController
+        .isKingSquareAttacked(attackedKingType: opponentKingType);
+    if (SharedState.instance.isKingChecked) {
+      SharedState.instance.checkedKingIndex =
+          ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+              Pieces.king, opponentKingType,
+              matchPiece: true, matchType: true);
 
       if (await gameStatusController.isCheckmate(
           playingTurn: opponentKingType!.playingTurn())) {
@@ -37,12 +37,14 @@ class GameStatusController {
     }
 
     if (await gameStatusController.checkForStaleMate(
-        opponentPlayerType: opponentKingType!, isKingChecked: isKingChecked)) {
+        opponentPlayerType: opponentKingType!,
+        isKingChecked: SharedState.instance.isKingChecked)) {
       // todo: uncomment this
       // soundToPlay = SoundType.draw;
     }
 
-    return GameStatusDTO(checkedKingIndex: checkedKingIndex);
+    return GameStatusDTO(
+        checkedKingIndex: SharedState.instance.checkedKingIndex);
   }
 
   bool doesOnlyOneKingExists() {
@@ -98,8 +100,8 @@ class GameStatusController {
     surroundingKnights
         .removeWhere((knight) => knight.type() == opponentKingType);
     // empty squares don't count, same for pieces that are not knights
-    surroundingKnights.removeWhere((square) =>
-        square.piece() == null || square.piece() != Pieces.knight);
+    surroundingKnights.removeWhere(
+        (square) => square.piece() == null || square.piece() != Pieces.knight);
 
     /// ------------------------------------getting surrounding opponent rooks and queens  (queens vertical/horizontal to the opponent king)---------
     List<int> surroundingRooksAndQueens = [
@@ -113,8 +115,8 @@ class GameStatusController {
             from: opponentKingIndex);
 
     // rooks or queens of the same type as the king can't check the king
-    surroundingRooksAndQueensInLineOfSight.removeWhere(
-        (rookOrQueen) => rookOrQueen.type() == opponentKingType);
+    surroundingRooksAndQueensInLineOfSight
+        .removeWhere((rookOrQueen) => rookOrQueen.type() == opponentKingType);
 
     // empty squares don't count, same for pieces that are neither rooks nor queens
     surroundingRooksAndQueensInLineOfSight.removeWhere((square) =>
@@ -135,8 +137,7 @@ class GameStatusController {
     // empty squares don't count, same for pieces that are neither bishops nor queens
     surroundingBishopsAndQueensInLineOfSight.removeWhere((square) =>
         square.piece() == null ||
-        (square.piece() != Pieces.bishop &&
-            square.piece() != Pieces.queen));
+        (square.piece() != Pieces.bishop && square.piece() != Pieces.queen));
 
     ///------------------------------------------------------------------------------------
 
@@ -179,8 +180,7 @@ class GameStatusController {
           moveIndex, Pieces.pawn, playingTurn.type());
 
       // checking if check remains
-      if (await isKingSquareAttacked(
-          attackedKingType: playingTurn.type())) {
+      if (await isKingSquareAttacked(attackedKingType: playingTurn.type())) {
         movesThatProtectTheKing.removeWhere((index) => index == moveIndex);
       }
 
@@ -208,8 +208,7 @@ class GameStatusController {
       // await Future.delayed(Duration(seconds: 1));
       // callbacks.updateView();
       //-----------------------
-      if (await isKingSquareAttacked(
-          attackedKingType: playingTurn.type())) {
+      if (await isKingSquareAttacked(attackedKingType: playingTurn.type())) {
         kingMovesThatWouldProtectHim.removeWhere((index) => index == moveIndex);
       }
       // resetting the square to its original state

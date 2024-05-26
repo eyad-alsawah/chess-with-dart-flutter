@@ -89,8 +89,8 @@ class BasicMovesController {
 
     // castling:
     getCastlingPieces
-        ? kingPieces.addAll(castlingController.getCastlingAvailability(
-            pieceType: from.type()!))
+        ? kingPieces.addAll(
+            castlingController.getCastlingAvailability(pieceType: from.type()!))
         : null;
 
     //right

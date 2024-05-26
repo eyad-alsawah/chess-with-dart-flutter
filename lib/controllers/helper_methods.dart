@@ -13,16 +13,13 @@ class HelperMethods {
   // Public static method to access the instance
   static HelperMethods get instance => _instance;
   //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
   bool isInMoveSelectionMode(
       {required int index,
       required PlayingTurn playingTurn,
       required List<int> legalMovesIndices}) {
     PieceType? tappedSquareType = (index).type();
     bool tappedOnAnEmptySquare = tappedSquareType == null;
-    bool tappedOnSquareOfSameType =
-        tappedSquareType == playingTurn.type();
+    bool tappedOnSquareOfSameType = tappedSquareType == playingTurn.type();
     bool tappedOnSquareCanMoveTo = legalMovesIndices.contains(index);
     return ((tappedOnAnEmptySquare || tappedOnSquareOfSameType) &&
         !tappedOnSquareCanMoveTo);

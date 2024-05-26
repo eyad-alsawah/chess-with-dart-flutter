@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/utils/extensions.dart';
@@ -11,9 +12,6 @@ class EnPassantController {
 
 // Public static method to access the instance
   static EnPassantController get instance => _instance;
-  //----------------------------------------------------------------------------
-  static int? enPassantCapturableLightPawnIndex;
-  static int? enPassantCapturableDarkPawnIndex;
   //-------------------------------------------------------------------------
   static bool handleMove({
     required int from,
@@ -42,9 +40,9 @@ class EnPassantController {
     if (from.piece() == Pieces.pawn &&
         ((fromRank == 2 && toRank == 4) || (fromRank == 7 && toRank == 5))) {
       if (from.type() == PieceType.light) {
-        enPassantCapturableLightPawnIndex = to;
+        SharedState.instance.enPassantCapturableLightPawnIndex = to;
       } else {
-        enPassantCapturableDarkPawnIndex = to;
+        SharedState.instance.enPassantCapturableDarkPawnIndex = to;
       }
     }
   }
@@ -53,9 +51,9 @@ class EnPassantController {
     required PieceType? movedPieceType,
   }) {
     if (movedPieceType == PieceType.light) {
-      enPassantCapturableDarkPawnIndex = null;
+      sharedState.enPassantCapturableDarkPawnIndex = null;
     } else if (movedPieceType == PieceType.dark) {
-      enPassantCapturableLightPawnIndex = null;
+      sharedState.enPassantCapturableLightPawnIndex = null;
     } else {
       print(
           "this condition will only be reached if player tapped on empty square in selection mode which shouldn't happen because in handleTap we are checking if we pressed on a highlighted index in selection mode");
@@ -80,20 +78,18 @@ class EnPassantController {
   }) {
     bool canCaptureEnPassant = false;
     int? indexToCheck = from.type() == PieceType.light
-        ? enPassantCapturableDarkPawnIndex
-        : enPassantCapturableLightPawnIndex;
+        ? sharedState.enPassantCapturableDarkPawnIndex
+        : sharedState.enPassantCapturableLightPawnIndex;
 
     if ((from.type() == PieceType.light && from.rank() == 5) ||
         (from.type() == PieceType.dark && from.rank() == 4)) {
       if (relativeDirection == RelativeDirection.diagonalTopLeft ||
           relativeDirection == RelativeDirection.diagonalBottomLeft) {
-        canCaptureEnPassant = indexToCheck != null &&
-            from > indexToCheck &&
-            (to).piece() == null;
+        canCaptureEnPassant =
+            indexToCheck != null && from > indexToCheck && (to).piece() == null;
       } else {
-        canCaptureEnPassant = indexToCheck != null &&
-            from < indexToCheck &&
-            (to).piece() == null;
+        canCaptureEnPassant =
+            indexToCheck != null && from < indexToCheck && (to).piece() == null;
       }
     }
 

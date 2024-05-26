@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/game_controller.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/extensions.dart';
@@ -21,7 +21,7 @@ Color getSquareColor({required int index, required bool ignoreTappedIndices}) {
   int currentRow = (index / 8).ceil();
   Color squareColor;
 
-  if (ChessController.legalMovesIndices.contains(index - 1) &&
+  if (SharedState.instance.legalMovesIndices.contains(index - 1) &&
       !ignoreTappedIndices) {
     squareColor = Colors.red;
   } else if (currentRow % 2 == 0) {
@@ -61,7 +61,7 @@ Widget drawInitialPieces({required double boardSize}) {
               ),
             ),
             Visibility(
-              visible: ChessController.legalMovesIndices.contains(index),
+              visible: SharedState.instance.legalMovesIndices.contains(index),
               child: Container(
                 height: AppSizeH.s10,
                 width: AppSizeW.s10,

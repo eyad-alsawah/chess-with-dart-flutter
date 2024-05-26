@@ -1,6 +1,5 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/game_controller.dart';
-import 'package:chess/controllers/game_status_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/global_keys.dart';
@@ -43,7 +42,7 @@ class _ChessBoardState extends State<ChessBoard> {
       onDraw: (drawType) {},
       fenString: null,
       //fenString:'4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0',
-      //  fenString: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+      //  fenString: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 1',
       playSound: (soundType) async {
         AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {
@@ -136,11 +135,11 @@ class _ChessBoardState extends State<ChessBoard> {
                             decoration: BoxDecoration(
                               color: state.debugHighlightIndices.contains(index)
                                   ? Colors.blue
-                                  : (GameStatusController.checkedKingIndex !=
+                                  : (SharedState.instance.checkedKingIndex !=
                                               null &&
                                           index ==
-                                              GameStatusController
-                                                  .checkedKingIndex)
+                                              SharedState
+                                                  .instance.checkedKingIndex)
                                       ? Colors.red
                                       : (index == state.selectedIndex &&
                                               state.selectedIndex != null)

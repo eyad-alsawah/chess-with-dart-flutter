@@ -221,8 +221,7 @@ class LegalMovesController {
     // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
     for (var index in legalMoves.deepCopy()) {
       Square currentSquareAtIndex = index.square().copy();
-      ChessBoardModel.updateSquareAtIndex(
-          index, to.piece(), to.type());
+      ChessBoardModel.updateSquareAtIndex(index, to.piece(), to.type());
 
       // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
       bool isKingAttacked = await gameStatusController.isKingSquareAttacked(

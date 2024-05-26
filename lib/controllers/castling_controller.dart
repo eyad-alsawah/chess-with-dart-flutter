@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/utils/extensions.dart';
@@ -12,47 +13,30 @@ class CastlingController {
 
   // Public static method to access the instance
   static CastlingController get instance => _instance;
-  //-------------------------State------------------------------------------------
-  static bool didLightKingSideRookMove = false;
-  static bool didLightQueenSideRookMove = false;
-  static bool didDarkKingSideRookMove = false;
-  static bool didDarkQueenSideRookMove = false;
-
-  static bool didLightKingMove = false;
-  static bool didDarkKingMove = false;
-
-  static void resetState() {
-    didLightKingMove = false;
-    didDarkKingMove = false;
-    didLightKingSideRookMove = false;
-    didLightQueenSideRookMove = false;
-    didDarkKingSideRookMove = false;
-    didDarkQueenSideRookMove = false;
-  }
-
   //----------------------------------------------------------------------------
   // todo: handle cases where there aren't rooks on the start of the game
   List<int> getCastlingAvailability({required PieceType pieceType}) {
     List<int> castlingAvailability;
     if (pieceType == PieceType.light) {
-      if (didLightKingMove) {
+      if (SharedState.instance.didLightKingMove) {
         castlingAvailability = [];
-      } else if (didLightKingSideRookMove) {
-        castlingAvailability =
-            didLightQueenSideRookMove ? [] : [ChessSquare.c1.index];
+      } else if (SharedState.instance.didLightKingSideRookMove) {
+        castlingAvailability = SharedState.instance.didLightQueenSideRookMove
+            ? []
+            : [ChessSquare.c1.index];
       } else {
-        castlingAvailability = didLightQueenSideRookMove
+        castlingAvailability = SharedState.instance.didLightQueenSideRookMove
             ? [ChessSquare.g6.index]
             : [ChessSquare.c1.index, ChessSquare.g1.index];
       }
     } else {
-      if (didDarkKingMove) {
+      if (SharedState.instance.didDarkKingMove) {
         castlingAvailability = [];
-      } else if (didDarkKingSideRookMove) {
+      } else if (SharedState.instance.didDarkKingSideRookMove) {
         castlingAvailability =
-            didDarkQueenSideRookMove ? [] : [ChessSquare.c8.index];
+            sharedState.didDarkQueenSideRookMove ? [] : [ChessSquare.c8.index];
       } else {
-        castlingAvailability = didDarkQueenSideRookMove
+        castlingAvailability = SharedState.instance.didDarkQueenSideRookMove
             ? [ChessSquare.g8.index]
             : [ChessSquare.c8.index, ChessSquare.g8.index];
       }
@@ -64,10 +48,12 @@ class CastlingController {
     PieceType fromSquarePieceType = from.type()!;
     Pieces fromSquarePiece = from.piece()!;
     // checking if castling is possible in the first place before checking all the other conditions
-    bool canWhiteKingCastle = !didLightKingMove &&
-        (!didLightKingSideRookMove || !didLightQueenSideRookMove);
-    bool canBlackKingCastle = !didDarkKingMove &&
-        (!didDarkKingSideRookMove || !didDarkQueenSideRookMove);
+    bool canWhiteKingCastle = !SharedState.instance.didLightKingMove &&
+        (!SharedState.instance.didLightKingSideRookMove ||
+            !SharedState.instance.didLightQueenSideRookMove);
+    bool canBlackKingCastle = !SharedState.instance.didDarkKingMove &&
+        (!SharedState.instance.didDarkKingSideRookMove ||
+            !SharedState.instance.didDarkQueenSideRookMove);
 
     if (fromSquarePieceType == PieceType.dark && !canBlackKingCastle) {
       return;
@@ -78,22 +64,22 @@ class CastlingController {
     // todo: check castling availability on the start of the game by checking the existing pieces on the squares like the a1 and h8 for example
     if (fromSquarePiece == Pieces.king) {
       if (fromSquarePieceType == PieceType.light) {
-        didLightKingMove = true;
+        SharedState.instance.didLightKingMove = true;
       } else {
-        didDarkKingMove = true;
+        SharedState.instance.didDarkKingMove = true;
       }
     } else if (fromSquarePiece == Pieces.rook) {
       if (fromSquarePieceType == PieceType.light) {
         if (from == ChessSquare.a1.index) {
-          didLightQueenSideRookMove = true;
+          SharedState.instance.didLightQueenSideRookMove = true;
         } else if (from == ChessSquare.h1.index) {
-          didLightKingSideRookMove = true;
+          SharedState.instance.didLightKingSideRookMove = true;
         }
       } else {
         if (from == ChessSquare.a8.index) {
-          didDarkQueenSideRookMove = true;
+          SharedState.instance.didDarkQueenSideRookMove = true;
         } else if (from == ChessSquare.h8.index) {
-          didDarkKingSideRookMove = true;
+          sharedState.didDarkKingSideRookMove = true;
         }
       }
     }
@@ -143,7 +129,7 @@ class CastlingController {
       {required int from, required List<int> legalAndIllegalMoves}) {
     if (from.piece() == Pieces.king) {
       if (from.type() == PieceType.light) {
-        if (!CastlingController.didLightKingMove) {
+        if (!SharedState.instance.didLightKingMove) {
           if ((ChessSquare.f1.index).piece() != null ||
               (ChessSquare.g1.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
@@ -159,7 +145,7 @@ class CastlingController {
           }
         }
       } else {
-        if (!CastlingController.didDarkKingMove) {
+        if (!SharedState.instance.didDarkKingMove) {
           if ((ChessSquare.f8.index).piece() != null ||
               (ChessSquare.g8.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
