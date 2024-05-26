@@ -44,7 +44,6 @@ class _ChessBoardState extends State<ChessBoard> {
       //fenString:'4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0',
       //  fenString: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 1',
       playSound: (soundType) async {
-        AudioPlayer audioPlayer = AudioPlayer();
         switch (soundType) {
           case SoundType.illegal:
             audioPlayer.setAsset(illegalSound);
