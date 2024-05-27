@@ -8,9 +8,7 @@ import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/controllers/typedefs.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
-import 'package:chess/model/square.dart';
 import 'package:chess/utils/extensions.dart';
-import 'package:chess/utils/fen_parser.dart';
 
 //--------------Main Game Controller-------------------
 class ChessController {
@@ -51,9 +49,13 @@ class ChessController {
     required this.fenString,
   }) {
     if (fenString != null) {
+      SharedState.instance.fen = fenString!;
       ChessBoardModel.clearBoard();
-      List<Square> fromFen = FenParser.generateChessBoard(fenString!);
-      ChessBoardModel.addAll(fromFen);
+      if (fenString != null) {
+        ChessBoardModel.fromFen(fenString!);
+        // todo: find a better way to update the playing turn string and fen strings on the game_view without updating the view
+        Future.delayed(Duration.zero).then((value) => updateView());
+      }
     }
     registerCallbacksListeners();
   }

@@ -101,7 +101,7 @@ class SharedState {
         completer.complete();
       }
     });
-    
+
     return completer.future;
   }
 

@@ -227,4 +227,91 @@ class ChessBoardModel {
 
     return '${piecesPlacementOnRanks.reversed.join('/')} $activeColor $castlingRights $enPassantTargetSquare $halfMoveClock $fullMoveNumber';
   }
+
+  static void fromFen(String fen) {
+    SharedState.instance.activeColor =
+        RegExp(r'\b(w|b)\b').firstMatch(fen)!.group(1)!;
+    SharedState.instance.castlingRights =
+        RegExp(r'^\S+\s\S+\s([KQkq-]+)\s').firstMatch(fen)!.group(1)!;
+    SharedState.instance.enPassantTargetSquare =
+        RegExp(r'^\S+\s\S+\s\S+\s(\S+)\s').firstMatch(fen)!.group(1)!;
+    SharedState.instance.halfMoveClock = int.parse(
+        RegExp(r'^\S+\s\S+\s\S+\s\S+\s(\d+)\s').firstMatch(fen)!.group(1)!);
+    SharedState.instance.fullMoveNumber = int.parse(
+        RegExp(r'^\S+\s\S+\s\S+\s\S+\s\d+\s(\d+)$').firstMatch(fen)!.group(1)!);
+    //---------------------------------------------
+    List<Square> chessBoardList = [];
+    // Corrected regex pattern
+    String? piecesPlacement = RegExp(r'^[^\s]*').stringMatch(fen);
+
+    List<String> piecesPlacementOnRanks = piecesPlacement?.split('/') ?? [];
+
+    for (var rank in piecesPlacementOnRanks.reversed) {
+      for (var char in rank.split('')) {
+        bool isNumber = int.tryParse(char) != null;
+        if (isNumber) {
+          for (int i = 1; i <= int.tryParse(char)!; i++) {
+            chessBoardList.add(Square(piece: null, pieceType: null));
+          }
+        } else if (char != '/') {
+          switch (char) {
+            case 'r':
+              chessBoardList
+                  .add(Square(piece: Pieces.rook, pieceType: PieceType.dark));
+              break;
+            case 'n':
+              chessBoardList
+                  .add(Square(piece: Pieces.knight, pieceType: PieceType.dark));
+              break;
+            case 'b':
+              chessBoardList
+                  .add(Square(piece: Pieces.bishop, pieceType: PieceType.dark));
+              break;
+            case 'q':
+              chessBoardList
+                  .add(Square(piece: Pieces.queen, pieceType: PieceType.dark));
+              break;
+            case 'k':
+              chessBoardList
+                  .add(Square(piece: Pieces.king, pieceType: PieceType.dark));
+              break;
+            case 'p':
+              chessBoardList
+                  .add(Square(piece: Pieces.pawn, pieceType: PieceType.dark));
+              break;
+            case 'R':
+              chessBoardList
+                  .add(Square(piece: Pieces.rook, pieceType: PieceType.light));
+              break;
+            case 'N':
+              chessBoardList.add(
+                  Square(piece: Pieces.knight, pieceType: PieceType.light));
+              break;
+            case 'B':
+              chessBoardList.add(
+                  Square(piece: Pieces.bishop, pieceType: PieceType.light));
+              break;
+            case 'Q':
+              chessBoardList
+                  .add(Square(piece: Pieces.queen, pieceType: PieceType.light));
+              break;
+            case 'K':
+              chessBoardList
+                  .add(Square(piece: Pieces.king, pieceType: PieceType.light));
+              break;
+            case 'P':
+              chessBoardList
+                  .add(Square(piece: Pieces.pawn, pieceType: PieceType.light));
+              break;
+            default:
+              throw 'fromFen: default case reached for $char';
+          }
+        }
+      }
+    }
+
+    for (var i = 0; i <= 63; i++) {
+      chessBoard[ChessSquare.values[i]] = chessBoardList[i];
+    }
+  }
 }
