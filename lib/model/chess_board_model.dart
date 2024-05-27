@@ -1,7 +1,6 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/square.dart';
-import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/extensions.dart';
 
 class ChessBoardModel {
@@ -153,10 +152,8 @@ class ChessBoardModel {
     // increase halfMoveClock if no pawn was moved, or no capture happened
     if (piece == Pieces.pawn || to.type() != null) {
       SharedState.instance.halfMoveClock = 0;
-      ColoredPrinter.printColored("resetting halfmove clock");
     } else {
       SharedState.instance.halfMoveClock++;
-      ColoredPrinter.printColored("increasing halfmove clock");
     }
 
     emptySquareAtIndex(from);

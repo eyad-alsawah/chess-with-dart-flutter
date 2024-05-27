@@ -121,6 +121,7 @@ class ChessController {
         await GameStatusController.checkStatus(index);
 
         SharedState.instance.changeActiveColor();
+        SharedState.instance.storeState().whenComplete(() => updateView());
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
         SoundType soundToPlay = (index.type() != null || didCaptureEnPassant)
             ? SoundType.capture

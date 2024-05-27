@@ -4,7 +4,10 @@ import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeView extends StatefulWidget {
@@ -57,6 +60,30 @@ class _HomeViewState extends State<HomeView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: AppSizeH.s50),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.05.sw),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      child: Text(
+                        SharedState.instance.fen,
+                        style: TextStyle(fontSize: 20.sp, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.copy, color: Colors.white),
+                    tooltip: 'Copy to clipboard',
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: SharedState.instance.fen));
+                    },
+                  ),
+                ],
+              ),
+            ),
             ChessBoard(
               size: 0.95.sw,
               onVictory: () => _controllerTopCenter.play(),
@@ -77,8 +104,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             SizedBox(height: AppSizeH.s30),
-            Text(SharedState.instance.fen,
-                style: const TextStyle(fontSize: 10, color: Colors.white)),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
