@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:chess/controllers/game_status_controller.dart';
 import 'package:chess/model/chess_board_model.dart';
-import 'package:chess/model/square.dart';
+import 'package:chess/model/global_state.dart';
 import 'package:chess/utils/capture_widget.dart';
 import 'package:chess/utils/colored_printer.dart';
-import 'package:chess/utils/extensions.dart';
 import 'package:chess/utils/global_keys.dart';
 import 'package:flutter/material.dart';
 
@@ -49,17 +49,7 @@ class SharedState {
     if (activeColor == 'b') {
       fullMoveNumber++;
     }
-
     activeColor = activeColor == 'w' ? 'b' : 'w';
-
-    fen = ChessBoardModel.toFen(
-        activeColor: playingTurn.activeColor(),
-        enPassantTargetSquare: enPassantTargetSquare,
-        castlingRights: castlingRights,
-        halfMoveClock: halfMoveClock,
-        fullMoveNumber: fullMoveNumber);
-
-    ColoredPrinter.printColored(fen);
   }
 
   void updateCastlingRights(
@@ -90,6 +80,9 @@ class SharedState {
 
   //------------------------------State and restoration-------------------------------------------------
   List<Uint8List> stateImages = [];
+  List<String> fenStrings = [];
+
+  int activeStateIndex = -1;
 
   Future<void> storeState() async {
     // using a complete to only resolve the future once a  PostFrameCallback is received.
@@ -102,52 +95,56 @@ class SharedState {
       }
     });
 
+    fen = ChessBoardModel.toFen(
+        activeColor: activeColor,
+        enPassantTargetSquare: enPassantTargetSquare,
+        castlingRights: castlingRights,
+        halfMoveClock: halfMoveClock,
+        fullMoveNumber: fullMoveNumber);
+
+    fenStrings.add(fen);
+    activeStateIndex++;
+    ColoredPrinter.printColored(fenStrings);
     return completer.future;
   }
 
-  void replay(ReplayType replayType) async {}
+  void replay(ReplayType replayType, [int? index]) async {
+    String stateToReplay = '';
+
+    switch (replayType) {
+      case ReplayType.previous:
+        if (activeStateIndex <= 0) {
+          return;
+        }
+        activeStateIndex--;
+        stateToReplay = fenStrings[activeStateIndex];
+        break;
+      case ReplayType.next:
+        if (activeStateIndex == fenStrings.length - 1) {
+          return;
+        }
+        activeStateIndex++;
+        stateToReplay = fenStrings[activeStateIndex];
+        break;
+      case ReplayType.atIndex:
+        activeStateIndex = index!;
+        stateToReplay = fenStrings[index];
+        break;
+    }
+    fen = stateToReplay;
+    ChessBoardModel.fromFen(stateToReplay);
+    //--------------------------------------------------------
+    // todo: find a cleaner way to handle the sounds, did this because of "PlayerInterruptedException" due to capture/move sounds being playing along with victory sound
+    SoundType? checkOrDrawSound = await GameStatusController.checkStatus(
+        activeColor == 'w' ? PieceType.light : PieceType.dark);
+    if (checkOrDrawSound != null) {
+      callbacks.playSound(checkOrDrawSound);
+    }
+  }
 }
 
 enum ReplayType {
   previous,
+  atIndex,
   next,
-}
-
-class GameState {
-  List<Square> currentChessBoard;
-
-  int? selectedPieceIndex;
-  Square? selectedPiece;
-  PlayingTurn playingTurn;
-
-  bool lockFurtherInteractions;
-  //-----------Castling----------------
-  bool didLightKingMove;
-  bool didDarkKingMove;
-  bool didLightKingSideRookMove;
-  bool didLightQueenSideRookMove;
-  bool didDarkKingSideRookMove;
-  bool didDarkQueenSideRookMove;
-  //-------------------
-  String squareName;
-  int? selectedIndex;
-  int? checkedKingIndex;
-  String currentPlayingTurn;
-
-  GameState(
-      {required this.currentChessBoard,
-      this.selectedPieceIndex,
-      this.selectedPiece,
-      required this.playingTurn,
-      required this.lockFurtherInteractions,
-      required this.didLightKingMove,
-      required this.didDarkKingMove,
-      required this.didLightKingSideRookMove,
-      required this.didLightQueenSideRookMove,
-      required this.didDarkKingSideRookMove,
-      required this.didDarkQueenSideRookMove,
-      required this.squareName,
-      this.selectedIndex,
-      this.checkedKingIndex,
-      required this.currentPlayingTurn});
 }

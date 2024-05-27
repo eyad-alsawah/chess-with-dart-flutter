@@ -313,5 +313,18 @@ class ChessBoardModel {
     for (var i = 0; i <= 63; i++) {
       chessBoard[ChessSquare.values[i]] = chessBoardList[i];
     }
+
+    // Cleanup-------------------------:
+    SharedState.instance.legalMovesIndices.clear();
+    SharedState.instance.debugHighlightIndices.clear();
+    SharedState.instance.selectedPieceIndex = null;
+    SharedState.instance.lockFurtherInteractions = false;
+    //------------------game_view-----------
+    SharedState.instance.squareName = "";
+    SharedState.instance.selectedIndex = null;
+    //------------------------------------
+    SharedState.instance.checkedKingIndex = null;
+    SharedState.instance.isKingChecked = false;
+    //---------------------------------
   }
 }

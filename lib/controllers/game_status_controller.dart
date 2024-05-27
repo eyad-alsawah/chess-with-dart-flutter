@@ -16,8 +16,8 @@ class GameStatusController {
   static GameStatusController get instance => _instance;
   //----------------------------------------------------------------------------
 
-  static Future<GameStatusDTO> checkStatus(int to) async {
-    PieceType? opponentKingType = to.type()?.oppositeType();
+  static Future<SoundType?> checkStatus(PieceType? opponentKingType) async {
+    SoundType? soundToPlay;
     // resetting checkedKingIndex on each new move so that the red check square is removed
     SharedState.instance.checkedKingIndex = null;
     SharedState.instance.isKingChecked = await gameStatusController
@@ -32,19 +32,17 @@ class GameStatusController {
           playingTurn: opponentKingType!.playingTurn())) {
         helperMethods.preventFurtherInteractions(true);
         callbacks.onVictory(VictoryType.checkmate);
-        callbacks.playSound(SoundType.victory);
+        soundToPlay = SoundType.victory;
       }
     }
 
     if (await gameStatusController.checkForStaleMate(
         opponentPlayerType: opponentKingType!,
         isKingChecked: SharedState.instance.isKingChecked)) {
-      // todo: uncomment this
+      // todo: unncomment this once you fix the logic of checkForStaleMate
       // soundToPlay = SoundType.draw;
     }
-
-    return GameStatusDTO(
-        checkedKingIndex: SharedState.instance.checkedKingIndex);
+    return soundToPlay;
   }
 
   bool doesOnlyOneKingExists() {
@@ -245,10 +243,4 @@ class GameStatusController {
     }
     return false;
   }
-}
-
-class GameStatusDTO {
-  final int? checkedKingIndex;
-
-  GameStatusDTO({required this.checkedKingIndex});
 }

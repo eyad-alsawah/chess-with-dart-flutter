@@ -4,10 +4,8 @@ import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
 import 'package:confetti/confetti.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeView extends StatefulWidget {
@@ -124,19 +122,32 @@ class _HomeViewState extends State<HomeView> {
                       controller: _previewController,
                       scrollDirection: Axis.horizontal,
                       itemCount: SharedState.instance.stateImages.length,
-                      itemBuilder: (context, index) => Container(
-                        height: AppSizeH.s50,
-                        width: AppSizeW.s50,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: index ==
-                                      SharedState.instance.stateImages.length -
-                                          1
-                                  ? Colors.red
-                                  : Colors.black),
-                          image: DecorationImage(
-                            image: MemoryImage(
-                                SharedState.instance.stateImages[index]),
+                      itemBuilder: (context, index) => GestureDetector(
+                        onTap: () {
+                          SharedState.instance
+                              .replay(ReplayType.atIndex, index);
+                          setState(() {});
+                        },
+                        child: Container(
+                          height: AppSizeH.s50,
+                          width: AppSizeW.s50,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 2.5.w,
+                              color:
+                                  SharedState.instance.activeStateIndex == index
+                                      ? Colors.green
+                                      : index ==
+                                              SharedState.instance.stateImages
+                                                      .length -
+                                                  1
+                                          ? Colors.red
+                                          : Colors.black,
+                            ),
+                            image: DecorationImage(
+                              image: MemoryImage(
+                                  SharedState.instance.stateImages[index]),
+                            ),
                           ),
                         ),
                       ),

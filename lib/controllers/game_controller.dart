@@ -51,12 +51,13 @@ class ChessController {
     if (fenString != null) {
       SharedState.instance.fen = fenString!;
       ChessBoardModel.clearBoard();
-      if (fenString != null) {
-        ChessBoardModel.fromFen(fenString!);
-        // todo: find a better way to update the playing turn string and fen strings on the game_view without updating the view
-        Future.delayed(Duration.zero).then((value) => updateView());
-      }
+      ChessBoardModel.fromFen(fenString!);
     }
+
+    // todo: find a better way to update the playing turn string and fen strings on the game_view without updating the view
+    Future.delayed(Duration.zero).then((value) async {
+      await SharedState.instance.storeState().then((value) => updateView());
+    });
     registerCallbacksListeners();
   }
 
@@ -120,16 +121,18 @@ class ChessController {
           pawnPromotedTo: pawnPromotedTo,
         );
         // -------------------------------------------------
-        await GameStatusController.checkStatus(index);
+        SoundType? checkOrDrawSound = await GameStatusController.checkStatus(
+            index.type()?.oppositeType());
 
         SharedState.instance.changeActiveColor();
         SharedState.instance.storeState().whenComplete(() => updateView());
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
-        SoundType soundToPlay = (index.type() != null || didCaptureEnPassant)
-            ? SoundType.capture
-            : SoundType.pieceMoved;
+        SoundType soundToPlay = checkOrDrawSound ??
+            ((from?.type() != null || didCaptureEnPassant)
+                ? SoundType.capture
+                : SoundType.pieceMoved);
 
-        callbacks.playSound(soundToPlay);
+        playSound(soundToPlay);
 
         callbacks.updateView();
       }

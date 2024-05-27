@@ -38,32 +38,33 @@ class _ChessBoardState extends State<ChessBoard> {
     super.initState();
     chess = ChessController(
       onDraw: (drawType) {},
-      fenString:
-          'rn2k2r/pppqppbp/5n2/3pPbp1/2B3Q1/2NP1N2/PPP2PPP/R1BK3R b kq - 0 7',
+      fenString: null,
+      // fenString:'rn2k2r/ppp1ppbp/B4n2/3pP1N1/1q1Pb1Q1/8/PPP2PPP/R1BK3R b kq - 0 11',
+      // 'rn2k2r/pppqppbp/5n2/3pPbp1/2B3Q1/2NP1N2/PPP2PPP/R1BK3R b kq - 0 7',
       playSound: (soundType) async {
         switch (soundType) {
           case SoundType.illegal:
-            audioPlayer.setAsset(illegalSound);
+            await audioPlayer.setAsset(illegalSound);
 
             break;
           case SoundType.pieceMoved:
-            audioPlayer.setAsset(pieceMovedSound);
+            await audioPlayer.setAsset(pieceMovedSound);
 
             break;
           case SoundType.capture:
-            audioPlayer.setAsset(captureSound);
+            // await audioPlayer.setAsset(captureSound);
 
             break;
           case SoundType.kingChecked:
-            audioPlayer.setAsset(kingCheckedSound);
+            await audioPlayer.setAsset(kingCheckedSound);
 
             break;
           case SoundType.victory:
-            audioPlayer.setAsset(victorySound);
+            await audioPlayer.setAsset(victorySound);
 
             break;
           case SoundType.draw:
-            audioPlayer.setAsset(drawSound);
+            await audioPlayer.setAsset(drawSound);
 
             break;
           default:
