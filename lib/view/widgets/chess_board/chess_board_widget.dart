@@ -28,44 +28,37 @@ class ChessBoard extends StatefulWidget {
 }
 
 class _ChessBoardState extends State<ChessBoard> {
-  late SharedState state;
   late ChessController chess;
   AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   void initState() {
-    state = SharedState.instance;
     super.initState();
     chess = ChessController(
       onDraw: (drawType) {},
       fenString: null,
+      //fenString: '4K3/pp6/3k4/3Q3n/P7/8/7P/7R b - - 2 48',
       // fenString:'rn2k2r/ppp1ppbp/B4n2/3pP1N1/1q1Pb1Q1/8/PPP2PPP/R1BK3R b kq - 0 11',
       // 'rn2k2r/pppqppbp/5n2/3pPbp1/2B3Q1/2NP1N2/PPP2PPP/R1BK3R b kq - 0 7',
       playSound: (soundType) async {
         switch (soundType) {
           case SoundType.illegal:
             await audioPlayer.setAsset(illegalSound);
-
             break;
           case SoundType.pieceMoved:
             await audioPlayer.setAsset(pieceMovedSound);
-
             break;
           case SoundType.capture:
-            // await audioPlayer.setAsset(captureSound);
-
+            await audioPlayer.setAsset(captureSound);
             break;
           case SoundType.kingChecked:
             await audioPlayer.setAsset(kingCheckedSound);
-
             break;
           case SoundType.victory:
             await audioPlayer.setAsset(victorySound);
-
             break;
           case SoundType.draw:
             await audioPlayer.setAsset(drawSound);
-
             break;
           default:
         }
@@ -79,7 +72,7 @@ class _ChessBoardState extends State<ChessBoard> {
           showPromotionTypeSelectionDialog(playingTurn, context),
       onPieceSelected:
           (highlightedLegalMovesIndices, selectedPieceIndex) async {
-        state.selectedIndex =
+        SharedState.instance.selectedIndex =
             highlightedLegalMovesIndices.isEmpty ? null : selectedPieceIndex;
       },
       onError: (error, errorString) {
@@ -118,17 +111,11 @@ class _ChessBoardState extends State<ChessBoard> {
                           crossAxisCount: 8,
                         ),
                         itemBuilder: (context, index) => GestureDetector(
-                          // onTap: () async {
-                          //   for (int i = 0; i <= 63; i++) {
-                          //     chess.handleSquareTapped(i);
-                          //     await Future.delayed(
-                          //         const Duration(milliseconds: 10));
-                          //   }
-                          // },
                           onTap: () => chess.handleSquareTapped(index),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: state.debugHighlightIndices.contains(index)
+                              color: SharedState.instance.debugHighlightIndices
+                                      .contains(index)
                                   ? Colors.blue
                                   : (SharedState.instance.checkedKingIndex !=
                                               null &&
@@ -136,8 +123,12 @@ class _ChessBoardState extends State<ChessBoard> {
                                               SharedState
                                                   .instance.checkedKingIndex)
                                       ? Colors.red
-                                      : (index == state.selectedIndex &&
-                                              state.selectedIndex != null)
+                                      : (index ==
+                                                  SharedState
+                                                      .instance.selectedIndex &&
+                                              SharedState
+                                                      .instance.selectedIndex !=
+                                                  null)
                                           ? Colors.lightGreen
                                           : getSquareColor(
                                               ignoreTappedIndices: true,

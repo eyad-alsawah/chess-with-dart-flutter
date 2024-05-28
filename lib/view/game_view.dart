@@ -93,7 +93,7 @@ class _HomeViewState extends State<HomeView> {
               child: Text(
                 SharedState.instance.playingTurn == PlayingTurn.light
                     ? 'White to move'
-                    : 'Black To Move',
+                    : 'Black to move',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,

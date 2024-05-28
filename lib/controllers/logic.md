@@ -28,3 +28,5 @@ Two Devices:
         - The input of a user is processed on the server and the game state is sent to both users.
 ----------------------
 Before making a decision on the game state, I need to see how it can be parsed into an official standard way like FEN, PNG, and Extended Position Description (EPD), so that it can later be handled by multiple Chess Engines like stockfish, even if I had to introduce an adapter in between.
+//----------------------------
+https://chess.stackexchange.com/questions/16601/connecting-chess-engine-with-a-java-program

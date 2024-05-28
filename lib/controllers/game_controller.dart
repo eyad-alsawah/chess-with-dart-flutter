@@ -101,6 +101,8 @@ class ChessController {
         if (from == null) {
           return;
         }
+        // this is used to determine wether to play a moving sound or a capture sound, because we can't determine the piece of the square we moved to at index after performing the move
+        PieceType? toPieceType = index.type();
 
         // -------------------EnPassant-------------------
         bool didCaptureEnPassant = EnPassantController.handleMove(
@@ -128,7 +130,7 @@ class ChessController {
         SharedState.instance.storeState().whenComplete(() => updateView());
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
         SoundType soundToPlay = checkOrDrawSound ??
-            ((from?.type() != null || didCaptureEnPassant)
+            ((toPieceType != null || didCaptureEnPassant)
                 ? SoundType.capture
                 : SoundType.pieceMoved);
 
