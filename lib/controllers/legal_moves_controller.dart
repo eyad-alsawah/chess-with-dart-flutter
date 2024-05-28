@@ -1,3 +1,4 @@
+import 'package:chess/controllers/basic_moves_controller.dart';
 import 'package:chess/controllers/castling_controller.dart';
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
@@ -165,10 +166,12 @@ class LegalMovesController {
       legalMoves = await preventMovingIfCheckRemains(
           legalMoves: legalMoves.deepCopy(), to: from);
     }
+
     // todo: causing problems needs fixing
     legalMoves = await filterMoveThatExposeKingToCheck(
         legalMoves.deepCopy(), from, fromHandleSquareTapped);
-
+    legalMoves =
+        await filterMovesThatCauseTwoAdjacentKings(legalMoves.deepCopy(), from);
     return legalMoves.deepCopy();
   }
 
@@ -210,10 +213,16 @@ class LegalMovesController {
     return legalMoves;
   }
 
-  Future<void> updateViewAndWait() async {
-    callbacks.updateView();
-    await Future.delayed(const Duration(milliseconds: 2000));
-    callbacks.updateView();
+  Future<List<int>> filterMovesThatCauseTwoAdjacentKings(
+      List<int> legalMoves, int from) async {
+    List<int> movesSurrondingTargetSquare = [];
+    for (var move in legalMoves.deepCopy()) {
+      movesSurrondingTargetSquare = BasicMovesController.instance
+          .getKingPieces(move, getCastlingPieces: false);
+    }
+    legalMoves.removeWhere((e) =>
+        movesSurrondingTargetSquare.contains(e) && e.piece() == Pieces.king);
+    return legalMoves;
   }
 
   Future<List<int>> preventMovingIfCheckRemains(
