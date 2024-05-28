@@ -18,10 +18,7 @@ class PromotionController {
       {required int from, required int to}) async {
     if (_shouldPawnBePromoted(from: from, to: to)) {
       return await callbacks
-          .onSelectPromotionType(
-              SharedState.instance.playingTurn == PlayingTurn.light
-                  ? PlayingTurn.dark
-                  : PlayingTurn.light)
+          .onSelectPromotionType(SharedState.instance.playingTurn)
           .then((selectedPromotionType) {
         ChessBoardModel.updateSquareAtIndex(
           to,

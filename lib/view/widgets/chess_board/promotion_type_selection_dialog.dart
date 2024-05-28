@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/core/theme/color_manager.dart';
 import 'package:chess/utils/image_assets.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ Future<Pieces> showPromotionTypeSelectionDialog(
             child: Container(
               padding: EdgeInsets.all(AppSizeW.s10),
               decoration: BoxDecoration(
-                color: const Color(0xFFB58863),
+                color: ColorManager.darkSquare,
                 borderRadius: BorderRadius.all(Radius.circular(AppSizeR.s12)),
               ),
               height: AppSizeH.s100,
