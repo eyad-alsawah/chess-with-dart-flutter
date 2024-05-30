@@ -115,16 +115,13 @@ class ChessBoardModel {
         .index;
   }
 
-  static int getIndexWherePieceAndPieceTypeMatch(Pieces? piece, PieceType? type,
-      {required bool matchPiece, required bool matchType}) {
+  static int getIndexWherePieceAndPieceTypeMatch(
+    Pieces? piece,
+    PieceType? type,
+  ) {
     return chessBoard.entries
         .firstWhere((entry) =>
-            (matchPiece
-                ? entry.value.piece == piece
-                : entry.value.piece != piece) &&
-            (matchType
-                ? entry.value.pieceType == type
-                : entry.value.pieceType != type))
+            entry.value.piece == piece && entry.value.pieceType == type)
         .key
         .index;
   }

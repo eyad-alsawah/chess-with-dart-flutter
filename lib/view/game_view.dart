@@ -1,5 +1,6 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/view/utils/sizes_manager.dart';
 import 'package:chess/view/widgets/chess_board/chess_board_widget.dart';
 import 'package:chess/view/widgets/drawer_widget.dart';
@@ -77,6 +78,8 @@ class _HomeViewState extends State<HomeView> {
                     onPressed: () {
                       Clipboard.setData(
                           ClipboardData(text: SharedState.instance.fen));
+                      ColoredPrinter.printColored(
+                          SharedState.instance.fen, AnsiColor.magenta);
                     },
                   ),
                 ],

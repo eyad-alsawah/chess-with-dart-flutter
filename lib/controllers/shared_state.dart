@@ -104,7 +104,7 @@ class SharedState {
 
     fenStrings.add(fen);
     activeStateIndex++;
-    ColoredPrinter.printColored(fenStrings);
+    ColoredPrinter.printColored(fen);
     return completer.future;
   }
 

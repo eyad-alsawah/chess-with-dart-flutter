@@ -170,8 +170,8 @@ class LegalMovesController {
     // todo: causing problems needs fixing
     legalMoves = await filterMoveThatExposeKingToCheck(
         legalMoves.deepCopy(), from, fromHandleSquareTapped);
-    legalMoves =
-        await filterMovesThatCauseTwoAdjacentKings(legalMoves.deepCopy(), from);
+    legalMoves = await filterMovesThatCauseTwoAdjacentKings(
+        legalMoves.deepCopy(), from, fromHandleSquareTapped);
     return legalMoves.deepCopy();
   }
 
@@ -214,14 +214,17 @@ class LegalMovesController {
   }
 
   Future<List<int>> filterMovesThatCauseTwoAdjacentKings(
-      List<int> legalMoves, int from) async {
-    List<int> movesSurrondingTargetSquare = [];
-    for (var move in legalMoves.deepCopy()) {
-      movesSurrondingTargetSquare = BasicMovesController.instance
-          .getKingPieces(move, getCastlingPieces: false);
+      List<int> legalMoves, int from, bool fromHandleSquareTapped) async {
+    if (from.piece() != Pieces.king) {
+      // return the list unmodified in case we are not trying to move a king.
+      return legalMoves;
     }
-    legalMoves.removeWhere((e) =>
-        movesSurrondingTargetSquare.contains(e) && e.piece() == Pieces.king);
+    int opponentKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+        Pieces.king, from.type()?.oppositeType());
+    List<int> opponentKingMoves =
+        BasicMovesController.instance.getKingPieces(opponentKingIndex);
+
+    legalMoves.removeWhere((e) => opponentKingMoves.contains(e));
     return legalMoves;
   }
 

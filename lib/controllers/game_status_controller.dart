@@ -25,8 +25,7 @@ class GameStatusController {
     if (SharedState.instance.isKingChecked) {
       SharedState.instance.checkedKingIndex =
           ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-              Pieces.king, opponentKingType,
-              matchPiece: true, matchType: true);
+              Pieces.king, opponentKingType);
 
       if (await gameStatusController.isCheckmate(
           playingTurn: opponentKingType!.playingTurn())) {
@@ -61,8 +60,7 @@ class GameStatusController {
   }) async {
     int opponentKingIndex = escapeTo ??
         ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-            Pieces.king, attackedKingType,
-            matchPiece: true, matchType: true);
+            Pieces.king, attackedKingType);
 
     PieceType? opponentKingType = attackedKingType;
     Files opponentKingFile = opponentKingIndex.file();
