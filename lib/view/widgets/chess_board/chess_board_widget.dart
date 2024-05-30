@@ -35,7 +35,7 @@ class _ChessBoardState extends State<ChessBoard> {
   void initState() {
     super.initState();
     chess = ChessController(
-      fenString: 'rnb1qbnr/ppp1pppp/5k2/8/5K2/8/PPPP2PP/RNBQ1BNR b - - 5 9',
+      fenString: null,
       onDraw: (drawType) {},
       playSound: (soundType) async {
         switch (soundType) {

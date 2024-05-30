@@ -42,7 +42,7 @@ class _HomeViewState extends State<HomeView> {
       drawer: DrawerWidget(
         updateView: () => setState(() {}),
         onResetGame: () async {
-          // await SharedState.instance.reset();
+          SharedState.instance.reset();
           setState(() {});
           // ignore: use_build_context_synchronously
           Navigator.of(context).pop();
