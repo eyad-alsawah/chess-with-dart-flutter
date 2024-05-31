@@ -21,7 +21,7 @@ class GameStatusController {
     // resetting checkedKingIndex on each new move so that the red check square is removed
     SharedState.instance.checkedKingIndex = null;
     SharedState.instance.isKingChecked = await gameStatusController
-        .isKingSquareAttacked(attackedKingType: opponentKingType);
+        .isKingSquareAttacked(kingTypeToCheck: opponentKingType);
     if (SharedState.instance.isKingChecked) {
       SharedState.instance.checkedKingIndex =
           ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
@@ -55,14 +55,12 @@ class GameStatusController {
   }
 
   Future<bool> isKingSquareAttacked({
-    required PieceType? attackedKingType,
-    int? escapeTo,
+    required PieceType? kingTypeToCheck,
   }) async {
-    int opponentKingIndex = escapeTo ??
-        ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-            Pieces.king, attackedKingType);
+    int opponentKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+        Pieces.king, kingTypeToCheck);
 
-    PieceType? opponentKingType = attackedKingType;
+    PieceType? opponentKingType = kingTypeToCheck;
     Files opponentKingFile = opponentKingIndex.file();
     int opponentKingRank = opponentKingIndex.rank();
 
@@ -176,7 +174,7 @@ class GameStatusController {
           moveIndex, Pieces.pawn, playingTurn.type());
 
       // checking if check remains
-      if (await isKingSquareAttacked(attackedKingType: playingTurn.type())) {
+      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type())) {
         movesThatProtectTheKing.removeWhere((index) => index == moveIndex);
       }
 
@@ -201,10 +199,8 @@ class GameStatusController {
       ChessBoardModel.updateSquareAtIndex(
           moveIndex, Pieces.king, playingTurn.type());
 
-      // await Future.delayed(Duration(seconds: 1));
-      // callbacks.updateView();
       //-----------------------
-      if (await isKingSquareAttacked(attackedKingType: playingTurn.type())) {
+      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type())) {
         kingMovesThatWouldProtectHim.removeWhere((index) => index == moveIndex);
       }
       // resetting the square to its original state

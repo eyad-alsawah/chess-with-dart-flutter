@@ -5,7 +5,6 @@ import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 
-import 'package:chess/model/square.dart';
 import 'package:chess/utils/debug_config.dart';
 import 'package:chess/utils/extensions.dart';
 
@@ -162,61 +161,50 @@ class LegalMovesController {
       }
     }
 
-    // filtering legal moves to prevent moving to a place that would not remove the check
-    if (kingChecked) {
-      // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
-      legalMoves = await preventMovingIfCheckRemains(
-          legalMoves: legalMoves.deepCopy(), to: from);
+    if (fromHandleSquareTapped) {
+      // condition to prevent entering a loop filterMoveThatExposeKingToCheck --> isKingSquareAttacked --> getLegalMovesOnly ---> filterMoveThatExposeKingToCheck ...
+      legalMoves =
+          await filterMovesThatExposeKingToCheck(legalMoves.deepCopy(), from);
+      // todo: explain why this is in the condition, (we don't intersect non king moves with opponent king when called from isKingSquareAttacked)
+      legalMoves = await filterMovesThatCauseTwoAdjacentKings(
+          legalMoves.deepCopy(), from);
     }
-
-    // todo: causing problems needs fixing
-    legalMoves = await filterMoveThatExposeKingToCheck(
-        legalMoves.deepCopy(), from, fromHandleSquareTapped);
-    legalMoves = await filterMovesThatCauseTwoAdjacentKings(
-        legalMoves.deepCopy(), from, fromHandleSquareTapped);
 
     return legalMoves.deepCopy();
   }
 
-  Future<List<int>> filterMoveThatExposeKingToCheck(
-      List<int> legalMoves, int from, bool fromHandleSquareTapped) async {
-    if (fromHandleSquareTapped) {
-      PieceType? fromType = from.type();
-      Pieces? fromPiece = from.piece();
+  Future<List<int>> filterMovesThatExposeKingToCheck(
+      List<int> legalMoves, int from) async {
+    PieceType? fromType = from.type();
+    Pieces? fromPiece = from.piece();
 
-      // deep copying the list to prevent Concurrent modification of legalMoves
-      for (var move in legalMoves.deepCopy()) {
-        PieceType? moveType = move.type();
-        Pieces? movePiece = move.piece();
+    // emptying the square we are at currently
+    await ChessBoardModel.emptySquareAtIndex(from);
+    for (var move in legalMoves.deepCopy()) {
+      PieceType? moveType = move.type();
+      Pieces? movePiece = move.piece();
+      // updating the square at move
+      await ChessBoardModel.updateSquareAtIndex(
+        move,
+        fromPiece,
+        fromType,
+      );
 
-        //--------------------
+      // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
+      bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
+          kingTypeToCheck: fromType);
 
-        // emptying the square we are at currently
-        await ChessBoardModel.emptySquareAtIndex(from);
+      await ChessBoardModel.updateSquareAtIndex(move, movePiece, moveType);
 
-        // updating the square at move
-        await ChessBoardModel.updateSquareAtIndex(
-          move,
-          fromPiece,
-          fromType,
-        );
-        // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-        bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
-            attackedKingType: fromType,
-            escapeTo: fromPiece == Pieces.king ? move : null);
-
-        // resetting the hypothetically moved pieces
-        await ChessBoardModel.updateSquareAtIndex(from, fromPiece, fromType);
-        await ChessBoardModel.updateSquareAtIndex(move, movePiece, moveType);
-
-        isKingAttacked ? legalMoves.remove(move) : null;
-      }
+      isKingAttacked ? legalMoves.remove(move) : null;
     }
+    // resetting the hypothetically moved pieces
+    await ChessBoardModel.updateSquareAtIndex(from, fromPiece, fromType);
     return legalMoves;
   }
 
   Future<List<int>> filterMovesThatCauseTwoAdjacentKings(
-      List<int> legalMoves, int from, bool fromHandleSquareTapped) async {
+      List<int> legalMoves, int from) async {
     if (from.piece() != Pieces.king) {
       // return the list unmodified in case we are not trying to move a king.
       return legalMoves;
@@ -227,30 +215,6 @@ class LegalMovesController {
         BasicMovesController.instance.getKingPieces(opponentKingIndex);
 
     legalMoves.removeWhere((e) => opponentKingMoves.contains(e));
-    return legalMoves;
-  }
-
-  Future<List<int>> preventMovingIfCheckRemains(
-      {required List<int> legalMoves, required int to}) async {
-    // in this step we place a piece on the legal moves square of the tapped piece and see if the king would still be checked or not.
-    for (var index in legalMoves.deepCopy()) {
-      Square currentSquareAtIndex = index.square().copy();
-      ChessBoardModel.updateSquareAtIndex(index, to.piece(), to.type());
-
-      // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
-      bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
-          escapeTo: to.piece() == Pieces.king ? index : null,
-          attackedKingType: to.type());
-
-      if (isKingAttacked) {
-        legalMoves.removeWhere((move) =>
-            move.file() == index.file() && move.rank() == index.rank());
-      }
-      // resetting the hypothetically moved piece
-      ChessBoardModel.updateSquareAtIndex(
-          index, currentSquareAtIndex.piece, currentSquareAtIndex.pieceType);
-    }
-
     return legalMoves;
   }
   //----------------------------------------------------------------------------
