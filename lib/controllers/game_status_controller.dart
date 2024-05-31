@@ -16,19 +16,19 @@ class GameStatusController {
   static GameStatusController get instance => _instance;
   //----------------------------------------------------------------------------
 
-  static Future<SoundType?> checkStatus(PieceType? opponentKingType) async {
+  static Future<SoundType?> checkStatus(PieceType? kingTypeToCheck) async {
     SoundType? soundToPlay;
     // resetting checkedKingIndex on each new move so that the red check square is removed
     SharedState.instance.checkedKingIndex = null;
     SharedState.instance.isKingChecked = await gameStatusController
-        .isKingSquareAttacked(kingTypeToCheck: opponentKingType);
+        .isKingSquareAttacked(kingTypeToCheck: kingTypeToCheck);
     if (SharedState.instance.isKingChecked) {
       SharedState.instance.checkedKingIndex =
           ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
-              Pieces.king, opponentKingType);
+              Pieces.king, kingTypeToCheck);
 
       if (await gameStatusController.isCheckmate(
-          playingTurn: opponentKingType!.playingTurn())) {
+          playingTurn: kingTypeToCheck!.playingTurn())) {
         helperMethods.preventFurtherInteractions(true);
         callbacks.onVictory(VictoryType.checkmate);
         soundToPlay = SoundType.victory;
@@ -36,7 +36,7 @@ class GameStatusController {
     }
 
     if (await gameStatusController.checkForStaleMate(
-        opponentPlayerType: opponentKingType!,
+        opponentPlayerType: kingTypeToCheck!,
         isKingChecked: SharedState.instance.isKingChecked)) {
       // todo: unncomment this once you fix the logic of checkForStaleMate
       // soundToPlay = SoundType.draw;
