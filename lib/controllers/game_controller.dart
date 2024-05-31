@@ -56,6 +56,7 @@ class ChessController {
 
     // todo: find a better way to update the playing turn string and fen strings on the game_view without updating the view
     Future.delayed(Duration.zero).then((value) async {
+      await GameStatusController.checkStatus(SharedState.instance.playingTurn.type());
       await SharedState.instance.storeState().then((value) => updateView());
     });
     registerCallbacksListeners();

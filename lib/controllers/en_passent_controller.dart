@@ -59,6 +59,9 @@ class EnPassantController {
     required int to,
     required RelativeDirection relativeDirection,
   }) {
+    if(from.piece() !=Pieces.pawn) {
+      return false;
+    }
     bool canCaptureEnPassant = false;
     int? indexToCheck = SharedState.instance.enPassantTargetSquare != '-'
         ? SharedState.instance.enPassantTargetSquare.fromCoordinates()
