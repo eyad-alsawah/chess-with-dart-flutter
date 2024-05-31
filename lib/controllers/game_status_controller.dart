@@ -41,6 +41,12 @@ class GameStatusController {
       callbacks.onDraw(DrawType.stalemate);
       soundToPlay = SoundType.draw;
     }
+
+    if (SharedState.instance.fullMoveNumber == 50) {
+      helperMethods.preventFurtherInteractions(true);
+      callbacks.onDraw(DrawType.stalemate);
+      soundToPlay = SoundType.draw;
+    }
     return soundToPlay;
   }
 

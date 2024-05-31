@@ -46,9 +46,6 @@ class SharedState {
   int fullMoveNumber = 0;
 
   void changeActiveColor() {
-    if (activeColor == 'b') {
-      fullMoveNumber++;
-    }
     activeColor = activeColor == 'w' ? 'b' : 'w';
   }
 

@@ -128,6 +128,10 @@ class ChessController {
           pawnPromotedTo: pawnPromotedTo,
         );
         // -------------------------------------------------
+        if (SharedState.instance.activeColor == 'b') {
+          SharedState.instance.fullMoveNumber++;
+        }
+
         SoundType? checkOrDrawSound = await GameStatusController.checkStatus(
             index.type()?.oppositeType());
 
