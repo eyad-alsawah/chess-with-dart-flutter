@@ -10,3 +10,10 @@ from:  8/3K4/8/3k4/8/8/8/8 b - - 22 76
 -----------------------------
 4. Moving the pawn from d6c7 does not expose the black king to a check from the queen at d1: ❌
 rnbq1bnr/pppk1ppp/3P4/8/8/8/PPP1PPPP/RNBQKBNR w KQ - 1 3
+------------------------
+5. The black king is checked by the queen on d8 even tho there is a bishop in between at c8: ✔️
+rQb1kbnr/pp3ppp/3q4/8/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 4 
+------------------------
+6. Back king on e4 is checked by enPassantTargetSquare at f4: ❌
+rn1B2nr/p4ppp/3b4/1p6/4k3/8/PPP1PPPP/RN2KBNR w KQ - 0 13
+----------------

@@ -110,6 +110,7 @@ class _ChessBoardState extends State<ChessBoard> {
                         itemBuilder: (context, index) => GestureDetector(
                           onTap: () => chess.handleSquareTapped(index),
                           child: Container(
+                            child: Text('$index'),
                             decoration: BoxDecoration(
                               color: SharedState.instance.debugHighlightIndices
                                       .contains(index)

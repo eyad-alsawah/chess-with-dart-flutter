@@ -87,12 +87,6 @@ class BasicMovesController {
 
     List<int> kingPieces = [];
 
-    // castling:
-    getCastlingPieces
-        ? kingPieces.addAll(
-            castlingController.getCastlingAvailability(pieceType: from.type()!))
-        : null;
-
     //right
     (file != Files.h) ? kingPieces.add(from + 1) : null;
     //left
@@ -110,6 +104,13 @@ class BasicMovesController {
     (file != Files.a && rank != 1) ? kingPieces.add(from - 9) : null;
     //bottom
     rank != 1 ? kingPieces.add(from - 8) : null;
+
+    // todo: this previously caused problems when adding the castling pieces before any other piece, because when getting the legal moves it caused for example to check if a capture happended on rankLeft at c8 before d8, this why I moved it to the end of the method
+    // castling:
+    getCastlingPieces
+        ? kingPieces.addAll(
+            castlingController.getCastlingAvailability(pieceType: from.type()!))
+        : null;
 
     return kingPieces;
   }

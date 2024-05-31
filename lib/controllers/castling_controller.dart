@@ -135,7 +135,13 @@ class CastlingController {
   }
 
   static List<int> preventCastlingIfPieceStandsBetweenRookAndKing(
-      {required int from, required List<int> legalAndIllegalMoves}) {
+      {required int from,
+      required List<int> legalAndIllegalMoves,
+      bool fromHandleSquareTapped = false}) {
+    if (!fromHandleSquareTapped) {
+      // todo: find a better fix than this for bug #5
+      return legalAndIllegalMoves;
+    }
     bool didLightKingMove =
         !SharedState.instance.castlingRights.contains(RegExp('[A-Z]'));
     bool didDarkKingMove =
@@ -146,14 +152,14 @@ class CastlingController {
           if ((ChessSquare.f1.index).piece() != null ||
               (ChessSquare.g1.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file() == Files.g && square.rank() == 1),
+              (move) => (move == ChessSquare.g1.index),
             );
           }
           if ((ChessSquare.b1.index).piece() != null ||
               (ChessSquare.c1.index).piece() != null ||
               (ChessSquare.d1.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file() == Files.c && square.rank() == 1),
+              (move) => (move == ChessSquare.c1.index),
             );
           }
         }
@@ -162,14 +168,14 @@ class CastlingController {
           if ((ChessSquare.f8.index).piece() != null ||
               (ChessSquare.g8.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file() == Files.g && square.rank() == 8),
+              (move) => (move == ChessSquare.g8.index),
             );
           }
           if ((ChessSquare.b8.index).piece() != null ||
               (ChessSquare.c8.index).piece() != null ||
               (ChessSquare.d8.index).piece() != null) {
             legalAndIllegalMoves.removeWhere(
-              (square) => (square.file() == Files.c && square.rank() == 8),
+              (move) => (move == ChessSquare.c8.index),
             );
           }
         }

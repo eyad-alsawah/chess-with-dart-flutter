@@ -34,9 +34,7 @@ class ColoredPrinter {
       [AnsiColor color = AnsiColor.green]) {
     final ansiCode = _colorCodes[color];
     if (ansiCode != null) {
-      if (kDebugMode) {
-        print('$ansiCode$object${_colorCodes[AnsiColor.reset]}');
-      }
+      print('$ansiCode$object${_colorCodes[AnsiColor.reset]}');
     } else {
       if (kDebugMode) {
         print('Unknown color: $color');

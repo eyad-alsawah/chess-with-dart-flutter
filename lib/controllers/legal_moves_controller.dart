@@ -71,7 +71,9 @@ class LegalMovesController {
     // for castling: to prevent the king from castling if any piece stands between the king and the rook
     legalAndIllegalMoves =
         CastlingController.preventCastlingIfPieceStandsBetweenRookAndKing(
-            from: from, legalAndIllegalMoves: legalAndIllegalMoves.deepCopy());
+            from: from,
+            legalAndIllegalMoves: legalAndIllegalMoves.deepCopy(),
+            fromHandleSquareTapped: fromHandleSquareTapped);
 
     for (var move in legalAndIllegalMoves) {
       RelativeDirection relativeDirection =
@@ -172,6 +174,7 @@ class LegalMovesController {
         legalMoves.deepCopy(), from, fromHandleSquareTapped);
     legalMoves = await filterMovesThatCauseTwoAdjacentKings(
         legalMoves.deepCopy(), from, fromHandleSquareTapped);
+
     return legalMoves.deepCopy();
   }
 
@@ -197,7 +200,6 @@ class LegalMovesController {
           fromPiece,
           fromType,
         );
-
         // here we are checking if the escape square is attacked instead of the tapped square in case the tapped piece is a king, because here we are hypothetically moving a king not another piece
         bool isKingAttacked = await gameStatusController.isKingSquareAttacked(
             attackedKingType: fromType,
@@ -206,10 +208,10 @@ class LegalMovesController {
         // resetting the hypothetically moved pieces
         await ChessBoardModel.updateSquareAtIndex(from, fromPiece, fromType);
         await ChessBoardModel.updateSquareAtIndex(move, movePiece, moveType);
+
         isKingAttacked ? legalMoves.remove(move) : null;
       }
     }
-
     return legalMoves;
   }
 
