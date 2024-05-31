@@ -36,18 +36,42 @@ class GameStatusController {
       }
     }
 
-    if (await gameStatusController.checkForStaleMate(kingTypeToCheck)) {
+    if (await gameStatusController.checkForStaleMate(kingTypeToCheck) ||
+        SharedState.instance.fullMoveNumber == 50 ||
+        checkForThreeFoldRepetition()) {
       helperMethods.preventFurtherInteractions(true);
       callbacks.onDraw(DrawType.stalemate);
       soundToPlay = SoundType.draw;
     }
 
-    if (SharedState.instance.fullMoveNumber == 50) {
-      helperMethods.preventFurtherInteractions(true);
-      callbacks.onDraw(DrawType.stalemate);
-      soundToPlay = SoundType.draw;
-    }
     return soundToPlay;
+  }
+
+  static bool checkForThreeFoldRepetition() {
+    RegExp halfMoveClockAndFullMoveNumberRegExp = RegExp(r'\s\d+\s\d+$');
+    Map<String, int> positionCounts = {};
+
+    // Using a regex to remove castling rights/enPassant, half-move clock, and full-move number from FEN strings before comparing them
+    List<String> positions = SharedState.instance.fenStrings
+        .map((fen) => fen.replaceAll(halfMoveClockAndFullMoveNumberRegExp, ''))
+        .toList();
+
+    for (int i = 0; i < positions.length; i++) {
+      String currentPosition = positions[i];
+      if (positionCounts.containsKey(currentPosition)) {
+        positionCounts[currentPosition] = positionCounts[currentPosition]! + 1;
+      } else {
+        positionCounts[currentPosition] = 1;
+      }
+    }
+
+    for (String position in positionCounts.keys) {
+      if (positionCounts[position]! >= 3) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   bool doesOnlyOneKingExists() {

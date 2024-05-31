@@ -26,3 +26,6 @@ rnb1kbnr/ppp1Pppp/8/8/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 3
 9. Both a checkmate and a stalemate is detected with these moves: ✔️
 1rb4r/pkPp3p/1b1P3n/1Q6/N3Pp2/8/P1P3PP/7K w - - 1 0 Qd5+ Ka6 2. cxb8=N#
 -----------------------------------------------------
+10. Black king is checked at g8 even tho it is not attacked: ❌
+5rk1/1pp2p1R/p1P4K/4p3/8/2n4B/n7/8 b - - 0 0
+!! could not find a logical way in which a player might get himself in that position
