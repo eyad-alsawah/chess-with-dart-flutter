@@ -20,3 +20,9 @@ rn1B2nr/p4ppp/3b4/1p6/4k3/8/PPP1PPPP/RN2KBNR w KQ - 0 13
 7. Black king can expose himself to check with move e8d7: ✔️
 rnb1kbnr/ppp1Pppp/8/8/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 3
 ------------------------------------------
+8. This position is not detected as stalemate even tho the white king has no where to go and isn't checked: ✔️
+8/8/8/8/8/5k1q/8/6K1 w - - 3 3
+-------------------------
+9. Both a checkmate and a stalemate is detected with these moves: ✔️
+1rb4r/pkPp3p/1b1P3n/1Q6/N3Pp2/8/P1P3PP/7K w - - 1 0 Qd5+ Ka6 2. cxb8=N#
+-----------------------------------------------------

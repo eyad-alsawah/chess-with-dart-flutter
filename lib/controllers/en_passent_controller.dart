@@ -59,7 +59,7 @@ class EnPassantController {
     required int to,
     required RelativeDirection relativeDirection,
   }) {
-    if(from.piece() !=Pieces.pawn) {
+    if (from.piece() != Pieces.pawn) {
       return false;
     }
     bool canCaptureEnPassant = false;

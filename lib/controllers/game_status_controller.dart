@@ -1,4 +1,5 @@
 import 'package:chess/controllers/enums.dart';
+import 'package:chess/controllers/legal_moves_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
 
 import 'package:chess/model/global_state.dart';
@@ -35,11 +36,10 @@ class GameStatusController {
       }
     }
 
-    if (await gameStatusController.checkForStaleMate(
-        opponentPlayerType: kingTypeToCheck!,
-        isKingChecked: SharedState.instance.isKingChecked)) {
-      // todo: unncomment this once you fix the logic of checkForStaleMate
-      // soundToPlay = SoundType.draw;
+    if (await gameStatusController.checkForStaleMate(kingTypeToCheck)) {
+      helperMethods.preventFurtherInteractions(true);
+      callbacks.onDraw(DrawType.stalemate);
+      soundToPlay = SoundType.draw;
     }
     return soundToPlay;
   }
@@ -67,7 +67,7 @@ class GameStatusController {
     /// -------------------------------------getting surrounding opponent pawns--------------------------
     List<int> surroundingOpponentPawns =
         basicMovesController.getPawnPieces(opponentKingIndex);
-      
+
     // pawns can't check a king of the same type
     surroundingOpponentPawns
         .removeWhere((pawn) => pawn.type() == opponentKingType);
@@ -218,24 +218,29 @@ class GameStatusController {
   }
 
   Future<bool> checkForStaleMate(
-      {required PieceType opponentPlayerType,
-      required bool isKingChecked}) async {
+    PieceType? opponentPlayerType,
+  ) async {
+    if (SharedState.instance.isKingChecked) {
+      return false;
+    }
     // checking for stalemate
     List<int> allLegalMovesIndices = [];
 
     for (int index = 0; index <= 63; index++) {
       if (index.type() == opponentPlayerType) {
+        // isKingChecked is false because a king can't be in stalemate and at the same time checked
         List<int> moves = await legalMovesController.getLegalMovesIndices(
-            from: index, isKingChecked: isKingChecked, ignorePlayingTurn: true);
+            from: index, isKingChecked: false, ignorePlayingTurn: true);
+        // had to call filterMovesThatExposeKingToCheck, filterMovesThatCauseTwoAdjacentKings here because passing false to ignorePlayingTurn caused problems
+        moves = await LegalMovesController.instance
+            .filterMovesThatExposeKingToCheck(moves, index);
+        moves = await LegalMovesController.instance
+            .filterMovesThatCauseTwoAdjacentKings(moves, index);
+
         allLegalMovesIndices.addAll(moves);
       }
     }
-    // player has no legal move and an empty square was not tapped
-    if (allLegalMovesIndices.isEmpty) {
-      helperMethods.preventFurtherInteractions(true);
-      callbacks.onDraw(DrawType.stalemate);
-      return true;
-    }
-    return false;
+
+    return allLegalMovesIndices.isEmpty;
   }
 }
