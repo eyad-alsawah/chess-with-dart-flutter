@@ -19,7 +19,6 @@ class GameStatusController {
 
   static Future<SoundType?> checkStatus(PieceType? kingTypeToCheck) async {
     SoundType? soundToPlay;
-    // resetting checkedKingIndex on each new move so that the red check square is removed
     SharedState.instance.checkedKingIndex = null;
     SharedState.instance.isKingChecked = await gameStatusController
         .isKingSquareAttacked(kingTypeToCheck: kingTypeToCheck);
@@ -27,21 +26,32 @@ class GameStatusController {
       SharedState.instance.checkedKingIndex =
           ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
               Pieces.king, kingTypeToCheck);
-
       if (await gameStatusController.isCheckmate(
           playingTurn: kingTypeToCheck!.playingTurn())) {
         helperMethods.preventFurtherInteractions(true);
         callbacks.onVictory(VictoryType.checkmate);
         soundToPlay = SoundType.victory;
       }
-    }
+    } else {
+      bool isStalemate =
+          await gameStatusController.checkForStaleMate(kingTypeToCheck);
+      bool isFiftyMoveRule =
+          !isStalemate && SharedState.instance.halfMoveClock >= 100;
+      bool isThreefoldRepetition = checkForThreeFoldRepetition();
 
-    if (await gameStatusController.checkForStaleMate(kingTypeToCheck) ||
-        SharedState.instance.fullMoveNumber == 50 ||
-        checkForThreeFoldRepetition()) {
-      helperMethods.preventFurtherInteractions(true);
-      callbacks.onDraw(DrawType.stalemate);
-      soundToPlay = SoundType.draw;
+      if (isStalemate || isFiftyMoveRule || isThreefoldRepetition) {
+        helperMethods.preventFurtherInteractions(true);
+        DrawType? drawType;
+        if (isStalemate) {
+          drawType = DrawType.stalemate;
+        } else if (isFiftyMoveRule) {
+          drawType = DrawType.fiftyMoveRule;
+        } else if (isThreefoldRepetition) {
+          drawType = DrawType.threeFoldRepetition;
+        }
+        callbacks.onDraw(drawType!);
+        soundToPlay = SoundType.draw;
+      }
     }
 
     return soundToPlay;
@@ -98,8 +108,7 @@ class GameStatusController {
     List<int> surroundingOpponentPawns =
         basicMovesController.getPawnPieces(opponentKingIndex);
     // todo: consider checking the type of the piece inside getPawnPieces
-    surroundingOpponentPawns
-        .removeWhere((pawn) => pawn.piece() != Pieces.pawn);  
+    surroundingOpponentPawns.removeWhere((pawn) => pawn.piece() != Pieces.pawn);
     // pawns can't check a king of the same type
     surroundingOpponentPawns
         .removeWhere((pawn) => pawn.type() == opponentKingType);

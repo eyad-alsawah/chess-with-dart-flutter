@@ -36,7 +36,14 @@ class _ChessBoardState extends State<ChessBoard> {
     super.initState();
     chess = ChessController(
       fenString: null,
-      onDraw: (drawType) {},
+      onDraw: (drawType) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Draw by ${drawType.name}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
       playSound: (soundType) async {
         switch (soundType) {
           case SoundType.illegal:
@@ -127,10 +134,18 @@ class _ChessBoardState extends State<ChessBoard> {
                                                       .instance.selectedIndex !=
                                                   null)
                                           ? Colors.lightGreen
-                                          : getSquareColor(
-                                              ignoreTappedIndices: true,
-                                              index: index,
-                                            ),
+                                          : SharedState.instance
+                                                      .bestMoveStartPos ==
+                                                  index
+                                              ? Colors.blueAccent
+                                              : SharedState.instance
+                                                          .bestMoveEndPos ==
+                                                      index
+                                                  ? Colors.blueAccent
+                                                  : getSquareColor(
+                                                      ignoreTappedIndices: true,
+                                                      index: index,
+                                                    ),
                             ),
                             // child: Text('$index'),
                           ),
