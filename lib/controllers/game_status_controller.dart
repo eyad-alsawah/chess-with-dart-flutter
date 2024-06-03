@@ -97,7 +97,9 @@ class GameStatusController {
     /// -------------------------------------getting surrounding opponent pawns--------------------------
     List<int> surroundingOpponentPawns =
         basicMovesController.getPawnPieces(opponentKingIndex);
-
+    // todo: consider checking the type of the piece inside getPawnPieces
+    surroundingOpponentPawns
+        .removeWhere((pawn) => pawn.piece() != Pieces.pawn);  
     // pawns can't check a king of the same type
     surroundingOpponentPawns
         .removeWhere((pawn) => pawn.type() == opponentKingType);
