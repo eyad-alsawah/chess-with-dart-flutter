@@ -6,6 +6,7 @@ import 'package:chess/controllers/game_status_controller.dart';
 import 'package:chess/controllers/promotion_controller.dart';
 import 'package:chess/controllers/shared_state.dart';
 import 'package:chess/controllers/typedefs.dart';
+import 'package:chess/controllers/uci_controller.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/utils/extensions.dart';
@@ -50,6 +51,7 @@ class ChessController {
   }) {
     if (fenString != null) {
       SharedState.instance.fen = fenString!;
+      SharedState.instance.uciString = "${fenString!} moves";
       ChessBoardModel.clearBoard();
       ChessBoardModel.fromFen(fenString!);
     }
@@ -136,6 +138,7 @@ class ChessController {
             index.type()?.oppositeType());
 
         SharedState.instance.changeActiveColor();
+        UciController.getBestMove(SharedState.instance.uciString);
         SharedState.instance.storeState().whenComplete(() => updateView());
         //  playing the pieceMoved sound when moving to a square that is not occupied by an openent piece, otherwise playing the capture sound
         SoundType soundToPlay = checkOrDrawSound ??

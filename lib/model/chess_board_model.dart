@@ -153,6 +153,25 @@ class ChessBoardModel {
       SharedState.instance.halfMoveClock++;
     }
 
+    String promotionType = '';
+    switch (pawnPromotedTo) {
+      case Pieces.rook:
+        promotionType = 'r';
+        break;
+      case Pieces.queen:
+        promotionType = 'q';
+        break;
+      case Pieces.knight:
+        promotionType = 'n';
+        break;
+      case Pieces.bishop:
+        promotionType = 'b';
+        break;
+      default:
+    }
+
+    SharedState.instance.uciString +=
+        ' ${ChessSquare.values[from].name}${ChessSquare.values[to].name}$promotionType';
     emptySquareAtIndex(from);
     updateSquareAtIndex(to, pawnPromotedTo ?? piece, type);
   }

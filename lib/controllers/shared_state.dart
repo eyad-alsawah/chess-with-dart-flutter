@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:chess/controllers/game_status_controller.dart';
+import 'package:chess/controllers/uci_controller.dart';
 import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
 import 'package:chess/utils/capture_widget.dart';
@@ -35,6 +36,11 @@ class SharedState {
   //---------------------------------
   int? checkedKingIndex;
   bool isKingChecked = false;
+
+  //----------------------------------------Universal Chess Interface (UCI)------------------------------------
+  String uciString = 'position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0 moves';
+  int? bestMoveStartPos;
+  int? bestMoveEndPos;
   //----------------------------------------Forsyth-Edwards Notation (FEN)-------------------------------------
   String fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
   String activeColor = 'w';
@@ -100,13 +106,14 @@ class SharedState {
         fullMoveNumber: fullMoveNumber);
 
     fenStrings.add(fen);
+
     activeStateIndex++;
     ColoredPrinter.printColored(fen);
     return completer.future;
   }
 
   void replay(ReplayType replayType, [int? index]) async {
-    String stateToReplay = '';
+    String stateToReplay =   '';
 
     switch (replayType) {
       case ReplayType.previous:
@@ -140,6 +147,9 @@ class SharedState {
   }
 
   void reset() {
+    uciString = 'position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0 moves';
+
+    UciController.newGame();
     SharedState.instance.fen =
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     stateImages.clear();

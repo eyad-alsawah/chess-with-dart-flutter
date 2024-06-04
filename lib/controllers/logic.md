@@ -30,3 +30,15 @@ Two Devices:
 Before making a decision on the game state, I need to see how it can be parsed into an official standard way like FEN, PNG, and Extended Position Description (EPD), so that it can later be handled by multiple Chess Engines like stockfish, even if I had to introduce an adapter in between.
 //----------------------------
 https://chess.stackexchange.com/questions/16601/connecting-chess-engine-with-a-java-program
+https://www.wbec-ridderkerk.nl/html/UCIProtocol.html
+https://chess.stackexchange.com/questions/2895/how-to-convert-pgn-moves-to-long-algebraic-notation-in-python
+https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+* figurine algebraic notation: ♞c6 in place of Nc6.
+--------------------------
+## Algebraic Notation:
+- Short Notation:
+    used by UCI:
+    moves are:
+        start coordinates + destination coordinates + (optional piece for promotion)
+----------
+https://new.uschess.org/news/evolution-modern-chess-rules-50-move-draw
