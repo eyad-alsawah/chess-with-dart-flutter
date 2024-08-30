@@ -10,6 +10,7 @@ import 'package:chess/utils/colored_printer.dart';
 import 'package:chess/utils/global_keys.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/extensions.dart';
 import 'enums.dart';
 
 class SharedState {
@@ -36,11 +37,68 @@ class SharedState {
   //---------------------------------
   int? checkedKingIndex;
   bool isKingChecked = false;
+  //-----------------------------------------------General-----------------------------------------------------
+  void handleMove(int from, int to, Pieces? pawnPromotionType) {
+    updateHalfMoveClock(from, to);
+    updateUciString(from, to, pawnPromotionType);
+    if (SharedState.instance.activeColor == 'b') {
+      SharedState.instance.fullMoveNumber++;
+    }
+    SharedState.instance.changeActiveColor();
+    UciController.getBestMove(SharedState.instance.uciString);
+  }
 
   //----------------------------------------Universal Chess Interface (UCI)------------------------------------
-  String uciString = 'position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0 moves';
+  String uciString =
+      'position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0 moves';
   int? bestMoveStartPos;
   int? bestMoveEndPos;
+
+  void updateUciString(int from, int to, Pieces? pawnPromotionType) {
+    String promotionType = '';
+    switch (pawnPromotionType) {
+      case Pieces.rook:
+        promotionType = 'r';
+        break;
+      case Pieces.queen:
+        promotionType = 'q';
+        break;
+      case Pieces.knight:
+        promotionType = 'n';
+        break;
+      case Pieces.bishop:
+        promotionType = 'b';
+        break;
+      default:
+    }
+
+    uciString +=
+        ' ${ChessSquare.values[from].name}${ChessSquare.values[to].name}$promotionType';
+  }
+
+  String removeLastMove(String uciPosition) {
+    // Split the UCI string into parts: "position", "fen", and the rest
+    List<String> parts = uciPosition.split(' moves ');
+
+    // If there are no moves, return the original position string
+    if (parts.length < 2) {
+      return uciPosition;
+    }
+
+    // Get the moves part and split it into individual moves
+    String moves = parts[1];
+    List<String> moveList = moves.split(' ');
+
+    // Remove the last move
+    if (moveList.isNotEmpty) {
+      moveList.removeLast();
+    }
+
+    // Reconstruct the UCI string without the last move
+    String newMoves = moveList.join(' ');
+    return parts[0] + (newMoves.isNotEmpty ? ' moves $newMoves' : '');
+  }
+
   //----------------------------------------Forsyth-Edwards Notation (FEN)-------------------------------------
   String fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
   String activeColor = 'w';
@@ -53,6 +111,15 @@ class SharedState {
 
   void changeActiveColor() {
     activeColor = activeColor == 'w' ? 'b' : 'w';
+  }
+
+  void updateHalfMoveClock(int from, int to) {
+    // increase halfMoveClock if no pawn was moved, or no capture happened
+    if (from.piece() == Pieces.pawn || to.type() != null) {
+      halfMoveClock = 0;
+    } else {
+      halfMoveClock++;
+    }
   }
 
   void updateCastlingRights(
@@ -88,7 +155,7 @@ class SharedState {
   int activeStateIndex = -1;
 
   Future<void> storeState() async {
-    // using a complete to only resolve the future once a  PostFrameCallback is received.
+    // using a complete to only resolve the future once a PostFrameCallback is received.
     Completer<void> completer = Completer<void>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       Uint8List? stateImage = await capture(GlobalKeys.captureKey);
@@ -113,7 +180,7 @@ class SharedState {
   }
 
   void replay(ReplayType replayType, [int? index]) async {
-    String stateToReplay =   '';
+    String stateToReplay = '';
 
     switch (replayType) {
       case ReplayType.previous:
@@ -147,11 +214,11 @@ class SharedState {
   }
 
   void reset() {
-    uciString = 'position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0 moves';
-
     UciController.newGame();
-    SharedState.instance.fen =
-        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+    fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    uciString = 'position fen $fen moves';
+    UciController.getBestMove(uciString);
     stateImages.clear();
     fenStrings.clear();
     activeStateIndex = -1;

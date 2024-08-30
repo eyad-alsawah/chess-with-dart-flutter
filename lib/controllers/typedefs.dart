@@ -1,4 +1,4 @@
-import 'package:chess/controllers/enums.dart';
+import 'enums.dart';
 
 typedef OnVictory = void Function(VictoryType victoryType);
 typedef OnDraw = void Function(DrawType drawType);

@@ -1,5 +1,6 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
+import 'package:chess/model/move.dart';
 import 'package:chess/model/square.dart';
 import 'package:chess/utils/extensions.dart';
 
@@ -142,38 +143,18 @@ class ChessBoardModel {
   }
 
   //-----------------------------
-  static Future<void> move(
-      {required int from, required int to, Pieces? pawnPromotedTo}) async {
+  static Future<void> executeMove(
+      {required int from,
+      required int to,
+      Pieces? pawnPromotionType,
+      Move? rookCastlingMove}) async {
     PieceType? type = from.type();
     Pieces? piece = from.piece();
-    // increase halfMoveClock if no pawn was moved, or no capture happened
-    if (piece == Pieces.pawn || to.type() != null) {
-      SharedState.instance.halfMoveClock = 0;
-    } else {
-      SharedState.instance.halfMoveClock++;
-    }
-
-    String promotionType = '';
-    switch (pawnPromotedTo) {
-      case Pieces.rook:
-        promotionType = 'r';
-        break;
-      case Pieces.queen:
-        promotionType = 'q';
-        break;
-      case Pieces.knight:
-        promotionType = 'n';
-        break;
-      case Pieces.bishop:
-        promotionType = 'b';
-        break;
-      default:
-    }
-
-    SharedState.instance.uciString +=
-        ' ${ChessSquare.values[from].name}${ChessSquare.values[to].name}$promotionType';
     emptySquareAtIndex(from);
-    updateSquareAtIndex(to, pawnPromotedTo ?? piece, type);
+    updateSquareAtIndex(to, pawnPromotionType ?? piece, type);
+    if (rookCastlingMove != null) {
+      await executeMove(from: rookCastlingMove.from, to: rookCastlingMove.to);
+    }
   }
 
   static String toFen(

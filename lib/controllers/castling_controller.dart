@@ -1,7 +1,7 @@
 import 'package:chess/controllers/enums.dart';
 import 'package:chess/controllers/shared_state.dart';
-import 'package:chess/model/chess_board_model.dart';
 import 'package:chess/model/global_state.dart';
+import 'package:chess/model/move.dart';
 import 'package:chess/utils/extensions.dart';
 
 class CastlingController {
@@ -33,7 +33,7 @@ class CastlingController {
             didLightQueenSideRookMove ? [] : [ChessSquare.c1.index];
       } else {
         castlingAvailability = didLightQueenSideRookMove
-            ? [ChessSquare.g6.index]
+            ? [ChessSquare.g1.index]
             : [ChessSquare.c1.index, ChessSquare.g1.index];
       }
     } else {
@@ -94,44 +94,52 @@ class CastlingController {
     }
   }
 
-  static void handleMove({
+  static Move? handleMove({
     required int from,
     required int to,
   }) {
     // moving the rook in case a king castled
-    castlingController.moveRookOnCastle(
+    Move? rookMove = castlingController.moveRookOnCastle(
       from: from,
       to: to,
     );
 
     castlingController.changeCastlingAvailability(from: from);
+    return rookMove;
   }
 
-  void moveRookOnCastle({required int from, required int to}) {
+  Move? moveRookOnCastle({required int from, required int to}) {
+    Move? move;
     if (from.piece() == Pieces.king) {
       if (from.type() == PieceType.dark &&
           from == ChessSquare.e8.index &&
           (to == ChessSquare.g8.index || to == ChessSquare.c8.index)) {
         // moving the rook and updating the board
         if (to == ChessSquare.g8.index) {
-          ChessBoardModel.move(
-              from: ChessSquare.h8.index, to: ChessSquare.f8.index);
+          move = Move(from: ChessSquare.h8.index, to: ChessSquare.f8.index);
         } else {
-          ChessBoardModel.move(
-              from: ChessSquare.a8.index, to: ChessSquare.d8.index);
+          move = Move(
+            from: ChessSquare.a8.index,
+            to: ChessSquare.d8.index,
+          );
         }
       } else if (from.type() == PieceType.light &&
           from == ChessSquare.e1.index &&
           (to == ChessSquare.c1.index || to == ChessSquare.g1.index)) {
         if (to == ChessSquare.g1.index) {
-          ChessBoardModel.move(
-              from: ChessSquare.h1.index, to: ChessSquare.f1.index);
+          move = Move(
+            from: ChessSquare.h1.index,
+            to: ChessSquare.f1.index,
+          );
         } else {
-          ChessBoardModel.move(
-              from: ChessSquare.a1.index, to: ChessSquare.d1.index);
+          move = Move(
+            from: ChessSquare.a1.index,
+            to: ChessSquare.d1.index,
+          );
         }
       }
     }
+    return move;
   }
 
   static List<int> preventCastlingIfPieceStandsBetweenRookAndKing(

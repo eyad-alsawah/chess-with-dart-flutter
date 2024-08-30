@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:chess/controllers/enums.dart';
-import 'package:chess/controllers/shared_state.dart';
-import 'package:chess/model/global_state.dart';
-import 'package:chess/utils/colored_printer.dart';
+import '../model/global_state.dart';
+import '../utils/colored_printer.dart';
+import 'enums.dart';
+import 'shared_state.dart';
 
 class UciController {
   static Future<void> getBestMove(String move) async {
     ColoredPrinter.printColored(move, AnsiColor.magenta);
     const url =
-        'http://192.168.1.106:8000/send-command'; // Replace with your server's URL
+        'http://192.168.1.101:3000/send-command'; // Replace with your server's URL
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({'command': move});
 
@@ -39,7 +39,7 @@ class UciController {
 
   static Future<void> newGame() async {
     const url =
-        'http://192.168.1.106:8000/new-game'; // Replace with your server's URL
+        'http://192.168.1.101:3000/new-game'; // Replace with your server's URL
     final headers = {'Content-Type': 'application/json'};
 
     try {

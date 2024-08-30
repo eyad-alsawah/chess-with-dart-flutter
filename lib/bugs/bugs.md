@@ -32,3 +32,13 @@ rnb1kbnr/ppp1Pppp/8/8/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 3
 ---------------
 11. Black king should not be checked: ✔️
 r4bnr/1p3ppp/8/4P3/2B3k1/5N2/PPPN2PP/R3K2R b KQ - 3 16
+--------------
+12. White can't castle short castle: ✔️
+ r7/1p2kpp1/5q1p/p7/1nBr4/2Q5/PP3PPP/3RK2R w K - 0 1 
+ --------------
+13. Should be checkmate on b5b7, king is not checkmated because the black king is treated as a pawn and thus not threating: ✔️
+8/K4pp1/2k4p/1q6/p5PP/P7/8/8 b - - 0 37
+--------------------
+14. Incorrect UCI string on castling (example: "moves h1g1 e1g1" instead of "moves e1g1"): ✔️
+r1bk3r/p2p1B1p/2p2pp1/8/1P6/8/P1P3PP/R3K2R w KQ - 0 18
+----------------------------

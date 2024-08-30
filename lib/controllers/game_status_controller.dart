@@ -216,7 +216,8 @@ class GameStatusController {
           moveIndex, Pieces.pawn, playingTurn.type());
 
       // checking if check remains
-      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type())) {
+      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type()) ||
+          await legalMovesController.areTwoKingsAdjacent()) {
         movesThatProtectTheKing.removeWhere((index) => index == moveIndex);
       }
 
@@ -240,9 +241,11 @@ class GameStatusController {
       // moving the king to the new square
       ChessBoardModel.updateSquareAtIndex(
           moveIndex, Pieces.king, playingTurn.type());
-
-      //-----------------------
-      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type())) {
+      callbacks.updateView();
+      //  await Future.delayed(const Duration(seconds: 1));
+      //   //-----------------------
+      if (await isKingSquareAttacked(kingTypeToCheck: playingTurn.type()) ||
+          await legalMovesController.areTwoKingsAdjacent()) {
         kingMovesThatWouldProtectHim.removeWhere((index) => index == moveIndex);
       }
       // resetting the square to its original state

@@ -18,7 +18,6 @@ class LegalMovesController {
   // Public static method to access the instance
   static LegalMovesController get instance => _instance;
   //----------------------------------------------------------------------------
-
   Future<List<int>> getLegalMovesIndices({
     required int from,
     bool isKingChecked = false,
@@ -50,7 +49,6 @@ class LegalMovesController {
   }
 
   //----------------------------------------------------------------------------------
-
   Future<List<int>> getLegalMovesOnly(
       {required List<int> legalAndIllegalMoves,
       required int from,
@@ -217,8 +215,19 @@ class LegalMovesController {
     legalMoves.removeWhere((e) => opponentKingMoves.contains(e));
     return legalMoves;
   }
-  //----------------------------------------------------------------------------
 
+  Future<bool> areTwoKingsAdjacent() async {
+    int anyKingIndex = ChessBoardModel.getIndexWherePieceAndPieceTypeMatch(
+        Pieces.king, PieceType.light);
+    List<int> opponentKingMoves =
+        BasicMovesController.instance.getKingPieces(anyKingIndex);
+
+    return opponentKingMoves.any((move) {
+      return move.piece() == Pieces.king;
+    });
+  }
+
+  //----------------------------------------------------------------------------
   List<int> getIllegalAndLegalMoves(int from) {
     List<int> moves = [];
     // Define a map to associate each piece type with its move calculation function
